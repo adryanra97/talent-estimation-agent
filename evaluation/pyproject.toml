@@ -1,0 +1,31 @@
+[project]
+name = "talent-estimation-eval"
+version = "0.1.0"
+description = "Kedro pipeline that evaluates the agents against reviewed decisions and calibrates PHM."
+requires-python = ">=3.12"
+authors = [{ name = "Adryan Rizky Alviano" }]
+dependencies = [
+    "talent-estimation-agent",
+    "kedro>=1.0",
+    "kedro-datasets[json,pandas-csvdataset,text]>=7.0",
+    "pandas>=2.2",
+]
+
+[tool.uv.sources]
+talent-estimation-agent = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/talent_estimation_eval"]
+
+[tool.kedro]
+package_name = "talent_estimation_eval"
+project_name = "Talent Estimation Evaluation"
+kedro_init_version = "1.0.0"
+source_dir = "src"
+
+[tool.kedro_telemetry]
+project_id = "3a79ebae982e4e6e9633c28cd7b2b793"

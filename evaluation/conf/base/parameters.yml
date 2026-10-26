@@ -1,0 +1,16 @@
+# Providers to compare. "demo" runs the rule-based judge without a model.
+# For a real provider, set the key in the environment variable named by
+# api_key_env (never in this file).
+providers:
+  - name: demo
+    provider: demo
+  # - name: gemini-flash
+  #   provider: google
+  #   model: gemini-2.5-flash
+  #   api_key_env: GOOGLE_API_KEY
+
+# Keep these equal to the application defaults unless you are testing a change.
+parameters:
+  phm: 9.0
+  hours_per_day: 8
+  days_per_month: 20

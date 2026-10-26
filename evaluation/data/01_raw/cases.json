@@ -1,0 +1,8 @@
+[
+  {
+    "name": "contoh-platform-analitik",
+    "note": "Kasus fiktif bawaan. Referensi FTE dibuat untuk contoh, bukan data nyata.",
+    "source": "demo",
+    "reference_fte": {"DE": 1.1, "DA": 0.7, "DS": 0.7, "AI": 0.8}
+  }
+]

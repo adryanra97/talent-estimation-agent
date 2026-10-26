@@ -1,0 +1,36 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+evaluation/conf/local/*
+!evaluation/conf/local/.gitkeep
+
+# Evaluation data: only the fictional sample is committed
+evaluation/data/**
+!evaluation/data/01_raw/
+!evaluation/data/01_raw/cases.json
+!evaluation/data/**/.gitkeep
+
+# Real project files never belong in this repository
+*.xlsx
+*.docx
+*.pdf
+
+# Misc
+.DS_Store
+.vercel

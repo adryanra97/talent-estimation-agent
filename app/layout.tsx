@@ -1,0 +1,22 @@
+import type { Metadata } from "next";
+import { Shell } from "@/components/shell";
+import { StoreProvider } from "@/lib/store";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Talent Estimation Agent",
+  description:
+    "Validasi kebutuhan talent dari WBS dengan Use Case Points dan bottom-up, dibantu agent AI.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="id">
+      <body>
+        <StoreProvider>
+          <Shell>{children}</Shell>
+        </StoreProvider>
+      </body>
+    </html>
+  );
+}

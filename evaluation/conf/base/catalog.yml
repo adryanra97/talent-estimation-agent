@@ -1,0 +1,21 @@
+# Evaluation cases. Real cases stay in data/ which is ignored by git;
+# the sample case is fictional.
+cases:
+  type: json.JSONDataset
+  filepath: data/01_raw/cases.json
+
+runs:
+  type: json.JSONDataset
+  filepath: data/02_intermediate/runs.json
+
+scores:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/scores.csv
+
+calibration:
+  type: json.JSONDataset
+  filepath: data/08_reporting/calibration.json
+
+report:
+  type: text.TextDataset
+  filepath: data/08_reporting/report.md

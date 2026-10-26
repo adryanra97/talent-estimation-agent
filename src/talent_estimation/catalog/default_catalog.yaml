@@ -1,0 +1,237 @@
+# Default capability catalog.
+#
+# The catalog describes each role by what it does, not by codes. Agents read it
+# to decide which roles a WBS item needs and whether the role is primary
+# ("Utama") or supporting ("Pendukung"). Users can replace this file for a
+# session from the settings page.
+
+version: "1.0"
+
+teams:
+  data:
+    label: Data
+    roles: [DE, DA, DS, AI]
+  design:
+    label: Design
+    roles: []   # UX Researcher, UI Designer, UX Writer are planned.
+
+roles:
+  DE:
+    name: Data Engineer
+    team: data
+    aliases: [data engineer, data engineering, de, etl engineer]
+    in_scope: >-
+      Pipeline data ETL/ELT, ingestion, cleansing, transformasi dan validasi data;
+      monitoring pipeline dan data quality.
+    out_of_scope: >-
+      Pembuatan dashboard BI atau UI reporting; pekerjaan DevSecOps atau
+      infrastruktur pusat data; troubleshooting di luar komponen data pipeline.
+    primary_keywords: >-
+      ingestion, ETL/ELT, pipeline, cleansing, transformation, registrasi dan
+      integrasi sumber data, mapping teknis, monitoring data flow atau pipeline,
+      data quality monitoring, freshness, latency, retry.
+    usually_supporting_on: >-
+      Requirement dan data mapping (input sumber data); alerting dan notifikasi
+      (penentuan threshold); analytics (penyedia dataset).
+    pillars:
+      SQL & Data Modeling: [Advanced SQL Query Writing, Dimensional & Relational Data Modeling, Lakehouse Schema Design]
+      Python for Data Eng: [Pipeline Scripting dengan Python, Data Ecosystem Libraries]
+      ETL/ELT & Orchestration: [Ingestion & CDC, Desain Pipeline Idempoten & Fault-Tolerant, Orchestration & Scheduling]
+      Platform Fundamentals: [Object Storage & Data Lake Design, Data Warehouse / OLAP Architecture, Trade-off Format & Partisi]
+      Data Quality & Testing: [Data Validation, Pipeline Unit Testing, Data Contract Definition]
+      Monitoring & Observability: [Pipeline Health Monitoring, Anomaly Detection pada Data, Incident Response & RCA, Data Lineage Tracking]
+      CI/CD for Data Pipelines: [Version Control Workflow untuk Pipeline, Automated Testing dalam CI/CD, Deployment Multi-Environment]
+      IaC & Containerization: [Infrastructure Provisioning, Containerization & Orchestration]
+      Security, Gov & Compliance: [Data Security, Data Governance & Catalog, Regulatory Compliance]
+
+  DA:
+    name: Data Analyst
+    team: data
+    aliases: [data analyst, analyst data, da, bi analyst]
+    in_scope: >-
+      Data collection dan validation, KPI, agregasi dan analisis use case;
+      dukungan data quality.
+    out_of_scope: >-
+      Pembuatan pipeline data produksi; pekerjaan DevSecOps atau infrastruktur.
+    primary_keywords: >-
+      KPI, indikator, aggregation, calculation, trend, tracking analytics, analisis
+      frekuensi atau lokasi, data collection dan validation, pendalaman use case,
+      definisi dashboard analitik.
+    usually_supporting_on: >-
+      Requirement dan data mapping (indikator, validasi sumber); workspace analis;
+      evaluasi AI atau prompt (relevansi); data quality.
+    pillars:
+      Architecture & Modelling: [Dimensional Data Modelling, Semantic & Metric Layer Design, Cloud Data Warehouse Optimization, Analytics Engineering (dbt), Database Design]
+      Querying & Transformation: [Advanced SQL Execution, Data Pipelines & Orchestration, Data Cleaning & Wrangling, Multi-Source Extraction, Validation & Reconciliation]
+      Dashboarding & Visuals: [BI Tool Mastery, Dashboard UX & Information Design, Advanced Calculations, Automated & Self-Service BI, Visual Storytelling]
+      Exploratory Analytics: [Exploratory Data Analysis, Applied Statistics & A/B Testing, Analytics Scripting (Python / R), Cohort & User Behaviour, Predictive]
+      Business Translation: [KPI Framework Definition, Business Problem Scoping, Financial & Unit Economics Modeling, Stakeholder & Executive Communication]
+      Governance & Operations: [Data Lineage & Cataloguing, Data Access & Security, Pipeline & Data Quality Monitoring]
+
+  DS:
+    name: Data Scientist
+    team: data
+    aliases: [data scientist, data science, ds, machine learning scientist]
+    in_scope: >-
+      Analitik, anomaly detection dan model untuk use case; review KPI dan logika
+      analitik; evaluasi AI atau prompt.
+    out_of_scope: >-
+      Coding frontend atau backend; konfigurasi DevSecOps atau infrastruktur.
+    primary_keywords: >-
+      anomaly detection, model analitik, segmentation, predictive atau forecasting,
+      supply-demand analysis, statistical analysis, evaluasi akurasi atau halusinasi.
+    usually_supporting_on: >-
+      Analytics dan KPI (review logika KPI); data quality (anomali); evaluasi prompt
+      atau AI.
+    pillars:
+      Math & Advanced Stats: [Linear Algebra & Calculus, Probability & Distributions, Hypothesis Testing & CLT, Econometrics, Ratio Metrics & Delta Method]
+      Experimentation & Causal: [A/B Testing Foundations, Experiment Design & Stratification, Advanced Test Sensitivity (CUPED), Multi-Arm Bandits, Quasi-Experiments]
+      Wrangling & Plumbing: [Advanced SQL & Optimization, Data Manipulation (Pandas), Big Data (Spark), Pipeline Development (ETL/ELT), Schema Design]
+      Classic ML & Modeling: [Supervised Learning, Feature Engineering & Selection, Unsupervised Learning & Clustering, Dimensionality Reduction, Model Evaluation]
+      Advanced AI & DL: [Neural Networks & Deep Learning, NLP & Text Mining, LLMs & Prompting, Embedding Generation & Fine-tuning, GenAI Evaluation & Safety]
+      Analytics & Storytelling: [Exploratory Data Analysis, Data Visualization, Dashboard & BI Development, Executive KPI, Translating Technical Concepts]
+      ML Lifecycle & MLOps: [Model Deployment & Serving, MLOps & Containerization, Model Monitoring & Observability, Version Control, Quality Management]
+      Governance & Strategy: [AI Governance & Responsible AI, Model Fairness & Bias Mitigation, Data-driven Business Strategy]
+
+  AI:
+    name: AI Engineer
+    team: data
+    aliases: [ai engineer, ai engineering, ml engineer, llm engineer, ai, agentic ai engineer]
+    in_scope: >-
+      AI insight per use case, layanan dan orkestrasi AI, antarmuka prompt, serta
+      materi pelatihan AI untuk pengguna.
+    out_of_scope: >-
+      Coding frontend atau backend aplikasi; konfigurasi DevSecOps atau infrastruktur.
+    primary_keywords: >-
+      AI insight, prompt template atau management, AI service, orchestration, agent,
+      context handling, RAG, prompt evaluation dan tuning, pelatihan AI.
+    usually_supporting_on: >-
+      Integrasi workspace (context passing, deep link); analytics (review insight).
+    pillars:
+      LLM & Prompting: [LLM Fundamentals & Architecture, Prompt Engineering, Prompt Optimization, Multi-Model Management, Fine-Tuning & Transfer Learning]
+      Retrieval & Knowledge: [RAG, Vector Database Management, Embedding Models & Techniques, Knowledge Base Management, Enterprise Search Architecture]
+      Applications & NLP: [Chat Application Development, Text Summarization, Semantic Search, Text Analytics, Document Classification, Named Entity Recognition, OCR & Parsing]
+      Agents: [AI Agent Development, Multi-Agent Orchestration, MCP Integration]
+      Data & Infrastructure: [Pipeline Development (ETL/ELT), Database Design & Management, Cloud Data Infrastructure, API Development & Integration, Data Modeling]
+      ML Lifecycle: [Model Training & Experimentation, Evaluation & Validation, Serving & Deployment, MLOps & CI/CD, Monitoring & Observability]
+      Analytics & Reporting: [Data Analytics & Exploration, Dashboard & Visualization, BI & Reporting, Executive Dashboard Development]
+      Governance & Compliance: [Audit Trail & Logging, AI Governance & Ethics]
+
+# Decision rules followed by the Estimator and Reviewer agents.
+rules:
+  - id: R1
+    title: Hanya item level terbawah
+    text: >-
+      Gunakan item WBS yang tidak punya turunan. Baris induk hanya ringkasan dan
+      diabaikan agar tidak dihitung ganda.
+  - id: R2
+    title: Role ditentukan dari isi pekerjaan
+    text: >-
+      Satu baris breakdown (item x role) dibuat bila isi pekerjaan item cocok
+      dengan lingkup role pada katalog. Kolom role di WBS hanya petunjuk, bukan
+      penentu.
+  - id: R3
+    title: Utama atau Pendukung
+    text: >-
+      Utama bila item memuat pekerjaan inti dalam lingkup role. Pendukung bila
+      role hanya memberi input, review, atau validasi. Bila item memuat dua
+      pekerjaan terpisah milik dua role, keduanya boleh Utama dengan alasan.
+  - id: R4
+    title: Potensi gap
+    text: >-
+      Bila isi pekerjaan jelas membutuhkan role tertentu tetapi WBS tidak
+      menyebutnya, tetap buat barisnya, tandai Perlu review, dan catat sebagai
+      temuan gap.
+  - id: R5
+    title: Permintaan bukan dasar alokasi
+    text: >-
+      Jumlah orang yang diminta adalah angka yang sedang divalidasi, bukan dasar
+      alokasi FTE bottom-up.
+  - id: R6
+    title: Tumpang tindih
+    text: >-
+      Bila dua item tampak mencakup pekerjaan sama dan periodenya beririsan,
+      jangan hitung ganda diam-diam. Tandai Perlu review dan catat temuan.
+  - id: R7
+    title: Item berulang
+    text: >-
+      Bila beberapa use case punya item identik, tulis satu baris per use case,
+      atau satu baris dengan Qty sebanyak use case bila WBS hanya memuat satu contoh.
+  - id: R8
+    title: Jumlah langkah
+    text: >-
+      Hitung butir pekerjaan pada deskripsi item. Klasifikasi awal 1-3 Simple,
+      4-7 Average, lebih dari 7 Complex. Naikkan atau turunkan satu kelas hanya
+      bila logikanya jelas lebih rumit atau sederhana, dan tulis alasannya.
+  - id: R9
+    title: Role di luar cakupan
+    text: >-
+      Role yang tidak ada di katalog atau di luar cakupan yang dipilih (misalnya
+      frontend, backend, QA, PM, BA) tidak dibuatkan baris.
+  - id: R10
+    title: Informasi tambahan
+    text: >-
+      Bila dokumen tambahan (misalnya notulen) menyebut pekerjaan yang tidak ada
+      di WBS, usulkan sebagai item tambahan dengan sumber yang jelas dan tandai
+      Perlu review.
+  - id: R11
+    title: Ketidakjelasan data
+    text: >-
+      Bila tanggal atau hari kerja kosong atau bertentangan, gunakan informasi
+      yang paling dapat dipercaya, catat selisihnya, dan tandai Perlu review.
+      Jangan mengarang angka.
+
+allocation_guide:
+  - {involvement: Utama, classification: Simple, range: "0,25 - 0,50", meaning: "Pekerjaan inti ringan, sekitar 1-2 hari per minggu"}
+  - {involvement: Utama, classification: Average, range: "0,50 - 1,00", meaning: "Pekerjaan inti menengah, satu orang paruh waktu sampai penuh"}
+  - {involvement: Utama, classification: Complex, range: "1,00 - 2,00", meaning: "Pekerjaan inti berat atau paralel, satu orang penuh atau lebih"}
+  - {involvement: Pendukung, classification: Semua, range: "0,10 - 0,25", meaning: "Review, validasi, atau input sesekali"}
+
+classification_rubric:
+  Simple: "1-3 langkah. Alur lurus, satu sumber atau satu keluaran, tanpa percabangan logika."
+  Average: "4-7 langkah. Beberapa sumber atau transformasi, ada validasi, logika bisnis menengah."
+  Complex: "Lebih dari 7 langkah atau logika rumit. Algoritma kompleks, pipeline terdistribusi atau real-time, banyak ketergantungan."
+
+actor_rubric:
+  Simple: "Sumber data, API, atau file yang terdefinisi jelas."
+  Average: "Database, broker, protokol kompleks, atau sistem pihak lain yang butuh koordinasi."
+  Complex: "Pengguna manusia atau stakeholder yang terlibat langsung (UAT, review)."
+
+# Closed categories for the AI assistance scenario. Savings are fractions.
+ai_categories:
+  - key: routine_code
+    label: Pembuatan kode atau SQL rutin
+    min_saving: 0.15
+    max_saving: 0.30
+    default_saving: 0.20
+    examples: script ETL, query, boilerplate, konfigurasi
+  - key: test_generation
+    label: Pembuatan test dan validasi
+    min_saving: 0.15
+    max_saving: 0.25
+    default_saving: 0.20
+    examples: unit test pipeline, aturan validasi data
+  - key: documentation
+    label: Dokumentasi
+    min_saving: 0.20
+    max_saving: 0.40
+    default_saving: 0.30
+    examples: data dictionary, dokumentasi mapping, README
+  - key: exploration
+    label: Eksplorasi dan profiling data
+    min_saving: 0.10
+    max_saving: 0.20
+    default_saving: 0.15
+    examples: EDA awal, ringkasan statistik, profiling kualitas data
+  - key: text_analysis
+    label: Ringkasan dan analisis teks
+    min_saving: 0.20
+    max_saving: 0.35
+    default_saving: 0.25
+    examples: review dokumen, ringkasan notulen, draf laporan
+  - key: judgment
+    label: Desain, keputusan, dan koordinasi
+    min_saving: 0.0
+    max_saving: 0.05
+    default_saving: 0.0
+    examples: keputusan arsitektur, rapat, validasi bisnis

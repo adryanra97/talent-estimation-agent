@@ -16,17 +16,10 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { RESULT_LINKS } from "@/lib/nav";
 import { useStore } from "@/lib/store";
 import { Button } from "./ui";
 
-const RESULT_LINKS = [
-  { href: "/hasil/ringkasan", label: "Ringkasan FTE" },
-  { href: "/hasil/breakdown", label: "Breakdown WBS" },
-  { href: "/hasil/bulanan", label: "Per Bulan" },
-  { href: "/hasil/peluang-ai", label: "Peluang Bantuan AI" },
-  { href: "/hasil/temuan", label: "Temuan & Asumsi" },
-  { href: "/hasil/pesan", label: "Draf Pesan" },
-];
 
 function NavLink({
   href,
@@ -147,7 +140,7 @@ function Header() {
     <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-4 border-b border-line bg-surface/95 px-6 py-2.5 backdrop-blur">
       <div className="flex min-w-0 items-center gap-3 text-sm">
         {demo && run ? (
-          <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200">
+          <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-amber-900 ring-1 ring-amber-200">
             Data contoh
           </span>
         ) : null}
@@ -164,7 +157,8 @@ function Header() {
       {run && (
         <Button size="sm" onClick={exportExcel} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
-          Unduh hasil Excel
+          <span className="sm:hidden">Excel</span>
+          <span className="hidden sm:inline">Unduh hasil Excel</span>
         </Button>
       )}
     </header>

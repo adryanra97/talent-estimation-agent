@@ -1,84 +1,133 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, ChevronDown, FileSpreadsheet, FileText, Loader2, RotateCcw, Upload } from "lucide-react";
+import { AlertCircle, CheckCircle2, ChevronDown, FileSpreadsheet, FileText, Loader2, Plus, RotateCcw, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Button, Card, Field, InfoTip, PageHeader, Toggle, inputBase, inputClass } from "@/components/ui";
 import { previewWbs } from "@/lib/api";
 import { date as fmtDate } from "@/lib/format";
-import { DEFAULT_PARAMETERS, type TeamInput, useStore } from "@/lib/store";
+import { DEFAULT_PARAMETERS, MAX_FILES_PER_FIELD, MAX_TOTAL_BYTES, type TeamInput, useStore } from "@/lib/store";
 import type { Parameters, Scope } from "@/lib/types";
+
+function size(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toLocaleString("id-ID", { maximumFractionDigits: 1 })} MB`;
+}
+
+const sameFile = (a: File, b: File) => a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
 
 function FilePicker({
   label,
   hint,
   accept,
-  file,
+  files,
   onChange,
   required,
   status,
+  fileStatus,
 }: {
   label: string;
   hint: string;
   accept: string;
-  file: File | null;
-  onChange: (f: File | null) => void;
+  files: File[];
+  onChange: (f: File[]) => void;
   required?: boolean;
   status?: React.ReactNode;
+  fileStatus?: (file: File, index: number) => React.ReactNode;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [rejected, setRejected] = useState<string | null>(null);
   const Icon = accept.includes("xlsx") ? FileSpreadsheet : FileText;
+  const extensions = accept.split(",").map((e) => e.trim().toLowerCase());
+  const full = files.length >= MAX_FILES_PER_FIELD;
+
+  function add(list: FileList | null) {
+    if (!list) return;
+    const incoming = [...list];
+    const wrongType = incoming.filter((f) => !extensions.some((ext) => f.name.toLowerCase().endsWith(ext)));
+    const fresh = incoming.filter((f) => !wrongType.includes(f) && !files.some((g) => sameFile(f, g)));
+    const room = MAX_FILES_PER_FIELD - files.length;
+    const notes = [];
+    if (wrongType.length) notes.push(`${wrongType.map((f) => f.name).join(", ")} bukan ${accept.replaceAll(",", ", ")}`);
+    if (fresh.length > room) notes.push(`maksimal ${MAX_FILES_PER_FIELD} file, ${fresh.length - room} file tidak ditambahkan`);
+    setRejected(notes.length ? `${notes.join("; ")}.` : null);
+    if (fresh.length && room > 0) onChange([...files, ...fresh.slice(0, room)]);
+  }
+
   return (
     <div>
-      <p className="mb-1.5 text-sm font-medium text-ink">
-        {label} {required ? <span className="text-red-700">*</span> : <span className="font-normal text-muted">(opsional)</span>}
-      </p>
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          const dropped = e.dataTransfer.files?.[0];
-          if (dropped) onChange(dropped);
-        }}
-        className={`flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 transition-colors ${
-          dragging ? "border-accent-500 bg-accent-50" : "border-line bg-canvas"
-        }`}
-      >
-        <Icon className="h-5 w-5 shrink-0 text-muted" aria-hidden />
-        <div className="min-w-0 flex-1">
-          {file ? (
-            <p className="truncate text-sm font-medium text-ink">{file.name}</p>
-          ) : (
-            <p className="text-sm text-muted">{hint}</p>
-          )}
-          {status}
-        </div>
-        {file ? (
-          <Button size="sm" variant="ghost" onClick={() => onChange(null)}>
-            Hapus
-          </Button>
-        ) : (
-          <Button size="sm" variant="secondary" onClick={() => input.current?.click()}>
-            <Upload className="h-4 w-4" aria-hidden />
-            Pilih file
-          </Button>
+      <div className="mb-1.5 flex items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-ink">
+          {label} {required ? <span className="text-red-700">*</span> : <span className="font-normal text-muted">(opsional)</span>}
+        </p>
+        {files.length > 0 && (
+          <span className="tabular text-xs text-muted">
+            {files.length}/{MAX_FILES_PER_FIELD} file
+          </span>
         )}
-        <input
-          ref={input}
-          type="file"
-          accept={accept}
-          className="sr-only"
-          aria-label={label}
-          onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-        />
       </div>
+      {files.length > 0 && (
+        <ul className="mb-2 divide-y divide-line rounded-lg border border-line bg-surface">
+          {files.map((file, index) => (
+            <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-3 px-4 py-2.5">
+              <Icon className="h-5 w-5 shrink-0 text-muted" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink">
+                  {file.name} <span className="tabular font-normal text-muted">· {size(file.size)}</span>
+                </p>
+                {fileStatus?.(file, index)}
+              </div>
+              <Button size="sm" variant="ghost" aria-label={`Hapus ${file.name}`} onClick={() => onChange(files.filter((_, i) => i !== index))}>
+                <X className="h-4 w-4" aria-hidden /> Hapus
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {!full && (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            add(e.dataTransfer.files);
+          }}
+          className={`flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 transition-colors ${
+            dragging ? "border-accent-500 bg-accent-50" : "border-line bg-canvas"
+          }`}
+        >
+          <Upload className="h-5 w-5 shrink-0 text-muted" aria-hidden />
+          <p className="min-w-0 flex-1 text-sm text-muted">{files.length ? "Tambah file lain: seret ke sini atau pilih" : hint}</p>
+          <Button size="sm" variant="secondary" onClick={() => input.current?.click()}>
+            {files.length ? <Plus className="h-4 w-4" aria-hidden /> : <Upload className="h-4 w-4" aria-hidden />}
+            {files.length ? "Tambah file" : "Pilih file"}
+          </Button>
+          <input
+            ref={input}
+            type="file"
+            accept={accept}
+            multiple
+            className="sr-only"
+            aria-label={label}
+            onChange={(e) => {
+              add(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </div>
+      )}
+      {rejected && (
+        <p className="mt-1 flex items-center gap-1.5 text-xs text-red-700">
+          <AlertCircle className="h-3.5 w-3.5" aria-hidden /> {rejected}
+        </p>
+      )}
+      {status}
     </div>
   );
 }
@@ -163,21 +212,19 @@ export default function NewValidationPage() {
     return !(v >= f.min && v <= f.max);
   }).map((f) => f.label);
 
-  const ready = Boolean(files.wbs && preview && !wbsError && !periodError && paramErrors.length === 0);
+  const totalBytes = [...files.wbs, ...files.request, ...files.supporting].reduce((a, f) => a + f.size, 0);
+  const tooLarge = totalBytes > MAX_TOTAL_BYTES;
+  const ready = Boolean(files.wbs.length && preview && !wbsError && !periodError && !tooLarge && paramErrors.length === 0);
   const canRun = ready && Boolean(apiKey);
 
-  async function chooseWbs(file: File | null) {
-    setFiles({ ...files, wbs: file });
+  async function chooseWbs(list: File[]) {
+    setFiles({ ...files, wbs: list });
     setPreview(null);
     setWbsError(null);
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".xlsx")) {
-      setWbsError("WBS harus berupa file Excel .xlsx.");
-      return;
-    }
+    if (!list.length) return;
     setChecking(true);
     try {
-      const result = await previewWbs(file);
+      const result = await previewWbs(list);
       setPreview(result);
       setProject({ ...project, start: result.start, end: result.end });
     } catch (err) {
@@ -223,43 +270,64 @@ export default function NewValidationPage() {
             <div className="space-y-4">
               <FilePicker
                 label="WBS"
-                hint="Seret file .xlsx ke sini atau pilih file"
+                hint="Seret file .xlsx ke sini atau pilih file. Bisa lebih dari satu, misalnya satu file per tim."
                 accept=".xlsx"
                 required
-                file={files.wbs}
+                files={files.wbs}
                 onChange={chooseWbs}
+                fileStatus={(file) => {
+                  const info = preview?.files.find((f) => f.name === file.name);
+                  return info ? (
+                    <p className="text-xs text-muted">
+                      {info.items} item di sheet &quot;{info.sheet}&quot;, {fmtDate(info.start)} s.d. {fmtDate(info.end)}
+                    </p>
+                  ) : null;
+                }}
                 status={
                   checking ? (
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Membaca struktur WBS
                     </p>
                   ) : wbsError ? (
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-red-700">
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-700">
                       <AlertCircle className="h-3.5 w-3.5" aria-hidden /> {wbsError}
                     </p>
                   ) : preview ? (
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-800">
-                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                      {preview.items} item level terbawah di sheet &quot;{preview.sheet}&quot;, {fmtDate(preview.start)} s.d.{" "}
-                      {fmtDate(preview.end)}
-                    </p>
+                    <div className="mt-1.5 space-y-1 text-xs">
+                      <p className="flex items-center gap-1.5 text-emerald-800">
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                        {files.wbs.length > 1 ? `Total ${preview.items} item dari ${files.wbs.length} file` : `${preview.items} item level terbawah`},{" "}
+                        {fmtDate(preview.start)} s.d. {fmtDate(preview.end)}
+                      </p>
+                      {preview.warnings.slice(0, 3).map((w) => (
+                        <p key={w} className="flex items-start gap-1.5 text-amber-800">
+                          <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden /> {w}
+                        </p>
+                      ))}
+                    </div>
                   ) : null
                 }
               />
               <FilePicker
                 label="Dokumen permintaan"
-                hint="PDF, Word, atau teks berisi jumlah talent yang diminta"
+                hint="PDF, Word, atau teks berisi jumlah talent yang diminta. Bisa lebih dari satu."
                 accept=".pdf,.docx,.txt,.md"
-                file={files.request}
+                files={files.request}
                 onChange={(f) => setFiles({ ...files, request: f })}
               />
               <FilePicker
                 label="Dokumen pendukung"
-                hint="Misalnya notulen rapat yang menyebut pekerjaan tambahan"
+                hint="Misalnya notulen rapat yang menyebut pekerjaan tambahan. Bisa lebih dari satu."
                 accept=".pdf,.docx,.txt,.md"
-                file={files.supporting}
+                files={files.supporting}
                 onChange={(f) => setFiles({ ...files, supporting: f })}
               />
+              {totalBytes > 0 && (
+                <p className={`tabular text-xs ${tooLarge ? "text-red-700" : "text-muted"}`}>
+                  Total unggahan {size(totalBytes)} dari batas 4 MB
+                  {tooLarge ? ". Kurangi file atau kecilkan ukurannya sebelum menjalankan." : "."}
+                </p>
+              )}
             </div>
           </Card>
 
@@ -502,6 +570,7 @@ export default function NewValidationPage() {
               <ul className="space-y-2.5 text-sm">
                 {[
                   { ok: Boolean(preview && !wbsError), text: "WBS terbaca" },
+                  { ok: !tooLarge, text: "Total file di bawah 4 MB" },
                   { ok: !periodError && Boolean(project.start && project.end), text: "Periode proyek valid" },
                   { ok: paramErrors.length === 0, text: "Parameter dalam batas wajar" },
                   { ok: Boolean(apiKey), text: "Model dan API key diatur", link: "/pengaturan" },

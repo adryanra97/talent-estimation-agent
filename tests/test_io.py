@@ -45,3 +45,20 @@ def test_text_and_masking():
         extract_text("a.exe", b"")
     masked = mask_text("Kirim ke a.b@contoh.id, 081234567890, NIK 3201234567890123")
     assert "[EMAIL]" in masked and "[TELEPON]" in masked and "[NIK]" in masked
+
+
+def test_merge_keeps_ids_when_unique():
+    from talent_estimation.io import merge_wbs
+
+    def book(item_id: str) -> bytes:
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["WBS", "Task", "Start", "End"])
+        ws.append([item_id, "Integrasi data", "2027-02-01", "2027-02-10"])
+        buf = io.BytesIO()
+        wb.save(buf)
+        return buf.getvalue()
+
+    merged = merge_wbs([("a.xlsx", read_wbs(book("1.1"))), ("b.xlsx", read_wbs(book("2.1")))])
+    assert [i.item_id for i in merged.items] == ["1.1", "2.1"]
+    assert [i.group for i in merged.items] == ["a", "b"]

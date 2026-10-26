@@ -269,3 +269,63 @@ def read_wbs(
     return WbsReadResult(
         items=items, mapping=mapping, role_legend=legend, warnings=warnings, total_rows=len(raw)
     )
+
+
+def _file_label(name: str) -> str:
+    stem = re.sub(r"\.[^.]+$", "", name or "").strip()
+    return stem or "WBS"
+
+
+def merge_wbs(results: list[tuple[str, WbsReadResult]]) -> WbsReadResult:
+    """Combine several WBS workbooks into one list of items.
+
+    Parameters
+    ----------
+    results : list of (str, WbsReadResult)
+        File name and read result per workbook, in upload order.
+
+    Returns
+    -------
+    WbsReadResult
+        All leaf items. When item IDs repeat across files, every item gets a
+        prefix ``A:``, ``B:`` and so on by file so that each row stays unique.
+        Items without a group use the file name as group. The mapping is the
+        one of the first file.
+    """
+    if not results:
+        raise WbsFormatError("Tidak ada file WBS.")
+    if len(results) == 1:
+        return results[0][1]
+    seen: set[str] = set()
+    clash = False
+    for _, result in results:
+        ids = {i.item_id for i in result.items}
+        clash = clash or bool(ids & seen)
+        seen |= ids
+    items: list[WbsItem] = []
+    legend: dict[str, str] = {}
+    warnings: list[str] = []
+    for index, (name, result) in enumerate(results):
+        label = _file_label(name)
+        prefix = f"{chr(65 + index)}:" if clash else ""
+        for item in result.items:
+            items.append(
+                item.model_copy(
+                    update={
+                        "item_id": f"{prefix}{item.item_id}",
+                        "group": item.group or label,
+                    }
+                )
+            )
+        legend.update(result.role_legend)
+        warnings.extend(f"{label}: {w}" for w in result.warnings)
+    if clash:
+        names = ", ".join(f"{chr(65 + i)} = {_file_label(n)}" for i, (n, _) in enumerate(results))
+        warnings.append(f"ID item sama muncul di lebih dari satu file. ID diberi awalan: {names}.")
+    return WbsReadResult(
+        items=items,
+        mapping=results[0][1].mapping,
+        role_legend=legend,
+        warnings=warnings,
+        total_rows=sum(r.total_rows for _, r in results),
+    )

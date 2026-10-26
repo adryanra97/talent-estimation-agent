@@ -50,3 +50,30 @@ def test_catalog_excel_download():
         "/api/py/catalog/parse", files={"file": ("katalog.xlsx", res.content)}
     ).json()
     assert set(parsed["roles"]) == {"DE", "DA", "DS", "AI", "UXR", "UX", "UI"}
+
+
+def test_preview_several_wbs_files_prefixes_clashing_ids(demo_wbs):
+    files = [("file", ("Tim_A.xlsx", demo_wbs)), ("file", ("Tim_B.xlsx", demo_wbs))]
+    body = client.post("/api/py/wbs/preview", files=files).json()
+    assert body["items"] == 46
+    assert [f["name"] for f in body["files"]] == ["Tim_A.xlsx", "Tim_B.xlsx"]
+    assert any("awalan" in w for w in body["warnings"])
+
+
+def test_run_with_several_documents(demo_wbs):
+    files = [
+        ("wbs", ("w.xlsx", demo_wbs)),
+        ("request_doc", ("a.txt", b"Permintaan: 1 Data Engineer")),
+        ("request_doc", ("b.txt", b"Tambahan: 0,5 FTE Data Analyst")),
+    ]
+    settings = {"demo": True, "project": {"scope": "data"}}
+    res = client.post("/api/py/runs", data={"settings": json.dumps(settings)}, files=files)
+    run = json.loads(res.text.splitlines()[-1])["run"]
+    requested = {r["role"]: r["requested_fte"] for r in run["role_inputs"]}
+    assert requested["DE"] == 1.0 and requested["DA"] == 0.5
+
+
+def test_too_many_files(demo_wbs):
+    files = [("wbs", (f"w{i}.xlsx", demo_wbs)) for i in range(6)]
+    res = client.post("/api/py/runs", data={"settings": json.dumps({"demo": True})}, files=files)
+    assert res.status_code == 400

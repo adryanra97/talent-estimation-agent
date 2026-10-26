@@ -218,4 +218,5 @@ export interface WbsPreview {
   end: string | null;
   warnings: string[];
   legend_size: number;
+  files: { name: string; sheet: string; items: number; start: string | null; end: string | null }[];
 }

@@ -37,7 +37,7 @@ from talent_estimation.domain.models import (
     RunResult,
 )
 from talent_estimation.excel import build_workbook
-from talent_estimation.io import WbsFormatError, extract_text, read_wbs
+from talent_estimation.io import WbsFormatError, WbsReadResult, extract_text, merge_wbs, read_wbs
 from talent_estimation.llm import (
     LangChainClient,
     LLMClient,
@@ -49,6 +49,8 @@ from talent_estimation.skills import AGENT_CARDS
 from talent_estimation.skills.schemas import ReclassifyRequest
 
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
+"""Total upload size per request. Vercel functions accept about 4.5 MB."""
+MAX_FILES_PER_FIELD = 5
 
 app = FastAPI(
     title="Talent Estimation Agent API",
@@ -107,6 +109,63 @@ async def _read(upload: UploadFile | None) -> bytes | None:
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail=f"File {upload.filename} lebih dari 4 MB.")
     return content
+
+
+async def _read_all(uploads: list[UploadFile] | None, label: str) -> list[tuple[str, bytes]]:
+    """Read every uploaded file of one form field."""
+    chosen = [u for u in uploads or [] if u.filename]
+    if len(chosen) > MAX_FILES_PER_FIELD:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{label} paling banyak {MAX_FILES_PER_FIELD} file.",
+        )
+    return [(u.filename or "", await _read(u) or b"") for u in chosen]
+
+
+def _check_total(*groups: list[tuple[str, bytes]]) -> None:
+    total = sum(len(content) for group in groups for _, content in group)
+    if total > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="Total ukuran file lebih dari 4 MB. Kurangi atau kecilkan file.",
+        )
+
+
+def _documents_text(files: list[tuple[str, bytes]]) -> str:
+    """Join the text of several documents, each under its own heading."""
+    parts = []
+    for name, content in files:
+        text = extract_text(name, content).strip()
+        if text:
+            parts.append(f"=== Dokumen: {name} ===\n{text}" if len(files) > 1 else text)
+    return "\n\n".join(parts)
+
+
+def _read_wbs_files(
+    files: list[tuple[str, bytes]], holidays: list[Any] | None = None
+) -> tuple[list[tuple[str, WbsReadResult]], WbsReadResult]:
+    """Read each WBS workbook and merge them. Errors name the file."""
+    results = []
+    for name, content in files:
+        try:
+            results.append((name, read_wbs(content, holidays=holidays)))
+        except WbsFormatError as exc:
+            message = f"{name}: {exc}" if len(files) > 1 else str(exc)
+            raise HTTPException(status_code=422, detail=message) from exc
+        except Exception as exc:
+            raise HTTPException(
+                status_code=422, detail=f"File {name} tidak bisa dibaca: {exc}"
+            ) from exc
+    return results, merge_wbs(results)
+
+
+def _period(result: WbsReadResult) -> tuple[str | None, str | None]:
+    starts = [i.start for i in result.items if i.start]
+    ends = [i.end for i in result.items if i.end]
+    return (
+        min(starts).isoformat() if starts else None,
+        max(ends).isoformat() if ends else None,
+    )
 
 
 @app.get("/api/py/health")
@@ -170,26 +229,31 @@ async def llm_test(
 
 
 @app.post("/api/py/wbs/preview")
-async def wbs_preview(file: Annotated[UploadFile, File()]) -> dict[str, Any]:
-    """Read a WBS file and report what was recognised, before a run starts."""
-    content = await _read(file)
-    try:
-        result = read_wbs(content or b"")
-    except WbsFormatError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=422, detail=f"File tidak bisa dibaca: {exc}") from exc
-    starts = [i.start for i in result.items if i.start]
-    ends = [i.end for i in result.items if i.end]
+async def wbs_preview(file: Annotated[list[UploadFile], File()]) -> dict[str, Any]:
+    """Read one or more WBS files and report what was recognised, before a run starts."""
+    files = await _read_all(file, "WBS")
+    _check_total(files)
+    results, merged = _read_wbs_files(files)
+    start, end = _period(merged)
     return {
-        "sheet": result.mapping.sheet,
-        "items": len(result.items),
-        "rows": result.total_rows,
-        "start": min(starts).isoformat() if starts else None,
-        "end": max(ends).isoformat() if ends else None,
-        "warnings": result.warnings,
-        "legend_size": len(result.role_legend),
-        "sample": [i.model_dump(mode="json") for i in result.items[:5]],
+        "sheet": merged.mapping.sheet,
+        "items": len(merged.items),
+        "rows": merged.total_rows,
+        "start": start,
+        "end": end,
+        "warnings": merged.warnings,
+        "legend_size": len(merged.role_legend),
+        "files": [
+            {
+                "name": name,
+                "sheet": result.mapping.sheet,
+                "items": len(result.items),
+                "start": _period(result)[0],
+                "end": _period(result)[1],
+            }
+            for name, result in results
+        ],
+        "sample": [i.model_dump(mode="json") for i in merged.items[:5]],
     }
 
 
@@ -206,9 +270,9 @@ def demo_wbs() -> Response:
 @app.post("/api/py/runs")
 async def create_run(
     settings: Annotated[str, Form()],
-    wbs: Annotated[UploadFile | None, File()] = None,
-    request_doc: Annotated[UploadFile | None, File()] = None,
-    supporting_doc: Annotated[UploadFile | None, File()] = None,
+    wbs: Annotated[list[UploadFile] | None, File()] = None,
+    request_doc: Annotated[list[UploadFile] | None, File()] = None,
+    supporting_doc: Annotated[list[UploadFile] | None, File()] = None,
     x_llm_api_key: Annotated[str | None, Header()] = None,
 ) -> StreamingResponse:
     """Run the agents and stream progress as newline-delimited JSON.
@@ -223,8 +287,13 @@ async def create_run(
     llm = _client(options.provider, x_llm_api_key, options.demo)
     catalog = options.catalog or load_default_catalog()
 
-    if options.demo and wbs is None:
-        wbs_bytes = build_demo_wbs()
+    wbs_files = await _read_all(wbs, "WBS")
+    request_files = await _read_all(request_doc, "Dokumen permintaan")
+    supporting_files = await _read_all(supporting_doc, "Dokumen pendukung")
+    _check_total(wbs_files, request_files, supporting_files)
+
+    if options.demo and not wbs_files:
+        wbs_files = [("WBS_contoh.xlsx", build_demo_wbs())]
         request_text, supporting_text = REQUEST_TEXT, NOTES_TEXT
         options.project = options.project.model_copy(
             update={
@@ -236,23 +305,11 @@ async def create_run(
             }
         )
     else:
-        wbs_bytes = await _read(wbs)
-        if not wbs_bytes:
+        if not wbs_files:
             raise HTTPException(status_code=400, detail="File WBS wajib diunggah.")
-        request_text = (
-            extract_text(request_doc.filename or "", await _read(request_doc) or b"")
-            if request_doc
-            else ""
-        )
-        supporting_text = (
-            extract_text(supporting_doc.filename or "", await _read(supporting_doc) or b"")
-            if supporting_doc
-            else ""
-        )
-    try:
-        parsed = read_wbs(wbs_bytes, holidays=options.parameters.holidays)
-    except WbsFormatError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+        request_text = _documents_text(request_files)
+        supporting_text = _documents_text(supporting_files)
+    _, parsed = _read_wbs_files(wbs_files, holidays=options.parameters.holidays)
 
     inputs = RunInputs(
         project=options.project,
@@ -274,7 +331,11 @@ async def create_run(
                     "type": "progress",
                     "agent": "Orchestrator",
                     "status": "done",
-                    "message": f"{len(parsed.items)} item WBS diterima",
+                    "message": (
+                        f"{len(parsed.items)} item WBS diterima dari {len(wbs_files)} file"
+                        if len(wbs_files) > 1
+                        else f"{len(parsed.items)} item WBS diterima"
+                    ),
                 }
             )
             + "\n"

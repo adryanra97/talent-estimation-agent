@@ -41,11 +41,15 @@ export interface TeamInput {
 
 export type RunStatus = "idle" | "running" | "done" | "error";
 
-interface Files {
-  wbs: File | null;
-  request: File | null;
-  supporting: File | null;
+export interface Files {
+  wbs: File[];
+  request: File[];
+  supporting: File[];
 }
+
+/** Limits that match the API: files per field and total upload size. */
+export const MAX_FILES_PER_FIELD = 5;
+export const MAX_TOTAL_BYTES = 4 * 1024 * 1024;
 
 interface Store {
   provider: ProviderConfig;
@@ -116,7 +120,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [team, setTeam] = useState<Record<string, TeamInput>>({});
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiTools, setAiTools] = useState("");
-  const [files, setFiles] = useState<Files>({ wbs: null, request: null, supporting: null });
+  const [files, setFiles] = useState<Files>({ wbs: [], request: [], supporting: [] });
   const [preview, setPreview] = useState<WbsPreview | null>(null);
   const [status, setStatus] = useState<RunStatus>("idle");
   const [events, setEvents] = useState<ProgressEvent[]>([]);

@@ -44,9 +44,9 @@ export async function downloadCatalogExcel(catalog: Catalog | null): Promise<voi
   URL.revokeObjectURL(url);
 }
 
-export async function previewWbs(file: File): Promise<WbsPreview> {
+export async function previewWbs(files: File[]): Promise<WbsPreview> {
   const form = new FormData();
-  form.append("file", file);
+  for (const file of files) form.append("file", file);
   const res = await fetch(`${BASE}/wbs/preview`, { method: "POST", body: form });
   if (!res.ok) throw await failure(res);
   return res.json();
@@ -63,9 +63,9 @@ export async function testConnection(provider: ProviderConfig, apiKey: string): 
 }
 
 export interface RunFiles {
-  wbs?: File | null;
-  request?: File | null;
-  supporting?: File | null;
+  wbs?: File[];
+  request?: File[];
+  supporting?: File[];
 }
 
 /** Start a run and call `onEvent` for every line of the NDJSON stream. */
@@ -78,9 +78,9 @@ export async function startRun(
 ): Promise<void> {
   const form = new FormData();
   form.append("settings", JSON.stringify(settings));
-  if (files.wbs) form.append("wbs", files.wbs);
-  if (files.request) form.append("request_doc", files.request);
-  if (files.supporting) form.append("supporting_doc", files.supporting);
+  for (const f of files.wbs ?? []) form.append("wbs", f);
+  for (const f of files.request ?? []) form.append("request_doc", f);
+  for (const f of files.supporting ?? []) form.append("supporting_doc", f);
   const res = await fetch(`${BASE}/runs`, {
     method: "POST",
     body: form,

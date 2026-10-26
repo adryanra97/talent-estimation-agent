@@ -6,6 +6,7 @@ from talent_estimation.io.wbs_reader import (
     WbsFormatError,
     WbsReadResult,
     detect_columns,
+    merge_wbs,
     preview_rows,
     read_wbs,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "WbsReadResult",
     "detect_columns",
     "extract_text",
+    "merge_wbs",
     "preview_rows",
     "read_wbs",
 ]

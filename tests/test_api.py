@@ -41,3 +41,12 @@ def test_demo_ignores_period_from_the_form():
     assert run["project"]["start"] == "2027-02-01"
     assert [m["month"][:7] for m in run["monthly"]] == ["2027-02", "2027-03", "2027-04"]
     assert not any(f["kind"] == "data_quality" for f in run["findings"])
+
+
+def test_catalog_excel_download():
+    res = client.post("/api/py/catalog/excel", json={})
+    assert res.status_code == 200 and res.content[:2] == b"PK"
+    parsed = client.post(
+        "/api/py/catalog/parse", files={"file": ("katalog.xlsx", res.content)}
+    ).json()
+    assert set(parsed["roles"]) == {"DE", "DA", "DS", "AI"}

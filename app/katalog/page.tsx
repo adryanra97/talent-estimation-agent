@@ -1,9 +1,9 @@
 "use client";
 
-import { RotateCcw, Upload } from "lucide-react";
+import { Download, RotateCcw, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button, Card, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
-import { parseCatalog } from "@/lib/api";
+import { downloadCatalogExcel, parseCatalog } from "@/lib/api";
 import { useStore } from "@/lib/store";
 
 export default function CatalogPage() {
@@ -35,6 +35,13 @@ export default function CatalogPage() {
             <Button variant="ghost" onClick={resetCatalog} disabled={catalogSource === "bawaan"}>
               <RotateCcw className="h-4 w-4" aria-hidden /> Pakai bawaan
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => downloadCatalogExcel(catalog).catch((err) => setNotice(err instanceof Error ? err.message : String(err)))}
+              disabled={!catalog}
+            >
+              <Download className="h-4 w-4" aria-hidden /> Unduh format Excel
+            </Button>
             <Button variant="secondary" onClick={() => input.current?.click()} disabled={loading}>
               <Upload className="h-4 w-4" aria-hidden /> Unggah katalog terbaru
             </Button>
@@ -49,10 +56,11 @@ export default function CatalogPage() {
           </>
         }
       />
-      <p className="mb-6 text-sm text-muted">
-        Sumber: <span className="font-medium text-ink">{catalogSource}</span>. Format Excel memakai sheet
-        <span className="font-mono"> Scope_Capability</span> (kolom Kode, Capability, In-scope, Out-of-scope, Kata kunci,
-        Biasanya pendukung) dan <span className="font-mono">Pilar_Skill</span> (Kode, Pilar, Skill).
+      <p className="mb-6 max-w-3xl text-sm text-muted">
+        Sumber: <span className="font-medium text-ink">{catalogSource}</span>. Untuk mengubah katalog, klik{" "}
+        <span className="font-medium text-ink">Unduh format Excel</span> (berisi katalog yang sedang aktif beserta petunjuk), edit di
+        Excel, lalu unggah kembali lewat <span className="font-medium text-ink">Unggah katalog terbaru</span>. Format YAML dan JSON
+        juga diterima.
       </p>
       {!catalog ? (
         <p className="text-sm text-muted">Memuat katalog.</p>

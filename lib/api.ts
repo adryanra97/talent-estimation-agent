@@ -29,6 +29,21 @@ export async function parseCatalog(file: File): Promise<Catalog> {
   return res.json();
 }
 
+export async function downloadCatalogExcel(catalog: Catalog | null): Promise<void> {
+  const res = await fetch(`${BASE}/catalog/excel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ catalog }),
+  });
+  if (!res.ok) throw await failure(res);
+  const url = URL.createObjectURL(await res.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "Katalog_Capability.xlsx";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export async function previewWbs(file: File): Promise<WbsPreview> {
   const form = new FormData();
   form.append("file", file);

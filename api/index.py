@@ -23,7 +23,12 @@ from pydantic import BaseModel, Field, ValidationError
 from talent_estimation import __version__
 from talent_estimation.agents import RunInputs, reclassify_rows, run_pipeline
 from talent_estimation.calc import recalculate
-from talent_estimation.catalog import Catalog, load_catalog_file, load_default_catalog
+from talent_estimation.catalog import (
+    Catalog,
+    catalog_to_excel,
+    load_catalog_file,
+    load_default_catalog,
+)
 from talent_estimation.demo import NOTES_TEXT, PROJECT_NAME, REQUEST_TEXT, build_demo_wbs
 from talent_estimation.domain.models import (
     Parameters,
@@ -124,6 +129,23 @@ async def parse_catalog(file: Annotated[UploadFile, File()]) -> dict[str, Any]:
         return load_catalog_file(file.filename or "", content or b"").model_dump(mode="json")
     except (ValueError, ValidationError) as exc:
         raise HTTPException(status_code=422, detail=f"Katalog tidak valid: {exc}") from exc
+
+
+class CatalogBody(BaseModel):
+    """A catalog sent by the browser; the default catalog is used when empty."""
+
+    catalog: Catalog | None = None
+
+
+@app.post("/api/py/catalog/excel")
+def catalog_excel(body: CatalogBody) -> Response:
+    """Download a catalog as an editable Excel workbook."""
+    content = catalog_to_excel(body.catalog or load_default_catalog())
+    return Response(
+        content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="Katalog_Capability.xlsx"'},
+    )
 
 
 @app.get("/api/py/agents")

@@ -75,7 +75,7 @@ export default function HomePage() {
             <Play className="h-4 w-4" aria-hidden /> Coba demo tanpa API key
           </Button>
         </div>
-        <p className="mt-3 text-xs text-muted">Demo memakai proyek fiktif dan penilai berbasis aturan. Hasilnya muncul dalam beberapa detik.</p>
+        <p className="mt-3 text-xs text-muted">Demo memakai proyek fiktif dan penilai berbasis aturan. Langkah tiap agent ditampilkan bertahap, sekitar 15 detik.</p>
       </section>
 
       {run && (

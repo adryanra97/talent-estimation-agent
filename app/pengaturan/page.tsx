@@ -8,7 +8,7 @@ import { useStore } from "@/lib/store";
 import type { Provider } from "@/lib/types";
 
 const PROVIDERS: { value: Provider; label: string; models: string[]; note: string }[] = [
-  { value: "google", label: "Google Gemini", models: ["gemini-2.5-flash", "gemini-2.5-pro"], note: "Key dari Google AI Studio. Ada tier gratis untuk uji coba." },
+  { value: "google", label: "Google Gemini", models: ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro-preview"], note: "Key dari Google AI Studio (aistudio.google.com/apikey). Tier gratis cukup untuk uji coba, tetapi data dapat dipakai Google untuk perbaikan produk: pakai data fiktif atau demo." },
   { value: "anthropic", label: "Anthropic Claude", models: ["claude-sonnet-5-5", "claude-haiku-5-5"], note: "Key dari Anthropic Console. Cek nama model terbaru di dokumentasi penyedia." },
   { value: "openai", label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1"], note: "Key dari OpenAI Platform." },
   { value: "azure", label: "Azure OpenAI", models: [], note: "Isi endpoint resource dan nama deployment." },

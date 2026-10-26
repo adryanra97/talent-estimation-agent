@@ -26,7 +26,7 @@ export const DEFAULT_PARAMETERS: Parameters = {
 
 export const DEFAULT_PROVIDER: ProviderConfig = {
   provider: "google",
-  model: "gemini-2.5-flash",
+  model: "gemini-3.8-flash",
   base_url: null,
   api_version: null,
   temperature: 0,
@@ -95,6 +95,35 @@ interface Store {
 }
 
 const Context = createContext<Store | null>(null);
+
+/**
+ * Demo runs finish in well under a second, which hides how the agents hand
+ * work to each other. The demo replays the real events with short pauses so
+ * each step is visible. Runs with a real model are never delayed.
+ */
+function demoDelay(event: Record<string, unknown>, seen: Set<string>): number {
+  if (event.type !== "progress") return 700;
+  const agent = String(event.agent);
+  const first = !seen.has(agent);
+  seen.add(agent);
+  const jitter = Math.random() * 700;
+  if (event.status === "done") return 1300 + jitter;
+  return first ? 450 : 1900 + jitter;
+}
+
+function wait(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      },
+      { once: true },
+    );
+  });
+}
 
 function toNumber(value: string): number | null {
   if (value.trim() === "") return null;
@@ -193,24 +222,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         demo: useDemo,
         catalog,
       };
+      const handle = (event: Record<string, unknown>) => {
+        if (event.type === "progress") {
+          setEvents((prev) => [...prev, { ...(event as unknown as ProgressEvent), at: Date.now() }]);
+        } else if (event.type === "result") {
+          setRun(event.run as RunResult);
+          setStatus("done");
+        } else if (event.type === "error") {
+          setError(String(event.message));
+          setStatus("error");
+        }
+      };
+      const queue: Record<string, unknown>[] = [];
       try {
         await api.startRun(
           settings,
           useDemo ? {} : files,
           useDemo ? "" : apiKey,
-          (event) => {
-            if (event.type === "progress") {
-              setEvents((prev) => [...prev, { ...(event as unknown as ProgressEvent), at: Date.now() }]);
-            } else if (event.type === "result") {
-              setRun(event.run as RunResult);
-              setStatus("done");
-            } else if (event.type === "error") {
-              setError(String(event.message));
-              setStatus("error");
-            }
-          },
+          useDemo ? (event) => queue.push(event) : handle,
           controller.signal,
         );
+        const seen = new Set<string>();
+        for (const event of queue) {
+          await wait(demoDelay(event, seen), controller.signal);
+          handle(event);
+        }
       } catch (err) {
         if (controller.signal.aborted) {
           setStatus("idle");

@@ -41,7 +41,7 @@ class ProviderConfig(BaseModel):
     """
 
     provider: Provider = "google"
-    model: str = "gemini-2.5-flash"
+    model: str = "gemini-3.8-flash"
     base_url: str | None = None
     api_version: str | None = None
     temperature: float = Field(0.0, ge=0, le=1)

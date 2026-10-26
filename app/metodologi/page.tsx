@@ -5,7 +5,7 @@ export default function MethodPage() {
     <>
       <PageHeader
         title="Metodologi"
-        description="Cara agent menilai dan cara sistem menghitung. Prinsipnya: model menilai dan menjelaskan, kode menghitung."
+        description="Model menilai dan menjelaskan; kode yang menghitung."
       />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Use Case Points (UCP)">

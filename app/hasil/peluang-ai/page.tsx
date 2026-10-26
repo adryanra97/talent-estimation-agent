@@ -41,14 +41,14 @@ export default function AiPage() {
           <>
             <PageHeader
               title="Peluang Bantuan AI"
-              description="Skenario: bagian pekerjaan yang dapat dipercepat dengan bantuan AI. Angka dasar di Ringkasan FTE tidak berubah. AI membantu tugas tertentu; tanggung jawab peran tetap pada talent."
+              description="Skenario terpisah: bagian pekerjaan yang bisa lebih cepat dengan bantuan AI. Angka di Ringkasan FTE tidak berubah."
               actions={<TeamFilter run={run} />}
             />
             {groups.map((g) => (
             <section key={g.key} aria-label={`Tim ${g.label}`} className="mb-6">
               {(groups.length > 1 || teamView !== "all") && (
                 <h2 className="mb-3 text-base font-semibold text-ink">
-                  Tim {g.label} <span className="text-sm font-normal text-muted">· {g.roles.length} role</span>
+                  Tim {g.label}
                 </h2>
               )}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -71,7 +71,7 @@ export default function AiPage() {
                   </p>
                   {a.top_skills.length > 0 && (
                     <div className="mt-3 border-t border-line pt-3">
-                      <p className="text-xs font-medium text-muted uppercase">Capability paling terbantu</p>
+                      <p className="text-xs font-medium text-muted">Capability paling terbantu</p>
                       <ul className="mt-1 space-y-0.5 text-xs text-ink">
                         {a.top_skills.slice(0, 3).map((s) => (
                           <li key={s}>{s}</li>
@@ -87,7 +87,7 @@ export default function AiPage() {
 
             <Card
               title="Detail tugas"
-              description="Persentase hemat berasal dari tabel kategori, bukan dari model. Ubah angkanya bila tim punya data yang lebih baik."
+              description="Persentase hemat diambil dari tabel kategori, bukan dari model. Boleh diubah."
               actions={
                 <div className="flex gap-2">
                   <select aria-label="Filter role" className={`${inputBase} w-auto`} value={role} onChange={(e) => setRole(e.target.value)}>
@@ -127,7 +127,7 @@ export default function AiPage() {
                           <p className="text-ink">{t.task}</p>
                           <p className="text-xs text-muted">
                             {t.item_id} {names[`${t.item_id}|${t.role}`]}
-                            {t.prerequisite ? ` · Prasyarat: ${t.prerequisite}` : ""}
+                            {t.prerequisite ? `. Prasyarat: ${t.prerequisite}` : ""}
                           </p>
                         </td>
                         <td className="py-2.5 pr-3"><RoleBadge role={t.role} /></td>

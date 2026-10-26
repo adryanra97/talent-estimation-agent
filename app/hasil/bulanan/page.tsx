@@ -30,7 +30,7 @@ export default function MonthlyPage() {
           <>
             <PageHeader
               title="Per Bulan"
-              description="Effort tiap item disebar ke bulan sesuai hari kerjanya. FTE bulan = person-days bulan dibagi hari kerja efektif bulan itu."
+              description="Effort tiap item dibagi ke bulan sesuai hari kerjanya."
               actions={
                 <>
                 <TeamFilter run={run} />
@@ -97,7 +97,7 @@ export default function MonthlyPage() {
                       <Fragment key={g.key}>
                         {grouped && (
                           <tr className="border-b border-line">
-                            <th colSpan={run.monthly.length + 2} scope="colgroup" className="sticky left-0 bg-surface pt-4 pb-1.5 text-left text-xs font-semibold tracking-wide text-muted uppercase">
+                            <th colSpan={run.monthly.length + 2} scope="colgroup" className="sticky left-0 bg-surface pt-4 pb-1.5 text-left text-sm font-semibold text-ink">
                               Tim {g.label}
                             </th>
                           </tr>

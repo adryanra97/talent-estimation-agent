@@ -75,7 +75,7 @@ function FilePicker({
               <Icon className="h-5 w-5 shrink-0 text-muted" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-ink">
-                  {file.name} <span className="tabular font-normal text-muted">· {size(file.size)}</span>
+                  {file.name} <span className="tabular font-normal text-muted">({size(file.size)})</span>
                 </p>
                 {fileStatus?.(file, index)}
               </div>
@@ -261,16 +261,16 @@ export default function NewValidationPage() {
     <>
       <PageHeader
         title="Validasi Baru"
-        description="Unggah WBS dan dokumen permintaan. Agent membaca dokumen, menilai setiap item, dan menghitung kebutuhan dengan dua metode. Tidak ada file yang disimpan."
+        description="Hanya WBS yang wajib. File diproses di memori dan tidak disimpan."
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card title="Dokumen" description="Hanya WBS yang wajib. Dokumen lain membantu agent membaca permintaan dan pekerjaan di luar WBS.">
+          <Card title="Dokumen">
             <div className="space-y-4">
               <FilePicker
                 label="WBS"
-                hint="Seret file .xlsx ke sini atau pilih file. Bisa lebih dari satu, misalnya satu file per tim."
+                hint="Seret file .xlsx ke sini. Boleh lebih dari satu."
                 accept=".xlsx"
                 required
                 files={files.wbs}
@@ -310,14 +310,14 @@ export default function NewValidationPage() {
               />
               <FilePicker
                 label="Dokumen permintaan"
-                hint="PDF, Word, atau teks berisi jumlah talent yang diminta. Bisa lebih dari satu."
+                hint="PDF, Word, atau teks yang menyebut jumlah talent."
                 accept=".pdf,.docx,.txt,.md"
                 files={files.request}
                 onChange={(f) => setFiles({ ...files, request: f })}
               />
               <FilePicker
                 label="Dokumen pendukung"
-                hint="Misalnya notulen rapat yang menyebut pekerjaan tambahan. Bisa lebih dari satu."
+                hint="Misalnya notulen yang menyebut pekerjaan tambahan."
                 accept=".pdf,.docx,.txt,.md"
                 files={files.supporting}
                 onChange={(f) => setFiles({ ...files, supporting: f })}
@@ -387,7 +387,7 @@ export default function NewValidationPage() {
                   checked={aiEnabled}
                   onChange={setAiEnabled}
                   label="Analisis peluang bantuan AI"
-                  description="Augmentation Agent memetakan tugas yang dapat dipercepat dengan bantuan AI, sebagai skenario terpisah."
+                  description="Skenario terpisah: tugas mana yang bisa lebih cepat dengan bantuan AI."
                 />
               </div>
             </div>
@@ -573,7 +573,7 @@ export default function NewValidationPage() {
                   { ok: !tooLarge, text: "Total file di bawah 4 MB" },
                   { ok: !periodError && Boolean(project.start && project.end), text: "Periode proyek valid" },
                   { ok: paramErrors.length === 0, text: "Parameter dalam batas wajar" },
-                  { ok: Boolean(apiKey), text: "Model dan API key diatur", link: "/pengaturan" },
+                  { ok: Boolean(apiKey), text: "Model dan API key siap", link: "/pengaturan" },
                 ].map((c) => (
                   <li key={c.text} className="flex items-center gap-2">
                     {c.ok ? (
@@ -597,16 +597,11 @@ export default function NewValidationPage() {
                   Jalankan validasi
                 </Button>
                 <Button variant="secondary" className="w-full" disabled={status === "running"} onClick={() => run(true)}>
-                  Coba mode demo
+                  Coba dengan data contoh
                 </Button>
-                <p className="text-xs text-muted">
-                  Mode demo memakai proyek fiktif dan penilai berbasis aturan, tanpa API key.
-                </p>
+                <p className="text-xs text-muted">Data contoh tidak butuh API key.</p>
               </div>
             </Card>
-            <p className="px-1 text-xs leading-relaxed text-muted">
-              File diproses di memori dan langsung dibuang. API key hanya disimpan di tab ini dan hilang saat tab ditutup.
-            </p>
           </div>
         </aside>
       </div>

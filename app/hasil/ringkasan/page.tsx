@@ -56,7 +56,7 @@ export default function SummaryPage() {
           <>
             <PageHeader
               title="Ringkasan FTE"
-              description={`${run.project.name || "Proyek"} · ${date(run.project.start)} s.d. ${date(run.project.end)} · FTE rata-rata periode`}
+              description={`${run.project.name || "Proyek"}, ${date(run.project.start)} s.d. ${date(run.project.end)}. Angka FTE adalah rata-rata selama periode.`}
               actions={
                 <>
                 <TeamFilter run={run} />
@@ -91,11 +91,11 @@ export default function SummaryPage() {
               {grouped || teamView !== "all" ? (
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-base font-semibold text-ink">
-                    Tim {g.label} <span className="text-sm font-normal text-muted">· {g.rows.length} role</span>
+                    Tim {g.label}
                   </h2>
                   <p className="tabular text-sm text-muted">
-                    Bottom-up <span className="font-medium text-ink">{fte(t.bu)}</span> · UCP <span className="font-medium text-ink">{fte(t.ucp)}</span> · diminta{" "}
-                    <span className="font-medium text-ink">{fte(t.req)}</span> FTE
+                    Diminta <span className="font-medium text-ink">{fte(t.req)}</span>, UCP <span className="font-medium text-ink">{fte(t.ucp)}</span>, bottom-up{" "}
+                    <span className="font-medium text-ink">{fte(t.bu)}</span> FTE
                   </p>
                 </div>
               ) : null}
@@ -144,7 +144,7 @@ export default function SummaryPage() {
 
             <Card
               title="Perbandingan per role"
-              description="Kebutuhan tambahan = kebutuhan total dikurangi talent existing; angka inilah yang dibandingkan dengan permintaan."
+              description="Kebutuhan tambahan adalah kebutuhan total dikurangi talent yang sudah ada. Angka ini yang dibandingkan dengan permintaan."
             >
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-sm">
@@ -174,7 +174,7 @@ export default function SummaryPage() {
                     <Fragment key={g.key}>
                     {grouped && (
                       <tr className="border-b border-line">
-                        <th colSpan={11} scope="colgroup" className="pt-4 pb-1.5 text-left text-xs font-semibold tracking-wide text-muted uppercase">
+                        <th colSpan={11} scope="colgroup" className="pt-4 pb-1.5 text-left text-sm font-semibold text-ink">
                           Tim {g.label}
                         </th>
                       </tr>
@@ -239,7 +239,7 @@ export default function SummaryPage() {
                   Man-hours bottom-up <span className="tabular font-medium text-ink">{num(shown.reduce((a, c) => a + (estimates[c.role]?.bu_hours ?? 0), 0))}</span> jam
                 </p>
                 <p className="text-muted">
-                  PHM <span className="tabular font-medium text-ink">{fte(run.parameters.phm, 1)}</span> jam/UCP · {run.breakdown.length} baris
+                  PHM <span className="tabular font-medium text-ink">{fte(run.parameters.phm, 1)}</span> jam per poin UCP, {run.breakdown.length} baris breakdown
                 </p>
               </div>
             </Card>

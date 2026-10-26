@@ -102,7 +102,7 @@ export default function AboutPage() {
     <>
       <PageHeader
         title="Tentang Aplikasi"
-        description="Talent Estimation Agent memvalidasi permintaan talent dari WBS dengan dua metode estimasi, sekumpulan agent yang saling memeriksa, dan mesin hitung yang dapat diaudit."
+        description="Apa yang dikerjakan aplikasi ini, bagaimana dibuat, dan bagaimana diuji."
       />
 
       <section aria-labelledby="keunggulan" className="mb-10">
@@ -164,7 +164,7 @@ export default function AboutPage() {
         </Card>
         <Card
           title="Verifikasi otomatis"
-          description="Dijalankan GitHub Actions pada setiap push. Semua pemeriksaan berjalan sampai selesai dan hasilnya tercatat per pemeriksaan."
+          description="Berjalan otomatis di GitHub Actions setiap ada perubahan."
           actions={
             <a
               href="https://github.com/adryanra97/talent-estimation-agent/actions/workflows/ci.yml"

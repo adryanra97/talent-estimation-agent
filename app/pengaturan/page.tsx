@@ -42,7 +42,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Pengaturan" description="Pilih penyedia model. Format API tiap penyedia ditangani oleh aplikasi." />
+      <PageHeader title="Pengaturan" description="Model bahasa yang dipakai agent. Key hanya tersimpan di tab ini." />
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2" title="Model bahasa">
           <div className="grid gap-4 sm:grid-cols-2">

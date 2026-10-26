@@ -11,7 +11,6 @@ import {
   Layers,
   Loader2,
   Settings,
-  Workflow,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -76,13 +75,8 @@ function Sidebar() {
     <aside className="hidden w-64 shrink-0 border-r border-line bg-surface lg:block">
       <div className="sticky top-0 flex h-screen flex-col">
         <Link href="/" className="flex items-center gap-2.5 border-b border-line px-5 py-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-white">
-            <Workflow className="h-4 w-4" aria-hidden />
-          </span>
-          <span className="leading-tight">
-            <span className="block text-sm font-semibold text-ink">Talent Estimation</span>
-            <span className="block text-xs text-muted">Agent</span>
-          </span>
+          <span aria-hidden className="h-5 w-1 rounded-full bg-accent-600" />
+          <span className="text-[15px] font-semibold text-ink">Talent Estimation</span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
           <NavLink href="/" label="Beranda" icon={<Home className="h-4 w-4" aria-hidden />} />
@@ -150,11 +144,11 @@ function Header() {
     openai_compatible: "Endpoint kustom",
   };
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-line bg-surface/95 px-6 py-3 backdrop-blur">
+    <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-4 border-b border-line bg-surface/95 px-6 py-2.5 backdrop-blur">
       <div className="flex min-w-0 items-center gap-3 text-sm">
         {demo && run ? (
           <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-amber-200">
-            Mode Demo · data contoh
+            Data contoh
           </span>
         ) : null}
         <Link href="/pengaturan" className="flex items-center gap-2 truncate text-muted hover:text-ink">
@@ -163,14 +157,16 @@ function Header() {
             className={`h-2 w-2 shrink-0 rounded-full ${connected ? "bg-emerald-500" : "bg-slate-300"}`}
           />
           {connected
-            ? `${providerName[provider.provider]} · ${provider.model}`
+            ? `${providerName[provider.provider]}, ${provider.model}`
             : "Model belum diatur"}
         </Link>
       </div>
-      <Button size="sm" onClick={exportExcel} disabled={!run || busy} title={run ? "Unduh hasil sebagai Excel" : "Jalankan validasi terlebih dahulu"}>
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
-        Unduh Excel
-      </Button>
+      {run && (
+        <Button size="sm" onClick={exportExcel} disabled={busy}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
+          Unduh hasil Excel
+        </Button>
+      )}
     </header>
   );
 }
@@ -205,7 +201,6 @@ function Footer() {
             GitHub
           </a>
           <span>Lisensi MIT</span>
-          <span>Tidak ada data yang disimpan di server</span>
         </span>
       </div>
     </footer>

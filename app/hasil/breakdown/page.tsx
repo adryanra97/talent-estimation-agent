@@ -129,7 +129,7 @@ function Table({ run }: { run: RunResult }) {
                         </p>
                         <p className="text-xs text-muted">
                           {date(r.start)} s.d. {date(r.end)}
-                          {r.source === "additional" && " · di luar WBS"}
+                          {r.source === "additional" && ", di luar WBS"}
                         </p>
                       </td>
                       <td className="py-2.5 pr-3"><RoleBadge role={r.role} /></td>
@@ -181,20 +181,20 @@ function Table({ run }: { run: RunResult }) {
                           <p className="text-muted">{r.description || "Tanpa deskripsi"}</p>
                           <dl className="mt-2 grid gap-2 sm:grid-cols-2">
                             <div>
-                              <dt className="text-xs font-medium text-muted uppercase">Alasan klasifikasi dan peran</dt>
+                              <dt className="text-xs font-medium text-muted">Alasan klasifikasi dan peran</dt>
                               <dd className="text-ink">{r.classification_reason || "-"}</dd>
                             </div>
                             <div>
-                              <dt className="text-xs font-medium text-muted uppercase">Alasan alokasi</dt>
+                              <dt className="text-xs font-medium text-muted">Alasan alokasi</dt>
                               <dd className="text-ink">{r.allocation_reason || "-"}</dd>
                             </div>
                             <div>
-                              <dt className="text-xs font-medium text-muted uppercase">Role di WBS</dt>
+                              <dt className="text-xs font-medium text-muted">Role di WBS</dt>
                               <dd className="text-ink">{r.role_hint || "-"}</dd>
                             </div>
                             <div>
-                              <dt className="text-xs font-medium text-muted uppercase">Jumlah langkah · Qty</dt>
-                              <dd className="text-ink">{r.steps ?? "-"} · {r.quantity}</dd>
+                              <dt className="text-xs font-medium text-muted">Jumlah langkah dan qty</dt>
+                              <dd className="text-ink">{r.steps ?? "-"} langkah, qty {r.quantity}</dd>
                             </div>
                           </dl>
                         </td>
@@ -237,7 +237,7 @@ export default function BreakdownPage() {
         <>
           <PageHeader
             title="Breakdown WBS"
-            description="Satu baris = satu item WBS untuk satu role. Ubah peran, klasifikasi, atau alokasi; semua total dihitung ulang tanpa memanggil model. Pilih baris untuk dinilai ulang oleh agent."
+            description="Satu baris adalah satu item untuk satu role. Perubahan langsung dihitung ulang; centang baris untuk dinilai ulang agent."
             actions={<TeamFilter run={run} />}
           />
           <Suspense>

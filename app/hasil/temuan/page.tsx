@@ -20,7 +20,7 @@ export default function FindingsPage() {
           <>
             <PageHeader
               title="Temuan & Asumsi"
-              description="Temuan dari Reviewer Agent dan cek perhitungan, beserta jejak keputusan setiap agent."
+              description="Hal yang perlu dicek, dan jejak keputusan setiap agent."
               actions={<TeamFilter run={run} />}
             />
             <div className="grid gap-6 lg:grid-cols-5">
@@ -61,7 +61,7 @@ export default function FindingsPage() {
                     {run.trace.map((t, i) => (
                       <li key={i} className="border-l-2 border-accent-200 pl-3">
                         <p className="font-medium text-ink">
-                          {t.agent} <span className="font-normal text-muted">· {t.action}</span>
+                          {t.agent} <span className="font-normal text-muted">({t.action})</span>
                         </p>
                         {t.detail && <p className="text-muted">{t.detail}</p>}
                       </li>

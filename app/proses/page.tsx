@@ -36,7 +36,7 @@ export default function ProcessPage() {
     return (
       <EmptyState
         title="Belum ada proses berjalan"
-        description="Mulai validasi dari halaman Validasi Baru atau coba mode demo."
+        description="Mulai dari Validasi Baru, atau coba dengan data contoh."
         href="/validasi"
         action="Ke Validasi Baru"
       />
@@ -55,7 +55,7 @@ export default function ProcessPage() {
     <>
       <PageHeader
         title="Proses"
-        description={demo ? "Mode demo: proyek fiktif dengan penilai berbasis aturan. Jeda tiap langkah disimulasikan agar alurnya terlihat; dengan model asli, lamanya bergantung pada jumlah item." : "Agent bekerja berurutan. Reviewer bisa mengirim baris kembali ke Estimator sampai dua putaran."}
+        description={demo ? "Data contoh dengan penilai berbasis aturan. Jeda tiap langkah disimulasikan agar alurnya terlihat." : "Agent bekerja berurutan. Lamanya bergantung pada jumlah item."}
         actions={
           status === "running" ? (
             <Button variant="danger" onClick={cancel}>
@@ -100,12 +100,12 @@ export default function ProcessPage() {
               <p className="font-medium">Proses berhenti</p>
               <p className="mt-1">{error}</p>
               <p className="mt-2 text-red-700">
-                Periksa API key dan model di Pengaturan, lalu jalankan ulang. Mode demo tetap bisa dipakai.
+                Periksa API key dan model di Pengaturan, lalu jalankan ulang. Data contoh tetap bisa dicoba.
               </p>
             </div>
           )}
         </Card>
-        <Card className="lg:col-span-2" title="Log aktivitas" description="Ringkasan setiap langkah, terbaru di bawah">
+        <Card className="lg:col-span-2" title="Log aktivitas" description="Terbaru di bawah">
           <ul className="max-h-[480px] space-y-2 overflow-y-auto text-sm" aria-live="polite">
             {events.map((e, i) => (
               <li key={i} className="border-l-2 border-line pl-3">

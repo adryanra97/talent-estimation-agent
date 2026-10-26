@@ -21,7 +21,7 @@ function Editor({ initial }: { initial: string }) {
   return (
     <Card
       title="Draf pesan balasan"
-      description="Disusun dari angka hasil hitung. Sunting sesuai kebutuhan sebelum dikirim."
+      description="Disusun dari angka hasil hitung. Sunting sebelum dikirim."
       actions={
         <Button variant="secondary" size="sm" onClick={copy}>
           {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
@@ -46,7 +46,7 @@ export default function MessagePage() {
     <WithRun>
       {(run) => (
         <>
-          <PageHeader title="Draf Pesan" description="Lampirkan file Excel bersama pesan ini agar setiap angka dapat ditelusuri." />
+          <PageHeader title="Draf Pesan" description="Lampirkan file Excel agar setiap angka bisa ditelusuri." />
           <Editor initial={run.message_draft} />
         </>
       )}

@@ -6,6 +6,7 @@ import {
   CircleDashed,
   Download,
   FilePlus2,
+  Info,
   Layers,
   Loader2,
   Settings,
@@ -109,6 +110,7 @@ function Sidebar() {
             <NavLink href="/katalog" label="Katalog Capability" icon={<Layers className="h-4 w-4" aria-hidden />} />
             <NavLink href="/pengaturan" label="Pengaturan" icon={<Settings className="h-4 w-4" aria-hidden />} />
             <NavLink href="/metodologi" label="Metodologi" icon={<BookOpen className="h-4 w-4" aria-hidden />} />
+            <NavLink href="/tentang" label="Tentang Aplikasi" icon={<Info className="h-4 w-4" aria-hidden />} />
           </div>
         </nav>
       </div>

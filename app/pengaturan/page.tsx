@@ -12,11 +12,29 @@ const PROVIDERS: { value: Provider; label: string; models: string[]; note: strin
   { value: "anthropic", label: "Anthropic Claude", models: ["claude-sonnet-5-5", "claude-haiku-5-5"], note: "Key dari Anthropic Console. Cek nama model terbaru di dokumentasi penyedia." },
   { value: "openai", label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1"], note: "Key dari OpenAI Platform." },
   { value: "azure", label: "Azure OpenAI", models: [], note: "Isi endpoint resource dan nama deployment." },
-  { value: "openai_compatible", label: "Endpoint kustom (OpenAI-compatible)", models: [], note: "Untuk gateway model internal yang kompatibel dengan format OpenAI." },
+  { value: "openai_compatible", label: "Endpoint kustom (OpenAI-compatible)", models: [], note: "Untuk gateway yang memakai format OpenAI. Tulis nama model persis seperti di gateway, termasuk awalan penyedianya bila ada (misalnya azure_ai/nama-model)." },
 ];
+
+function parseHeaders(text: string): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const line of text.split("\n")) {
+    const index = line.indexOf(":");
+    if (index > 0) {
+      const name = line.slice(0, index).trim();
+      const value = line.slice(index + 1).trim();
+      if (name && value) headers[name] = value;
+    }
+  }
+  return headers;
+}
 
 export default function SettingsPage() {
   const { provider, setProvider, apiKey, setApiKey } = useStore();
+  const [headersText, setHeadersText] = useState(() =>
+    Object.entries(provider.extra_headers ?? {})
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n"),
+  );
   const [show, setShow] = useState(false);
   const [state, setState] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [message, setMessage] = useState("");
@@ -32,7 +50,12 @@ export default function SettingsPage() {
     try {
       const fresh = { ...provider, ...AUTO };
       const result = await testConnection(fresh, apiKey);
-      setProvider({ ...fresh, send_temperature: result.send_temperature, structured_method: result.structured_method });
+      setProvider({
+        ...fresh,
+        send_temperature: result.send_temperature,
+        structured_method: result.structured_method,
+        max_tokens: result.max_tokens,
+      });
       setState("ok");
       setNotes(result.adjustments);
       setMessage(`Terhubung. Model menjawab "${result.reply}".`);
@@ -84,7 +107,7 @@ export default function SettingsPage() {
               )}
             </Field>
             {needsUrl && (
-              <Field label={provider.provider === "azure" ? "Endpoint resource" : "Base URL"} hint={provider.provider === "azure" ? "Contoh: https://nama-resource.openai.azure.com" : "Contoh: https://gateway.contoh.id/v1"}>
+              <Field label={provider.provider === "azure" ? "Endpoint resource" : "Base URL"} hint={provider.provider === "azure" ? "Contoh: https://nama-resource.openai.azure.com" : "Alamat dasar gateway, tanpa /chat/completions. Contoh: https://gateway.contoh.id/v1"}>
                 {(id) => <input id={id} className={inputClass} value={provider.base_url ?? ""} onChange={(e) => setProvider({ ...provider, ...AUTO, base_url: e.target.value || null })} />}
               </Field>
             )}
@@ -92,6 +115,38 @@ export default function SettingsPage() {
               <Field label="API version" hint="Bawaan 2024-10-21">
                 {(id) => <input id={id} className={inputClass} value={provider.api_version ?? ""} onChange={(e) => setProvider({ ...provider, ...AUTO, api_version: e.target.value || null })} />}
               </Field>
+            )}
+            {provider.provider === "openai_compatible" && (
+              <>
+                <Field label="Batas token jawaban" hint="Dikirim sebagai max_tokens. Gateway yang meneruskan ke Claude membutuhkannya.">
+                  {(id) => (
+                    <input
+                      id={id}
+                      type="number"
+                      min={256}
+                      max={64000}
+                      step={256}
+                      className={`${inputClass} tabular`}
+                      value={provider.max_tokens ?? ""}
+                      onChange={(e) => setProvider({ ...provider, ...AUTO, max_tokens: e.target.value ? Number(e.target.value) : null })}
+                    />
+                  )}
+                </Field>
+                <Field label="Header tambahan (opsional)" hint="Satu header per baris, misalnya User-Agent: curl/8.0. Isi bila dokumentasi gateway memintanya.">
+                  {(id) => (
+                    <textarea
+                      id={id}
+                      rows={2}
+                      className={`${inputClass} font-mono text-xs`}
+                      value={headersText}
+                      onChange={(e) => {
+                        setHeadersText(e.target.value);
+                        setProvider({ ...provider, ...AUTO, extra_headers: parseHeaders(e.target.value) });
+                      }}
+                    />
+                  )}
+                </Field>
+              </>
             )}
             <div className="sm:col-span-2">
               <Field label="API key" hint="Disimpan hanya di memori tab ini dan dikirim per permintaan. Tidak pernah disimpan di server.">

@@ -32,6 +32,8 @@ export const DEFAULT_PROVIDER: ProviderConfig = {
   temperature: 0,
   mask_pii: true,
   send_temperature: true,
+  max_tokens: 8192,
+  extra_headers: {},
   structured_method: "auto",
 };
 

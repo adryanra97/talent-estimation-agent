@@ -46,6 +46,12 @@ class ProviderConfig(BaseModel):
     send_temperature : bool
         Send ``temperature``. Some reasoning models accept only their default
         and reject the parameter, so the client turns it off when refused.
+    max_tokens : int or None
+        Output limit sent to OpenAI-compatible endpoints. Gateways that route
+        to Claude need it; ``None`` leaves it out.
+    extra_headers : dict
+        Extra HTTP headers for OpenAI-compatible endpoints, for gateways that
+        ask for a specific ``User-Agent`` or routing header.
     structured_method : str
         How a structured answer is requested. ``auto`` tries the provider's
         best method first and falls back when the endpoint refuses it:
@@ -59,6 +65,8 @@ class ProviderConfig(BaseModel):
     temperature: float = Field(0.0, ge=0, le=1)
     mask_pii: bool = True
     send_temperature: bool = True
+    max_tokens: int | None = Field(8192, ge=256, le=64000)
+    extra_headers: dict[str, str] = Field(default_factory=dict)
     structured_method: StructuredMethod = "auto"
 
 
@@ -119,7 +127,15 @@ def build_chat_model(config: ProviderConfig, api_key: str, *, send_temperature: 
 
     if config.provider == "openai_compatible" and not config.base_url:
         raise ValueError("Endpoint kustom membutuhkan base URL.")
-    return ChatOpenAI(model=config.model, api_key=api_key, base_url=config.base_url, **common)
+    extra: dict[str, Any] = {}
+    if config.provider == "openai_compatible":
+        if config.max_tokens:
+            extra["max_tokens"] = config.max_tokens
+        if config.extra_headers:
+            extra["default_headers"] = dict(config.extra_headers)
+    return ChatOpenAI(
+        model=config.model, api_key=api_key, base_url=config.base_url, **common, **extra
+    )
 
 
 def _is_bad_request(exc: Exception) -> bool:
@@ -235,6 +251,13 @@ class LangChainClient:
         async with self._lock:
             # Temperature is the most common refusal, so it is dropped first:
             # on the first refusal, or whenever the error names it.
+            if "max_tokens" in str(exc) and self.config.max_tokens:
+                self.config = self.config.model_copy(update={"max_tokens": None})
+                self._model = build_chat_model(
+                    self.config, self._api_key, send_temperature=self._send_temperature
+                )
+                self.adjustments.append("max_tokens tidak dikirim")
+                return True
             if self._send_temperature and (_mentions_temperature(exc) or not self.adjustments):
                 self._send_temperature = False
                 self._model = build_chat_model(self.config, self._api_key, send_temperature=False)
@@ -322,6 +345,7 @@ async def test_connection(config: ProviderConfig, api_key: str) -> dict[str, Any
     )
     return {
         "reply": result.reply,
+        "max_tokens": client.config.max_tokens,
         "structured_method": client.method,
         "send_temperature": client.send_temperature,
         "adjustments": client.adjustments,

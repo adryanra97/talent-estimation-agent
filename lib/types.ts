@@ -201,11 +201,14 @@ export interface ProviderConfig {
   temperature: number;
   mask_pii: boolean;
   send_temperature: boolean;
+  max_tokens: number | null;
+  extra_headers: Record<string, string>;
   structured_method: "auto" | "native" | "function_calling" | "json_mode" | "prompt";
 }
 
 export interface ConnectionResult {
   reply: string;
+  max_tokens: number | null;
   structured_method: ProviderConfig["structured_method"];
   send_temperature: boolean;
   adjustments: string[];

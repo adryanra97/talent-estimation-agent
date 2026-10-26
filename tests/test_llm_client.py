@@ -85,3 +85,15 @@ async def test_gives_advice_when_everything_is_refused(monkeypatch):
     config = ProviderConfig(provider="openai_compatible", model="m", base_url="https://x")
     with pytest.raises(LLMError, match="nama model"):
         await llm_client.test_connection(config, "key")
+
+
+def test_gateway_gets_headers_and_token_limit():
+    config = ProviderConfig(
+        provider="openai_compatible",
+        model="azure_ai/some-model",
+        base_url="https://gateway.example/v1",
+        extra_headers={"User-Agent": "curl/8.0"},
+    )
+    model = llm_client.build_chat_model(config, "key")
+    assert model.max_tokens == 8192
+    assert model.default_headers == {"User-Agent": "curl/8.0"}

@@ -97,3 +97,25 @@ def test_gateway_gets_headers_and_token_limit():
     model = llm_client.build_chat_model(config, "key")
     assert model.max_tokens == 8192
     assert model.default_headers == {"User-Agent": "curl/8.0"}
+
+
+async def test_budget_error_is_not_retried(monkeypatch):
+    calls = []
+
+    class Broke:
+        def with_structured_output(self, schema, method="native"):
+            class Runnable:
+                async def ainvoke(self, messages):
+                    calls.append(method)
+                    raise BadRequestError(
+                        "Error code: 400 - {'error': {'message': 'Budget has been exceeded!', "
+                        "'type': 'budget_exceeded'}}"
+                    )
+
+            return Runnable()
+
+    monkeypatch.setattr(llm_client, "build_chat_model", lambda *a, **k: Broke())
+    config = ProviderConfig(provider="openai_compatible", model="m", base_url="https://x")
+    with pytest.raises(LLMError, match="Budget API key sudah habis"):
+        await llm_client.test_connection(config, "key")
+    assert calls == ["function_calling"], "no retry spends more budget"

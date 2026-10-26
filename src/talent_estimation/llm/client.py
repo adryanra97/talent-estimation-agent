@@ -149,6 +149,27 @@ def _is_bad_request(exc: Exception) -> bool:
     return bool(re.search(r"\b(400|422)\b", text)) and "Unauthorized" not in text
 
 
+_QUOTA_MARKERS = (
+    "budget",
+    "insufficient_quota",
+    "quota",
+    "credit balance",
+    "billing",
+    "rate limit",
+    "rate_limit",
+)
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    """Return True when the key ran out of budget, quota, or rate limit.
+
+    Gateways often report these as HTTP 400, so they are checked before any
+    retry: changing the request cannot help and would only spend more.
+    """
+    text = str(exc).lower()
+    return getattr(exc, "status_code", None) == 429 or any(m in text for m in _QUOTA_MARKERS)
+
+
 def _mentions_temperature(exc: Exception) -> bool:
     return "temperature" in str(exc).lower()
 
@@ -169,12 +190,18 @@ def explain_error(exc: Exception) -> str:
     """Turn a provider error into advice the user can act on."""
     text = str(exc)
     status = getattr(exc, "status_code", None)
+    if "budget" in text.lower():
+        return (
+            "Budget API key sudah habis. Minta admin gateway menaikkan budget key ini, "
+            "atau pakai key lain. Satu validasi memanggil model beberapa kali, sebanyak "
+            "jumlah item dibagi 12 ditambah beberapa panggilan per role."
+        )
+    if _is_quota_error(exc):
+        return "Kuota atau batas permintaan API key tercapai. Tunggu sebentar, atau pakai key atau model lain."
     if status == 401 or "401" in text or "invalid api key" in text.lower():
         return "API key ditolak (401). Periksa key dan pastikan cocok dengan penyedia yang dipilih."
     if status == 404 or re.search(r"\b404\b", text):
         return "Model atau endpoint tidak ditemukan (404). Periksa nama model, nama deployment, dan base URL."
-    if status == 429 or re.search(r"\b429\b", text):
-        return "Kuota atau batas permintaan tercapai (429). Tunggu sebentar atau pakai model yang lebih ringan."
     if _is_bad_request(exc):
         return (
             "Endpoint menolak permintaan (400). Penyebab umum: nama model tidak dikenal oleh "
@@ -307,7 +334,7 @@ class LangChainClient:
                     )
                     continue
                 except Exception as exc:
-                    if _is_bad_request(exc) and await self._adapt(exc):
+                    if not _is_quota_error(exc) and _is_bad_request(exc) and await self._adapt(exc):
                         continue
                     raise LLMError(
                         f"{explain_error(exc)} Skill: {skill}. Pesan dari server: {exc}"

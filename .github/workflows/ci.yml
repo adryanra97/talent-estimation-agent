@@ -5,32 +5,84 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   python:
+    name: Python checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: astral-sh/setup-uv@v5
-      - name: Install
-        run: uv sync --all-packages --extra dev
-      - name: Lint
-        run: uv run ruff check src api tests && uv run ruff format --check src api tests
-      - name: Type check
-        run: uv run mypy
-      - name: Test
-        run: uv run pytest -q
-      - name: Evaluation pipeline (demo case)
+
+      - name: Install LibreOffice for the Excel formula test
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libreoffice-calc
+
+      - name: Install Python environment from uv.lock
+        run: uv sync --all-packages --extra dev --locked
+
+      - name: Ruff lint
+        run: .github/scripts/run-check.sh "Ruff lint" uv run ruff check src api tests --output-format=full
+
+      - name: Ruff format
+        run: .github/scripts/run-check.sh "Ruff format" uv run ruff format --check --diff src api tests
+
+      - name: Mypy type check
+        run: .github/scripts/run-check.sh "Mypy type check" uv run mypy
+
+      - name: Pytest with coverage
+        run: >
+          .github/scripts/run-check.sh "Pytest with coverage"
+          uv run pytest -v -rs --junitxml=pytest.xml
+          --cov=talent_estimation --cov-report=term-missing --cov-report=xml
+
+      - name: Kedro evaluation pipeline (demo case)
         working-directory: evaluation
-        run: uv run kedro run
+        run: ../.github/scripts/run-check.sh "Kedro evaluation pipeline" uv run kedro run
+
+      - name: Requirements file in sync with uv.lock
+        run: >
+          .github/scripts/run-check.sh "requirements.txt in sync"
+          bash -c 'uv export --package talent-estimation-agent --no-dev --no-hashes --no-emit-project --output-file /tmp/req.txt >/dev/null && diff <(grep -v "^#" requirements.txt) <(grep -v "^#" /tmp/req.txt)'
+
+      - name: Summary
+        if: always()
+        run: .github/scripts/summary.sh "Python checks"
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-test-reports
+          path: |
+            pytest.xml
+            coverage.xml
+          if-no-files-found: ignore
 
   web:
+    name: Web checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run build
+
+      - name: Install
+        run: npm ci
+
+      - name: TypeScript type check
+        run: .github/scripts/run-check.sh "TypeScript type check" npm run typecheck
+
+      - name: Next.js production build
+        run: .github/scripts/run-check.sh "Next.js production build" npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Summary
+        if: always()
+        run: .github/scripts/summary.sh "Web checks"

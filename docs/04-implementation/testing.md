@@ -17,7 +17,17 @@ Run everything with:
 uv run pytest
 ```
 
-The LibreOffice test is skipped when `soffice` is not installed.
+The LibreOffice test is skipped when `soffice` is not installed. CI installs
+LibreOffice so the test always runs there.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs every check through
+`.github/scripts/run-check.sh`, which records the result and keeps going when
+a check fails. `.github/scripts/summary.sh` writes a table of results and the
+log of each check to the job summary, then fails the job if any check failed.
+The JUnit report (`pytest.xml`) and coverage report (`coverage.xml`) are
+uploaded as artifacts.
 
 ## Golden test
 

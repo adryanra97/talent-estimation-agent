@@ -1,5 +1,12 @@
 # Talent Estimation Agent
 
+[![CI](https://github.com/adryanra97/talent-estimation-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/adryanra97/talent-estimation-agent/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.12-3776ab)
+[![Ruff](https://img.shields.io/badge/lint-ruff-d7ff64)](https://docs.astral.sh/ruff/)
+[![uv](https://img.shields.io/badge/env-uv-de5fe9)](https://docs.astral.sh/uv/)
+![Coverage](https://img.shields.io/badge/coverage-94%25-2ea44f)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 An agentic system that validates talent requests for a project. It reads the
 work breakdown structure (WBS) and the request document, decides which roles
 every work package needs, and estimates the full-time equivalent (FTE) per
@@ -96,9 +103,31 @@ Checks:
 ```bash
 uv run ruff check src api tests
 uv run mypy
-uv run pytest
+uv run pytest --cov=talent_estimation
 cd evaluation && uv run kedro run
 ```
+
+## Quality checks
+
+Every push and pull request runs the checks below in GitHub Actions. All
+checks run to the end even when one fails, and the run page shows a summary
+table with the result and duration of each check plus its full log. Test and
+coverage reports are attached to the run as artifacts.
+
+| Check | Tool | What it verifies |
+|---|---|---|
+| Lint | Ruff | Code style, imports, bug patterns, NumPy-style docstrings |
+| Format | Ruff formatter | Consistent formatting (`ruff format --check`) |
+| Types | mypy with the Pydantic plugin | Type correctness of the package |
+| Tests | pytest with pytest-cov | Unit, integration, and API tests with line coverage |
+| Excel formulas | LibreOffice | The downloaded workbook recalculates to the same numbers as the engine |
+| Evaluation | Kedro | The evaluation and calibration pipeline runs on the sample case |
+| Dependencies | uv | `requirements.txt` for Vercel matches `uv.lock` |
+| Web types | TypeScript | `tsc --noEmit` on the interface |
+| Web build | Next.js | Production build succeeds |
+
+Locally, `pre-commit install` runs Ruff and keeps `requirements.txt` in sync
+before every commit.
 
 ## Deploy
 

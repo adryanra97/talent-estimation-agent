@@ -1,11 +1,13 @@
 # Default capability catalog.
 #
+# Role descriptions follow a data team's capability matrix: five capability
+# areas per role, skill pillars, and a 1-5 competency scale.
 # The catalog describes each role by what it does, not by codes. Agents read it
 # to decide which roles a WBS item needs and whether the role is primary
 # ("Utama") or supporting ("Pendukung"). Users can replace this file for a
 # session from the settings page.
 
-version: "1.0"
+version: "1.1"
 
 teams:
   data:
@@ -19,20 +21,49 @@ roles:
   DE:
     name: Data Engineer
     team: data
-    aliases: [data engineer, data engineering, de, etl engineer]
+    aliases: [data engineer, data engineering, de, etl engineer, big data engineer]
+    summary: >-
+      Membangun dan merawat fondasi data: memindahkan, membersihkan, menyimpan,
+      dan menjaga kualitas data agar siap dipakai untuk analitik dan AI.
+    capability_areas:
+      SQL & Python: Bahasa utama rekayasa data, mulai dari query kompleks sampai scripting pipeline.
+      ETL/ELT & Orchestration: Pipeline pergerakan data, ingestion termasuk CDC, serta penjadwalan dan orkestrasi.
+      Platform Fundamentals: Arsitektur lakehouse dan data warehouse, desain storage, format, dan partisi.
+      Quality & Observability: Validasi data, data contract, monitoring kesehatan pipeline, penanganan insiden, dan lineage.
+      CI/CD & Infrastructure: Version control dan test otomatis pipeline, deployment multi-environment, infrastruktur sebagai kode, dan container.
     in_scope: >-
-      Pipeline data ETL/ELT, ingestion, cleansing, transformasi dan validasi data;
-      monitoring pipeline dan data quality.
+      Integrasi dan registrasi sumber data; ingestion batch maupun streaming
+      (termasuk CDC); pipeline ETL/ELT untuk cleansing, transformasi, dan
+      validasi data; desain skema dimensional atau relasional, lakehouse, data
+      lake, dan data warehouse; orkestrasi dan penjadwalan pipeline; aturan dan
+      monitoring kualitas data (freshness, latency, completeness, retry);
+      penanganan insiden dan RCA pipeline; data lineage dan katalog data;
+      keamanan dan tata kelola data pada level pipeline; CI/CD, infrastruktur
+      sebagai kode, dan container untuk pipeline data.
     out_of_scope: >-
-      Pembuatan dashboard BI atau UI reporting; pekerjaan DevSecOps atau
-      infrastruktur pusat data; troubleshooting di luar komponen data pipeline.
+      Dashboard, laporan BI, dan visualisasi (Data Analyst); model statistik dan
+      machine learning (Data Scientist); aplikasi LLM, RAG, dan agent (AI
+      Engineer); frontend atau backend aplikasi; administrasi infrastruktur
+      pusat data di luar komponen pipeline.
     primary_keywords: >-
-      ingestion, ETL/ELT, pipeline, cleansing, transformation, registrasi dan
-      integrasi sumber data, mapping teknis, monitoring data flow atau pipeline,
-      data quality monitoring, freshness, latency, retry.
+      ingestion, ETL, ELT, pipeline data, data pipeline, CDC, change data
+      capture, streaming, batch, cleansing, transformation, transformasi data,
+      data integration, integrasi data, integrasi sumber, source registration,
+      registrasi sumber, mapping teknis, data mapping, data warehouse, data lake,
+      lakehouse, skema data, schema design, partisi, orchestration, orkestrasi,
+      scheduling, penjadwalan, airflow, data quality, kualitas data, data
+      validation, validasi data, data contract, monitoring pipeline, data flow,
+      freshness, latency, retry, lineage, data catalog, terraform, container
     usually_supporting_on: >-
-      Requirement dan data mapping (input sumber data); alerting dan notifikasi
-      (penentuan threshold); analytics (penyedia dataset).
+      Requirement dan data mapping (identifikasi sumber dan kelayakan teknis);
+      dashboard dan analitik (penyedia dataset atau semantic layer); model
+      machine learning (penyedia data training dan fitur); RAG atau AI
+      (pipeline dokumen dan data pendukung); alerting dan notifikasi (penentuan
+      threshold teknis); review keamanan dan tata kelola data.
+    substitutes: >-
+      Data Analyst dapat menutup transformasi SQL sederhana. AI Engineer dengan
+      pilar Data & Infrastructure dapat menutup pipeline yang khusus melayani
+      kebutuhan AI.
     pillars:
       SQL & Data Modeling: [Advanced SQL Query Writing, Dimensional & Relational Data Modeling, Lakehouse Schema Design]
       Python for Data Eng: [Pipeline Scripting dengan Python, Data Ecosystem Libraries]
@@ -41,72 +72,152 @@ roles:
       Data Quality & Testing: [Data Validation, Pipeline Unit Testing, Data Contract Definition]
       Monitoring & Observability: [Pipeline Health Monitoring, Anomaly Detection pada Data, Incident Response & RCA, Data Lineage Tracking]
       CI/CD for Data Pipelines: [Version Control Workflow untuk Pipeline, Automated Testing dalam CI/CD, Deployment Multi-Environment]
-      IaC & Containerization: [Infrastructure Provisioning, Containerization & Orchestration]
+      IaC & Containerization: [Infrastructure Provisioning (Terraform), Containerization & Orchestration]
       Security, Gov & Compliance: [Data Security, Data Governance & Catalog, Regulatory Compliance]
 
   DA:
     name: Data Analyst
     team: data
-    aliases: [data analyst, analyst data, da, bi analyst]
+    aliases: [data analyst, analyst data, da, bi analyst, business intelligence analyst]
+    summary: >-
+      Menerjemahkan kebutuhan bisnis menjadi metrik, analisis, dan visual yang
+      dipakai untuk mengambil keputusan.
+    capability_areas:
+      Architecture & Modelling: Strukturisasi relasi data untuk analitik, termasuk dimensional model, semantic dan metric layer, serta analytics engineering.
+      Querying & Transformation: Ekstraksi dan pembersihan data dari banyak sumber, serta validasi dan rekonsiliasi.
+      Dashboarding & Visuals: Analitik visual interaktif, desain dashboard, kalkulasi lanjutan, dan BI self-service.
+      Advanced Analytics: Eksplorasi data mendalam, statistik terapan dan A/B test, analisis cohort dan perilaku pengguna, prediksi sederhana.
+      Business Translation: Penerjemahan kebutuhan bisnis menjadi KPI, scoping masalah, pemodelan unit economics, dan komunikasi ke stakeholder.
     in_scope: >-
-      Data collection dan validation, KPI, agregasi dan analisis use case;
-      dukungan data quality.
+      Definisi KPI, indikator, dan metrik; query, agregasi, dan logika
+      perhitungan; data collection dan validasi untuk kebutuhan analisis;
+      semantic atau metric layer dan model analitik (misalnya dbt); dashboard,
+      laporan BI, dan visual storytelling; analisis deskriptif, tren,
+      segmentasi deskriptif, cohort, dan funnel; analisis hasil A/B test;
+      rekonsiliasi data antar sumber; pendalaman use case bersama pengguna
+      bisnis; penyajian insight ke stakeholder dan eksekutif.
     out_of_scope: >-
-      Pembuatan pipeline data produksi; pekerjaan DevSecOps atau infrastruktur.
+      Pipeline data produksi dan infrastruktur (Data Engineer); model machine
+      learning kompleks dan deployment model (Data Scientist); aplikasi LLM dan
+      agent (AI Engineer); frontend atau backend aplikasi.
     primary_keywords: >-
-      KPI, indikator, aggregation, calculation, trend, tracking analytics, analisis
-      frekuensi atau lokasi, data collection dan validation, pendalaman use case,
-      definisi dashboard analitik.
+      KPI, indikator, metrik, metric, dashboard, business intelligence, power
+      bi, tableau, looker, laporan, report, reporting, aggregation, agregasi,
+      calculation, perhitungan, analytical logic, trend, tren, tracking,
+      analisis deskriptif, cohort, funnel, segmentasi, A/B test, EDA,
+      exploratory, data collection, pengumpulan data, rekonsiliasi,
+      reconciliation, semantic layer, metric layer, dbt, kebutuhan bisnis,
+      insight bisnis, analisis frekuensi, analisis lokasi, pendalaman use case
     usually_supporting_on: >-
-      Requirement dan data mapping (indikator, validasi sumber); workspace analis;
-      evaluasi AI atau prompt (relevansi); data quality.
+      Requirement dan data mapping (definisi indikator dan validasi sumber);
+      validasi data dan data quality dari sisi bisnis; evaluasi relevansi
+      insight atau keluaran AI; UAT dashboard dan workspace analis; review
+      logika bisnis pada model.
+    substitutes: >-
+      Data Scientist dapat menutup analisis lanjutan dan eksperimen. Data
+      Engineer dapat menutup transformasi data yang berat.
     pillars:
       Architecture & Modelling: [Dimensional Data Modelling, Semantic & Metric Layer Design, Cloud Data Warehouse Optimization, Analytics Engineering (dbt), Database Design]
       Querying & Transformation: [Advanced SQL Execution, Data Pipelines & Orchestration, Data Cleaning & Wrangling, Multi-Source Extraction, Validation & Reconciliation]
-      Dashboarding & Visuals: [BI Tool Mastery, Dashboard UX & Information Design, Advanced Calculations, Automated & Self-Service BI, Visual Storytelling]
-      Exploratory Analytics: [Exploratory Data Analysis, Applied Statistics & A/B Testing, Analytics Scripting (Python / R), Cohort & User Behaviour, Predictive]
+      Dashboarding & Visuals: [BI Tool Mastery, Dashboard UX & Information Design, Advanced Calculations (DAX / LODs), Automated & Self-Service BI, Visual Storytelling]
+      Exploratory Analytics: [Exploratory Data Analysis (EDA), Applied Statistics & A/B Testing, Analytics Scripting (Python / R), Cohort & User Behaviour, Predictive]
       Business Translation: [KPI Framework Definition, Business Problem Scoping, Financial & Unit Economics Modeling, Stakeholder & Executive Communication]
-      Governance & Operations: [Data Lineage & Cataloguing, Data Access & Security, Pipeline & Data Quality Monitoring]
+      Governance & Operations: [Data Lineage & Cataloguing, Data Access & Security (RLS/CLS), Pipeline & Data Quality Monitoring]
 
   DS:
     name: Data Scientist
     team: data
-    aliases: [data scientist, data science, ds, machine learning scientist]
+    aliases: [data scientist, data science, ds, machine learning scientist, ml scientist]
+    summary: >-
+      Membangun model statistik dan machine learning untuk prediksi, deteksi,
+      dan inferensi, termasuk mengevaluasi kualitas model dan keluaran AI.
+    capability_areas:
+      Math & Advanced Statistics: Fondasi algoritma prediksi, mulai dari probabilitas dan uji hipotesis sampai ekonometrika.
+      Classic & Deep ML: Pemodelan data tingkat lanjut, dari supervised dan unsupervised learning sampai deep learning dan NLP.
+      Causal Inference: Desain eksperimen, A/B test lanjutan, dan uji kausalitas.
+      Analytics & Storytelling: Eksplorasi data dan visualisasi wawasan untuk keputusan bisnis.
+      MLOps & Plumbing: Data wrangling skala besar dan pemeliharaan pipeline model, termasuk deployment dan monitoring.
     in_scope: >-
-      Analitik, anomaly detection dan model untuk use case; review KPI dan logika
-      analitik; evaluasi AI atau prompt.
+      Feature engineering; model supervised dan unsupervised; forecasting dan
+      prediksi; anomaly detection berbasis model; clustering dan segmentasi
+      berbasis model; NLP dan text mining (klasifikasi teks, topic modeling,
+      sentimen); deep learning; desain eksperimen dan causal inference;
+      evaluasi model dan evaluasi keluaran AI generatif (akurasi, halusinasi,
+      bias, fairness); fine-tuning dan pembuatan embedding; deployment dan
+      monitoring model (drift); review metodologi statistik.
     out_of_scope: >-
-      Coding frontend atau backend; konfigurasi DevSecOps atau infrastruktur.
+      Frontend atau backend aplikasi; infrastruktur platform data; dashboard
+      operasional rutin (Data Analyst); integrasi LLM ke aplikasi, RAG, dan
+      agent (AI Engineer), kecuali evaluasinya.
     primary_keywords: >-
-      anomaly detection, model analitik, segmentation, predictive atau forecasting,
-      supply-demand analysis, statistical analysis, evaluasi akurasi atau halusinasi.
+      machine learning, model prediksi, predictive, prediksi, forecasting,
+      peramalan, anomaly detection, deteksi anomali, klasifikasi, regresi,
+      clustering, model analitik, analytical model, segmentasi model, feature
+      engineering, training model, tuning, evaluasi model, akurasi, precision,
+      recall, deep learning, neural network, NLP, text mining, topic modeling,
+      sentimen, sentiment, eksperimen, experiment design, causal, uplift,
+      statistik, statistical analysis, hypothesis, econometrics, supply-demand
+      analysis, evaluasi halusinasi, GenAI evaluation, bias, fairness, MLOps,
+      model monitoring, drift
     usually_supporting_on: >-
-      Analytics dan KPI (review logika KPI); data quality (anomali); evaluasi prompt
-      atau AI.
+      Review logika KPI dan metodologi statistik; anomali pada data quality;
+      evaluasi prompt dan keluaran AI; desain eksperimen untuk analisis bisnis;
+      penyediaan fitur atau skor model untuk aplikasi.
+    substitutes: >-
+      Dapat mengisi pekerjaan machine learning saat AI Engineer terbatas. AI
+      Engineer dapat menutup training dan serving model. Data Analyst dapat
+      menutup eksplorasi dan analisis deskriptif.
     pillars:
       Math & Advanced Stats: [Linear Algebra & Calculus, Probability & Distributions, Hypothesis Testing & CLT, Econometrics, Ratio Metrics & Delta Method]
       Experimentation & Causal: [A/B Testing Foundations, Experiment Design & Stratification, Advanced Test Sensitivity (CUPED), Multi-Arm Bandits, Quasi-Experiments]
       Wrangling & Plumbing: [Advanced SQL & Optimization, Data Manipulation (Pandas), Big Data (Spark), Pipeline Development (ETL/ELT), Schema Design]
       Classic ML & Modeling: [Supervised Learning, Feature Engineering & Selection, Unsupervised Learning & Clustering, Dimensionality Reduction, Model Evaluation]
       Advanced AI & DL: [Neural Networks & Deep Learning, NLP & Text Mining, LLMs & Prompting, Embedding Generation & Fine-tuning, GenAI Evaluation & Safety]
-      Analytics & Storytelling: [Exploratory Data Analysis, Data Visualization, Dashboard & BI Development, Executive KPI, Translating Technical Concepts]
+      Analytics & Storytelling: [Exploratory Data Analysis, Data Visualization (Matplotlib/Seaborn), Dashboard & BI Development, Executive KPI, Translating Technical Concepts]
       ML Lifecycle & MLOps: [Model Deployment & Serving, MLOps & Containerization, Model Monitoring & Observability, Version Control, Quality Management]
       Governance & Strategy: [AI Governance & Responsible AI, Model Fairness & Bias Mitigation, Data-driven Business Strategy]
 
   AI:
     name: AI Engineer
     team: data
-    aliases: [ai engineer, ai engineering, ml engineer, llm engineer, ai, agentic ai engineer]
+    aliases: [ai engineer, ai engineering, ml engineer, llm engineer, genai engineer, agentic ai engineer]
+    summary: >-
+      Membangun aplikasi AI generatif yang siap dipakai: integrasi LLM, prompt,
+      RAG, agent, dan layanan AI beserta deployment dan tata kelolanya.
+    capability_areas:
+      LLM, Prompting & Agents: Rekayasa AI generatif, termasuk prompt engineering dan optimasi, multi-model, fine-tuning, agent, orkestrasi multi-agent, dan integrasi MCP.
+      RAG & Knowledge Retrieval: Integrasi basis pengetahuan eksternal melalui RAG, vector database, embedding, dan enterprise search.
+      NLP & Applications: Aplikasi pemrosesan bahasa alami seperti chat, ringkasan teks, semantic search, klasifikasi dokumen, NER, serta OCR dan parsing.
+      ML Lifecycle & Infra: Deployment model end-to-end, API dan integrasi, pipeline data pendukung, MLOps, serta monitoring.
+      Governance & Compliance: Etika dan kepatuhan AI, audit trail, dan logging.
     in_scope: >-
-      AI insight per use case, layanan dan orkestrasi AI, antarmuka prompt, serta
-      materi pelatihan AI untuk pengguna.
+      Integrasi LLM dan pengelolaan multi-model; prompt engineering, template,
+      dan optimasi; AI insight dan fitur generatif di produk; RAG, vector
+      database, embedding, dan knowledge base; chatbot dan asisten; ringkasan,
+      semantic search, klasifikasi dokumen, NER, OCR, dan parsing dokumen;
+      agent, orkestrasi multi-agent, dan integrasi MCP; layanan AI dan API
+      inference; context handling; serving, deployment, dan monitoring model;
+      fine-tuning; guardrail, audit trail, dan tata kelola AI; evaluasi dan
+      tuning prompt; materi dan pelatihan pemakaian AI untuk pengguna.
     out_of_scope: >-
-      Coding frontend atau backend aplikasi; konfigurasi DevSecOps atau infrastruktur.
+      Frontend atau backend aplikasi umum di luar layanan AI; dashboard dan
+      laporan BI (Data Analyst); pipeline data umum yang tidak melayani AI
+      (Data Engineer); riset statistik murni (Data Scientist).
     primary_keywords: >-
-      AI insight, prompt template atau management, AI service, orchestration, agent,
-      context handling, RAG, prompt evaluation dan tuning, pelatihan AI.
+      LLM, GenAI, AI generatif, generative AI, prompt, prompt template, prompt
+      engineering, chatbot, asisten virtual, agent, agentic, multi-agent,
+      orchestration AI, MCP, RAG, retrieval augmented, vector database, vector
+      DB, embedding, knowledge base, semantic search, summarization, ringkasan
+      otomatis, OCR, document parsing, named entity, AI insight, AI service,
+      layanan AI, inference, model serving, fine-tuning, guardrail, context
+      handling, evaluasi prompt, prompt tuning, AI training center, pelatihan AI
     usually_supporting_on: >-
-      Integrasi workspace (context passing, deep link); analytics (review insight).
+      Integrasi workspace atau aplikasi (context passing dan deep link); review
+      insight analitik; pipeline dokumen untuk RAG bersama Data Engineer;
+      evaluasi model bersama Data Scientist.
+    substitutes: >-
+      Data Scientist dapat menutup machine learning klasik dan evaluasi model.
+      Data Engineer dapat menutup pipeline data pendukung.
     pillars:
       LLM & Prompting: [LLM Fundamentals & Architecture, Prompt Engineering, Prompt Optimization, Multi-Model Management, Fine-Tuning & Transfer Learning]
       Retrieval & Knowledge: [RAG, Vector Database Management, Embedding Models & Techniques, Knowledge Base Management, Enterprise Search Architecture]
@@ -116,6 +227,14 @@ roles:
       ML Lifecycle: [Model Training & Experimentation, Evaluation & Validation, Serving & Deployment, MLOps & CI/CD, Monitoring & Observability]
       Analytics & Reporting: [Data Analytics & Exploration, Dashboard & Visualization, BI & Reporting, Executive Dashboard Development]
       Governance & Compliance: [Audit Trail & Logging, AI Governance & Ethics]
+
+# Competency scale used when talent is assessed per skill.
+competency_scale:
+  1: "Tidak ada pengalaman: belum pernah mempelajari."
+  2: "Dasar: pernah mencoba dengan bimbingan."
+  3: "Menengah: bisa mengerjakan secara mandiri untuk kasus atau skenario umum."
+  4: "Mahir: bisa menangani kasus kompleks dan me-review pekerjaan orang lain."
+  5: "Ahli: menjadi rujukan tim, mampu menetapkan standar dan membimbing orang lain."
 
 # Decision rules followed by the Estimator and Reviewer agents.
 rules:
@@ -180,6 +299,14 @@ rules:
       Bila tanggal atau hari kerja kosong atau bertentangan, gunakan informasi
       yang paling dapat dipercaya, catat selisihnya, dan tandai Perlu review.
       Jangan mengarang angka.
+  - id: R12
+    title: Capability, bukan sekadar role
+    text: >-
+      Tentukan role dari capability yang dibutuhkan pekerjaan. Bila pekerjaan
+      bisa dikerjakan role lain dengan capability yang sama (misalnya Data
+      Scientist untuk pekerjaan machine learning saat AI Engineer terbatas),
+      sebutkan alternatif itu di alasan, tetapi hitung pada role yang paling
+      sesuai.
 
 allocation_guide:
   - {involvement: Utama, classification: Simple, range: "0,25 - 0,50", meaning: "Pekerjaan inti ringan, sekitar 1-2 hari per minggu"}

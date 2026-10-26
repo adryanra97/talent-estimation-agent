@@ -93,7 +93,15 @@ def _keywords(text: str) -> list[str]:
 
 def _keyword_score(text: str, keywords: Iterable[str]) -> int:
     lowered = text.lower()
-    return sum(1 for k in keywords if k and k in lowered)
+    score = 0
+    for k in keywords:
+        if not k:
+            continue
+        if len(k) <= 4:
+            score += bool(re.search(rf"\b{re.escape(k)}\b", lowered))
+        else:
+            score += k in lowered
+    return score
 
 
 def _item_line(item: WbsItem, legend: dict[str, str]) -> str:

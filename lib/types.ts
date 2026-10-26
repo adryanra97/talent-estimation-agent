@@ -160,10 +160,13 @@ export interface RoleProfile {
   name: string;
   team: string;
   aliases: string[];
+  summary: string;
+  capability_areas: Record<string, string>;
   in_scope: string;
   out_of_scope: string;
   primary_keywords: string;
   usually_supporting_on: string;
+  substitutes: string;
   pillars: Record<string, string[]>;
 }
 
@@ -180,6 +183,7 @@ export interface Catalog {
   version: string;
   teams: Record<string, { label: string; roles: string[] }>;
   roles: Record<string, RoleProfile>;
+  competency_scale: Record<string, string>;
   rules: { id: string; title: string; text: string }[];
   allocation_guide: Record<string, string>[];
   classification_rubric: Record<string, string>;

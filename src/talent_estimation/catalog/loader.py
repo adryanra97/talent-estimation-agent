@@ -26,10 +26,13 @@ class RoleProfile(BaseModel):
     name: str
     team: str = "data"
     aliases: list[str] = Field(default_factory=list)
+    summary: str = ""
+    capability_areas: dict[str, str] = Field(default_factory=dict)
     in_scope: str = ""
     out_of_scope: str = ""
     primary_keywords: str = ""
     usually_supporting_on: str = ""
+    substitutes: str = ""
     pillars: dict[str, list[str]] = Field(default_factory=dict)
 
     def describe(self) -> str:
@@ -41,14 +44,22 @@ class RoleProfile(BaseModel):
             Multi-line description of the role.
         """
         pillars = "; ".join(f"{p}: {', '.join(s)}" for p, s in self.pillars.items())
-        return (
-            f"{self.code} - {self.name}\n"
-            f"  Lingkup utama: {self.in_scope}\n"
-            f"  Di luar lingkup: {self.out_of_scope}\n"
-            f"  Kata kunci pekerjaan utama: {self.primary_keywords}\n"
-            f"  Biasanya pendukung pada: {self.usually_supporting_on}\n"
-            f"  Pilar skill: {pillars}"
-        )
+        areas = "\n".join(f"    - {k}: {v}" for k, v in self.capability_areas.items())
+        lines = [f"{self.code} - {self.name}"]
+        if self.summary:
+            lines.append(f"  Ringkasan: {self.summary}")
+        if areas:
+            lines.append(f"  Area capability:\n{areas}")
+        lines += [
+            f"  Lingkup utama: {self.in_scope}",
+            f"  Di luar lingkup: {self.out_of_scope}",
+            f"  Kata kunci pekerjaan utama: {self.primary_keywords}",
+            f"  Biasanya pendukung pada: {self.usually_supporting_on}",
+        ]
+        if self.substitutes:
+            lines.append(f"  Substitusi: {self.substitutes}")
+        lines.append(f"  Pilar skill: {pillars}")
+        return "\n".join(lines)
 
 
 class Rule(BaseModel):
@@ -65,6 +76,7 @@ class Catalog(BaseModel):
     version: str = "1.0"
     teams: dict[str, dict[str, Any]] = Field(default_factory=dict)
     roles: dict[str, RoleProfile]
+    competency_scale: dict[int, str] = Field(default_factory=dict)
     rules: list[Rule] = Field(default_factory=list)
     allocation_guide: list[dict[str, str]] = Field(default_factory=list)
     classification_rubric: dict[str, str] = Field(default_factory=dict)

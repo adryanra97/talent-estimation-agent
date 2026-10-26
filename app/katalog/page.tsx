@@ -68,7 +68,23 @@ export default function CatalogPage() {
                   </div>
                   <StatusBadge tone="neutral">Tim {catalog.teams[r.team]?.label ?? r.team}</StatusBadge>
                 </div>
+                {r.summary && <p className="mt-3 text-sm text-ink">{r.summary}</p>}
                 <dl className="mt-4 space-y-3 text-sm">
+                  {Object.keys(r.capability_areas ?? {}).length > 0 && (
+                    <div>
+                      <dt className="text-xs font-medium text-muted uppercase">Area capability</dt>
+                      <dd>
+                        <ul className="mt-1 space-y-1">
+                          {Object.entries(r.capability_areas).map(([area, text]) => (
+                            <li key={area}>
+                              <span className="font-medium text-ink">{area}</span>
+                              <span className="text-muted"> · {text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </dd>
+                    </div>
+                  )}
                   <div>
                     <dt className="text-xs font-medium text-muted uppercase">Lingkup utama</dt>
                     <dd className="text-ink">{r.in_scope}</dd>
@@ -81,6 +97,12 @@ export default function CatalogPage() {
                     <dt className="text-xs font-medium text-muted uppercase">Biasanya pendukung pada</dt>
                     <dd className="text-ink">{r.usually_supporting_on}</dd>
                   </div>
+                  {r.substitutes && (
+                    <div>
+                      <dt className="text-xs font-medium text-muted uppercase">Substitusi</dt>
+                      <dd className="text-ink">{r.substitutes}</dd>
+                    </div>
+                  )}
                   <div>
                     <dt className="text-xs font-medium text-muted uppercase">Pilar skill</dt>
                     <dd className="mt-1 flex flex-wrap gap-1.5">
@@ -95,6 +117,18 @@ export default function CatalogPage() {
               </Card>
             ))}
           </div>
+          {Object.keys(catalog.competency_scale ?? {}).length > 0 && (
+            <Card title="Skala kompetensi" description="Acuan penilaian talent per skill">
+              <ol className="grid gap-2 text-sm sm:grid-cols-5">
+                {Object.entries(catalog.competency_scale).map(([level, text]) => (
+                  <li key={level} className="rounded-lg bg-canvas p-3 ring-1 ring-line">
+                    <p className="text-lg font-semibold text-accent-700">{level}</p>
+                    <p className="text-muted">{text}</p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          )}
           <Card title="Aturan keputusan" description="Dipatuhi Estimator dan Reviewer Agent">
             <ol className="grid gap-3 text-sm sm:grid-cols-2">
               {catalog.rules.map((rule) => (

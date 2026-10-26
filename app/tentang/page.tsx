@@ -90,7 +90,7 @@ const READY = [
 
 const BEFORE_PRODUCTION = [
   ["Uji dengan model nyata", "Jalankan pada beberapa proyek dengan tiap penyedia yang akan dipakai dan bandingkan dengan keputusan reviewer."],
-  ["Kalibrasi PHM", "Nilai bawaan 9 berasal dari satu proyek. Kalibrasi dengan pipeline Kedro pada beberapa proyek yang sudah direview."],
+  ["Kalibrasi PHM", "Nilai bawaan 15 diambil dari batas bawah literatur. Kalibrasi dengan pipeline Kedro pada beberapa proyek yang sudah direview."],
   ["Autentikasi", "Aktifkan perlindungan deployment atau SSO organisasi agar hanya pengguna berwenang yang bisa membuka aplikasi."],
   ["Persetujuan keamanan data", "Pastikan penyedia model dan region pemrosesan disetujui untuk jenis dokumen yang diunggah."],
   ["Observabilitas", "Tambahkan pemantauan galat dan latensi tanpa mencatat isi dokumen atau key."],

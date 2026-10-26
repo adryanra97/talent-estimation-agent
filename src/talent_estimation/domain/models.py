@@ -92,7 +92,7 @@ class Parameters(BaseModel):
 
     hours_per_day: float = Field(8.0, gt=0, le=24)
     days_per_month: float = Field(20.0, gt=0, le=31)
-    phm: float = Field(9.0, gt=0, le=60)
+    phm: float = Field(15.0, gt=0, le=60)
     support_factor: float = Field(0.25, ge=0, le=1)
     tolerance: float = Field(0.15, ge=0, le=1)
     duration_override_months: float | None = Field(None, gt=0)

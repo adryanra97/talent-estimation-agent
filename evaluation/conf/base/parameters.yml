@@ -11,6 +11,6 @@ providers:
 
 # Keep these equal to the application defaults unless you are testing a change.
 parameters:
-  phm: 9.0
+  phm: 15.0
   hours_per_day: 8
   days_per_month: 20

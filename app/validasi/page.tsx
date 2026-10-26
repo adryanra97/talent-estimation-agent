@@ -171,7 +171,7 @@ const PARAM_FIELDS: {
   step: number;
   pct?: boolean;
 }[] = [
-  { key: "phm", label: "Pengali jam per poin UCP (PHM)", tip: "Jam kerja per 1 poin UCP. Literatur memakai 15-20 untuk use case software; item WBS lebih kecil sehingga nilai bawaan 9 (kalibrasi awal).", min: 5, max: 30, step: 0.5 },
+  { key: "phm", label: "Pengali jam per poin UCP (PHM)", tip: "Jam kerja per 1 poin UCP. Nilai bawaan 15, batas bawah rentang literatur (15-20 untuk use case software). Turunkan hanya bila ada data kalibrasi.", min: 5, max: 30, step: 0.5 },
   { key: "hours_per_day", label: "Jam kerja per hari", tip: "Jam efektif dalam satu person-day.", min: 4, max: 12, step: 0.5 },
   { key: "days_per_month", label: "Hari kerja per bulan", tip: "Hari kerja efektif dalam satu person-month.", min: 15, max: 23, step: 1 },
   { key: "tolerance", label: "Toleransi selaras (%)", tip: "Selisih maksimum terhadap permintaan agar dianggap selaras.", min: 0, max: 0.5, step: 0.05, pct: true },

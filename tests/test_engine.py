@@ -84,7 +84,7 @@ def test_ucp_and_bottom_up_by_hand():
     e = run.estimates[0]
     uucp = 4 + 10 + 15 * 0.25
     _, tcf, _, ef = factor_totals(RoleFactors(role="DE"))
-    hours = uucp * tcf * ef * 9
+    hours = uucp * tcf * ef * Parameters().phm
     assert e.ucp_hours == pytest.approx(hours)
     assert e.ucp_fte == pytest.approx(hours / 8 / 20 / 2)
     assert e.bu_person_days == pytest.approx(20 * 0.5 + 23 * 0.2)

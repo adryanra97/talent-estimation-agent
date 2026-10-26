@@ -15,7 +15,7 @@ import type {
 export const DEFAULT_PARAMETERS: Parameters = {
   hours_per_day: 8,
   days_per_month: 20,
-  phm: 9,
+  phm: 15,
   support_factor: 0.25,
   tolerance: 0.15,
   duration_override_months: null,

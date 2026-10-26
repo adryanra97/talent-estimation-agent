@@ -44,10 +44,10 @@ project documents.
 | PHM | Hours | Person-days (8 h) | Person-months (20 d) |
 |---|---|---|---|
 | 20 (Karner) | 1,635 | 204 | 10.2 |
-| 9 (application default) | 736 | 92 | 4.6 |
+| 15 (application default) | 1,226 | 153 | 7.7 |
 
-The application calibrates PHM to 9 because WBS items are much smaller than
-software use cases. This project is a software project, so the literature
-value of 20 is the appropriate one here. The difference is a reminder that
+The application defaults to 15, the low end of the literature range, because
+WBS items are usually smaller than full software use cases. This project is a
+software project, so the literature value of 20 is the appropriate one here. The difference is a reminder that
 PHM is a property of the kind of work being estimated, not a universal
 constant.

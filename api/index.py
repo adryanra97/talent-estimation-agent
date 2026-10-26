@@ -217,15 +217,19 @@ def agents() -> list[dict[str, Any]]:
 async def llm_test(
     provider: ProviderConfig,
     x_llm_api_key: Annotated[str | None, Header()] = None,
-) -> dict[str, str]:
-    """Check that the key and endpoint answer a minimal prompt."""
+) -> dict[str, Any]:
+    """Check that the key and endpoint answer a minimal prompt.
+
+    The reply also says which request settings worked, so the browser can
+    reuse them for the run instead of discovering them again.
+    """
     if not x_llm_api_key:
         raise HTTPException(status_code=400, detail="API key belum diisi.")
     try:
-        reply = await test_connection(provider, x_llm_api_key)
+        result = await test_connection(provider, x_llm_api_key)
     except (LLMError, ValueError) as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    return {"status": "ok", "reply": reply}
+    return {"status": "ok", **result}
 
 
 @app.post("/api/py/wbs/preview")

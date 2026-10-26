@@ -31,6 +31,8 @@ export const DEFAULT_PROVIDER: ProviderConfig = {
   api_version: null,
   temperature: 0,
   mask_pii: true,
+  send_temperature: true,
+  structured_method: "auto",
 };
 
 export interface TeamInput {

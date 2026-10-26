@@ -1,4 +1,4 @@
-import type { Catalog, ProviderConfig, RunResult, WbsPreview } from "./types";
+import type { Catalog, ConnectionResult, ProviderConfig, RunResult, WbsPreview } from "./types";
 
 const BASE = "/api/py";
 
@@ -52,14 +52,14 @@ export async function previewWbs(files: File[]): Promise<WbsPreview> {
   return res.json();
 }
 
-export async function testConnection(provider: ProviderConfig, apiKey: string): Promise<string> {
+export async function testConnection(provider: ProviderConfig, apiKey: string): Promise<ConnectionResult> {
   const res = await fetch(`${BASE}/llm/test`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...keyHeader(apiKey) },
     body: JSON.stringify(provider),
   });
   if (!res.ok) throw await failure(res);
-  return (await res.json()).reply;
+  return res.json();
 }
 
 export interface RunFiles {

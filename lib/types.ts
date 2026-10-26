@@ -200,6 +200,15 @@ export interface ProviderConfig {
   api_version: string | null;
   temperature: number;
   mask_pii: boolean;
+  send_temperature: boolean;
+  structured_method: "auto" | "native" | "function_calling" | "json_mode" | "prompt";
+}
+
+export interface ConnectionResult {
+  reply: string;
+  structured_method: ProviderConfig["structured_method"];
+  send_temperature: boolean;
+  adjustments: string[];
 }
 
 export interface ProgressEvent {

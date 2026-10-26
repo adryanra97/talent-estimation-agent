@@ -20,15 +20,22 @@ export default function SettingsPage() {
   const [show, setShow] = useState(false);
   const [state, setState] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [message, setMessage] = useState("");
+  const [notes, setNotes] = useState<string[]>([]);
   const current = PROVIDERS.find((p) => p.value === provider.provider)!;
   const needsUrl = provider.provider === "azure" || provider.provider === "openai_compatible";
 
+  const AUTO = { send_temperature: true, structured_method: "auto" as const };
+
   async function test() {
     setState("testing");
+    setNotes([]);
     try {
-      const reply = await testConnection(provider, apiKey);
+      const fresh = { ...provider, ...AUTO };
+      const result = await testConnection(fresh, apiKey);
+      setProvider({ ...fresh, send_temperature: result.send_temperature, structured_method: result.structured_method });
       setState("ok");
-      setMessage(`Terhubung. Model menjawab: "${reply}".`);
+      setNotes(result.adjustments);
+      setMessage(`Terhubung. Model menjawab "${result.reply}".`);
     } catch (err) {
       setState("fail");
       const text = err instanceof Error ? err.message : String(err);
@@ -54,7 +61,7 @@ export default function SettingsPage() {
                   value={provider.provider}
                   onChange={(e) => {
                     const next = PROVIDERS.find((p) => p.value === e.target.value)!;
-                    setProvider({ ...provider, provider: next.value, model: next.models[0] ?? "", base_url: null, api_version: null });
+                    setProvider({ ...provider, ...AUTO, provider: next.value, model: next.models[0] ?? "", base_url: null, api_version: null });
                     setState("idle");
                   }}
                 >
@@ -67,7 +74,7 @@ export default function SettingsPage() {
             <Field label={provider.provider === "azure" ? "Nama deployment" : "Model"} hint={current.models.length ? `Contoh: ${current.models.join(", ")}` : undefined}>
               {(id) => (
                 <>
-                  <input id={id} list="models" className={inputClass} value={provider.model} onChange={(e) => setProvider({ ...provider, model: e.target.value })} />
+                  <input id={id} list="models" className={inputClass} value={provider.model} onChange={(e) => setProvider({ ...provider, ...AUTO, model: e.target.value })} />
                   <datalist id="models">
                     {current.models.map((m) => (
                       <option key={m} value={m} />
@@ -78,12 +85,12 @@ export default function SettingsPage() {
             </Field>
             {needsUrl && (
               <Field label={provider.provider === "azure" ? "Endpoint resource" : "Base URL"} hint={provider.provider === "azure" ? "Contoh: https://nama-resource.openai.azure.com" : "Contoh: https://gateway.contoh.id/v1"}>
-                {(id) => <input id={id} className={inputClass} value={provider.base_url ?? ""} onChange={(e) => setProvider({ ...provider, base_url: e.target.value || null })} />}
+                {(id) => <input id={id} className={inputClass} value={provider.base_url ?? ""} onChange={(e) => setProvider({ ...provider, ...AUTO, base_url: e.target.value || null })} />}
               </Field>
             )}
             {provider.provider === "azure" && (
               <Field label="API version" hint="Bawaan 2024-10-21">
-                {(id) => <input id={id} className={inputClass} value={provider.api_version ?? ""} onChange={(e) => setProvider({ ...provider, api_version: e.target.value || null })} />}
+                {(id) => <input id={id} className={inputClass} value={provider.api_version ?? ""} onChange={(e) => setProvider({ ...provider, ...AUTO, api_version: e.target.value || null })} />}
               </Field>
             )}
             <div className="sm:col-span-2">
@@ -124,13 +131,20 @@ export default function SettingsPage() {
               Tes koneksi
             </Button>
             {state === "ok" && (
-              <p className="flex items-center gap-1.5 text-sm text-emerald-800" role="status">
-                <CheckCircle2 className="h-4 w-4" aria-hidden /> {message}
-              </p>
+              <div className="text-sm" role="status">
+                <p className="flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="h-4 w-4" aria-hidden /> {message}
+                </p>
+                {notes.length > 0 && (
+                  <p className="mt-1 text-muted">
+                    Disesuaikan otomatis untuk endpoint ini: {notes.join("; ")}. Pengaturan ini dipakai saat validasi.
+                  </p>
+                )}
+              </div>
             )}
             {state === "fail" && (
-              <p className="flex items-center gap-1.5 text-sm text-red-700" role="alert">
-                <XCircle className="h-4 w-4 shrink-0" aria-hidden /> {message}
+              <p className="flex max-w-2xl items-start gap-1.5 text-sm text-red-700" role="alert">
+                <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> <span className="break-words">{message}</span>
               </p>
             )}
           </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Shell } from "@/components/shell";
 import { StoreProvider } from "@/lib/store";
+import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 
 export const metadata: Metadata = {

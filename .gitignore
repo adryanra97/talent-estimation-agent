@@ -34,3 +34,8 @@ evaluation/data/**
 # Misc
 .DS_Store
 .vercel
+
+# Test reports
+.coverage
+coverage.xml
+pytest.xml

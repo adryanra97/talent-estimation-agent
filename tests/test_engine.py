@@ -3,7 +3,12 @@ from datetime import date
 import pytest
 
 from talent_estimation.calc import recalculate
-from talent_estimation.calc.engine import analysis_duration, effective_weight, factor_totals
+from talent_estimation.calc.engine import (
+    analysis_duration,
+    effective_weight,
+    factor_totals,
+    outside_period,
+)
 from talent_estimation.domain.models import (
     Actor,
     AiTask,
@@ -111,3 +116,10 @@ def test_ai_scenario_uses_task_weights():
     a = run.ai_summary[0]
     assert a.saved_person_days == pytest.approx(10 * 0.5 * 0.2)
     assert a.bu_fte_assisted == pytest.approx(a.bu_fte * (1 - a.saving_share))
+
+
+def test_outside_period_detects_items_beyond_the_period():
+    run = make_run(project=ProjectInfo(start=date(2027, 2, 1), end=date(2027, 2, 28)))
+    outside = {r.item_id: share for r, share in outside_period(run)}
+    assert set(outside) == {"1.1.2"}
+    assert outside["1.1.2"] == pytest.approx(1.0)

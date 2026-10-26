@@ -245,6 +245,41 @@ def monthly_distribution(
     return result
 
 
+def outside_period(run: RunResult) -> list[tuple[BreakdownRow, float]]:
+    """Find rows whose working days fall partly or fully outside the analysis period.
+
+    Effort of such rows still counts in the average FTE, but it does not appear
+    in the monthly distribution or the peak.
+
+    Parameters
+    ----------
+    run : RunResult
+        Run with project dates and breakdown.
+
+    Returns
+    -------
+    list of tuple
+        Rows with the share of their working days outside the period (0 to 1).
+    """
+    start, end = run.project.start, run.project.end
+    if start is None or end is None:
+        return []
+    holidays = run.parameters.holidays
+    result: list[tuple[BreakdownRow, float]] = []
+    for row in run.breakdown:
+        if row.start is None or row.end is None:
+            continue
+        total = networkdays(row.start, row.end, holidays)
+        if total <= 0:
+            continue
+        lo, hi = max(row.start, start), min(row.end, end)
+        inside = networkdays(lo, hi, holidays) if lo <= hi else 0
+        share = 1 - inside / total
+        if share > 0:
+            result.append((row, share))
+    return result
+
+
 def _versus(value: float, requested: float | None, tolerance: float) -> str | None:
     if requested is None:
         return None

@@ -405,7 +405,7 @@ def reconcile(
     tuple
         Candidate rows with their ratio, and divergence findings per role.
     """
-    from talent_estimation.calc.engine import bottom_up_person_days
+    from talent_estimation.calc.engine import bottom_up_person_days, outside_period
 
     candidates: list[tuple[BreakdownRow, float]] = []
     for row in run.breakdown:
@@ -431,6 +431,23 @@ def reconcile(
         for c in run.comparisons
         if c.divergence is not None and abs(c.divergence) > run.parameters.tolerance
     ]
+    outside = outside_period(run)
+    if outside:
+        items = sorted({r.item_id for r, _ in outside})
+        shown = ", ".join(items[:8]) + (f" dan {len(items) - 8} lainnya" if len(items) > 8 else "")
+        findings.append(
+            Finding(
+                kind="data_quality",
+                message=(
+                    f"{len(items)} item punya hari kerja di luar periode analisis "
+                    f"{run.project.start:%d %b %Y} s.d. {run.project.end:%d %b %Y} ({shown}). "
+                    "Effort-nya tetap masuk FTE rata-rata, tetapi tidak tampil di sebaran "
+                    "bulanan dan FTE puncak. Periksa periode proyek."
+                ),
+                severity="Tinggi",
+                source="Reconciler",
+            )
+        )
     return candidates[:limit], findings
 
 

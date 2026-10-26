@@ -179,11 +179,7 @@ export default function NewValidationPage() {
     try {
       const result = await previewWbs(file);
       setPreview(result);
-      setProject({
-        ...project,
-        start: project.start ?? result.start,
-        end: project.end ?? result.end,
-      });
+      setProject({ ...project, start: result.start, end: result.end });
     } catch (err) {
       setWbsError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -301,12 +297,12 @@ export default function NewValidationPage() {
                   {roles.map((r) => r.name).join(", ") || "Memuat katalog"}
                 </p>
               </fieldset>
-              <Field label="Tanggal mulai" hint="Terisi otomatis dari WBS" error={null}>
+              <Field label="Tanggal mulai" hint="Terisi dari WBS; ubah bila proyek berjalan di periode lain" error={null}>
                 {(id) => (
                   <input id={id} type="date" className={inputClass} value={project.start ?? ""} onChange={(e) => setProject({ ...project, start: e.target.value || null })} />
                 )}
               </Field>
-              <Field label="Tanggal selesai" hint="Terisi otomatis dari WBS" error={periodError}>
+              <Field label="Tanggal selesai" hint="Item di luar periode tidak tampil di sebaran bulanan" error={periodError}>
                 {(id) => (
                   <input id={id} type="date" className={inputClass} value={project.end ?? ""} onChange={(e) => setProject({ ...project, end: e.target.value || null })} />
                 )}

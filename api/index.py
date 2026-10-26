@@ -204,7 +204,9 @@ async def create_run(
     if options.demo and wbs is None:
         wbs_bytes = build_demo_wbs()
         request_text, supporting_text = REQUEST_TEXT, NOTES_TEXT
-        options.project.name = options.project.name or PROJECT_NAME
+        options.project = options.project.model_copy(
+            update={"name": PROJECT_NAME, "start": None, "end": None, "reference": ""}
+        )
     else:
         wbs_bytes = await _read(wbs)
         if not wbs_bytes:

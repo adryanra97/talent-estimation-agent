@@ -32,3 +32,12 @@ def test_demo_run_recalculate_and_excel():
 def test_wbs_preview(demo_wbs):
     body = client.post("/api/py/wbs/preview", files={"file": ("w.xlsx", demo_wbs)}).json()
     assert body["items"] == 19 and body["start"] == "2027-02-01"
+
+
+def test_demo_ignores_period_from_the_form():
+    settings = {"demo": True, "project": {"start": "2026-10-01", "end": "2027-01-31"}}
+    res = client.post("/api/py/runs", data={"settings": json.dumps(settings)})
+    run = json.loads(res.text.splitlines()[-1])["run"]
+    assert run["project"]["start"] == "2027-02-01"
+    assert [m["month"][:7] for m in run["monthly"]] == ["2027-02", "2027-03", "2027-04"]
+    assert not any(f["kind"] == "data_quality" for f in run["findings"])

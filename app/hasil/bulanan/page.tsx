@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { WithRun } from "@/components/result-guard";
 import { Card, PageHeader, RoleBadge } from "@/components/ui";
-import { ROLE_COLOR, fte, month } from "@/lib/format";
+import { ROLE_COLOR, date, fte, month } from "@/lib/format";
 
 export default function MonthlyPage() {
   const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");
@@ -12,6 +12,12 @@ export default function MonthlyPage() {
     <WithRun>
       {(run) => {
         const data = run.monthly.map((m) => ({ month: month(m.month), ...m[method] }));
+        const { start, end } = run.project;
+        const outside = new Set(
+          run.breakdown
+            .filter((r) => start && end && r.start && r.end && (r.start < start || r.end > end))
+            .map((r) => r.item_id),
+        );
         return (
           <>
             <PageHeader
@@ -37,6 +43,16 @@ export default function MonthlyPage() {
                 </div>
               }
             />
+            {outside.size > 0 && (
+              <div role="alert" className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <p className="font-medium">{outside.size} item WBS berada di luar periode analisis ({date(start)} s.d. {date(end)}).</p>
+                <p className="mt-1">
+                  Effort-nya tetap dihitung dalam FTE rata-rata, tetapi tidak tampil di grafik ini dan di FTE puncak. Ubah periode di
+                  Validasi Baru lalu jalankan ulang bila periodenya kurang tepat. Item: {[...outside].slice(0, 8).join(", ")}
+                  {outside.size > 8 ? ` dan ${outside.size - 8} lainnya` : ""}.
+                </p>
+              </div>
+            )}
             <Card title={`FTE per bulan, metode ${method === "ucp" ? "UCP" : "bottom-up"}`}>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">

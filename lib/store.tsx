@@ -173,7 +173,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         reference_fte: toNumber(t.reference),
       }));
       const settings = {
-        project,
+        project: useDemo ? { ...project, name: "", start: null, end: null, reference: "" } : project,
         parameters,
         role_inputs,
         ai_enabled: aiEnabled,

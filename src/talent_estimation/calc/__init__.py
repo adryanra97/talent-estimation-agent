@@ -9,6 +9,7 @@ from talent_estimation.calc.engine import (
     estimate_role,
     factor_totals,
     monthly_distribution,
+    outside_period,
     recalculate,
     ucp_person_days_by_row,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "estimate_role",
     "factor_totals",
     "monthly_distribution",
+    "outside_period",
     "recalculate",
     "ucp_person_days_by_row",
 ]

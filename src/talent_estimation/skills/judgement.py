@@ -582,6 +582,24 @@ _TEMPLATES: dict[str, list[tuple[str, float, str, str, str]]] = {
         ("Evaluasi keluaran AI", 0.25, "test_generation", "ML Lifecycle", "Evaluation & Validation"),
         ("Desain alur dan keputusan arsitektur", 0.2, "judgment", "Agents", "Multi-Agent Orchestration"),
     ],
+    "UXR": [
+        ("Penyusunan rencana dan panduan riset", 0.15, "documentation", "Research Planning", "Method Selection"),
+        ("Sesi wawancara dan uji dengan pengguna", 0.4, "judgment", "Qualitative Methods", "User Interview"),
+        ("Transkrip, ringkasan, dan sintesis temuan", 0.3, "text_analysis", "Synthesis & Communication", "Affinity Mapping"),
+        ("Laporan insight dan rekomendasi", 0.15, "documentation", "Synthesis & Communication", "Insight Reporting"),
+    ],
+    "UX": [
+        ("Struktur informasi dan user flow", 0.3, "judgment", "Interaction Design", "User & Task Flow"),
+        ("Wireframe dan variasi tata letak", 0.3, "design_variation", "Wireframing & Prototyping", "Wireframing"),
+        ("Prototipe interaktif", 0.25, "design_variation", "Wireframing & Prototyping", "Interactive Prototyping"),
+        ("Microcopy dan label", 0.15, "documentation", "UX Writing", "Microcopy"),
+    ],
+    "UI": [
+        ("Eksplorasi gaya visual dan arah desain", 0.25, "judgment", "Visual Design", "Visual Hierarchy"),
+        ("Mockup layar dan state", 0.4, "design_variation", "Mockup & Responsive", "High-Fidelity Mockup"),
+        ("Ikon, ilustrasi, dan aset", 0.15, "design_variation", "Handoff & QA", "Asset Preparation"),
+        ("Dokumentasi komponen dan handoff", 0.2, "documentation", "Design System", "Usage Documentation"),
+    ],
 }  # fmt: skip
 _SUPPORT_TEMPLATE = [
     ("Review dan validasi", 0.7, "judgment", "", ""),

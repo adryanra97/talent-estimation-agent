@@ -20,8 +20,8 @@ the WBS and the request.
 ## Scope
 
 In scope: data roles (Data Engineer, Data Analyst, Data Scientist, AI
-Engineer); Use Case Points and bottom-up estimation; a review loop; an AI
+Engineer) and design roles (UX Researcher, UX Designer, UI Designer); Use Case Points and bottom-up estimation; a review loop; an AI
 assistance scenario; Excel export.
 
-Out of scope for this version: design roles (planned), assignment of named
+Out of scope for this version: assignment of named
 people, storage of run history, integration with document management systems.

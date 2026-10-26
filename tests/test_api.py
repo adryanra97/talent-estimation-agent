@@ -31,7 +31,7 @@ def test_demo_run_recalculate_and_excel():
 
 def test_wbs_preview(demo_wbs):
     body = client.post("/api/py/wbs/preview", files={"file": ("w.xlsx", demo_wbs)}).json()
-    assert body["items"] == 19 and body["start"] == "2027-02-01"
+    assert body["items"] == 23 and body["start"] == "2027-02-01"
 
 
 def test_demo_ignores_period_from_the_form():
@@ -49,4 +49,4 @@ def test_catalog_excel_download():
     parsed = client.post(
         "/api/py/catalog/parse", files={"file": ("katalog.xlsx", res.content)}
     ).json()
-    assert set(parsed["roles"]) == {"DE", "DA", "DS", "AI"}
+    assert set(parsed["roles"]) == {"DE", "DA", "DS", "AI", "UXR", "UX", "UI"}

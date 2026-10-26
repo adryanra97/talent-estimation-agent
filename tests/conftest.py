@@ -29,7 +29,7 @@ def demo_inputs(catalog, demo_wbs):
 
     parsed = read_wbs(demo_wbs)
     return RunInputs(
-        project=ProjectInfo(name=PROJECT_NAME),
+        project=ProjectInfo(name=PROJECT_NAME, scope="all"),
         items=parsed.items,
         legend=parsed.role_legend,
         request_text=REQUEST_TEXT,

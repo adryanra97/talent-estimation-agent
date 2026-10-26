@@ -2,11 +2,26 @@
 
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { Fragment } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
+import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, InfoTip, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
 import { date, fte, num, pct } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { visibleGroups } from "@/lib/teams";
 import type { Comparison } from "@/lib/types";
+
+function sum(rows: Comparison[]) {
+  return rows.reduce(
+    (acc, c) => ({
+      ucp: acc.ucp + c.ucp_fte,
+      bu: acc.bu + c.bu_fte,
+      req: acc.req + (c.requested_fte ?? 0),
+      existing: acc.existing + c.existing_fte,
+    }),
+    { ucp: 0, bu: 0, req: 0, existing: 0 },
+  );
+}
 
 function tone(text: string | null): "good" | "warn" | "bad" | "neutral" {
   if (!text) return "neutral";
@@ -23,20 +38,19 @@ function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
 }
 
 export default function SummaryPage() {
-  const { catalog, update, run: current } = useStore();
+  const { catalog, update, run: current, teamView } = useStore();
   return (
     <WithRun>
       {(run) => {
         const estimates = Object.fromEntries(run.estimates.map((e) => [e.role, e]));
-        const total = run.comparisons.reduce(
-          (acc, c) => ({
-            ucp: acc.ucp + c.ucp_fte,
-            bu: acc.bu + c.bu_fte,
-            req: acc.req + (c.requested_fte ?? 0),
-            existing: acc.existing + c.existing_fte,
-          }),
-          { ucp: 0, bu: 0, req: 0, existing: 0 },
-        );
+        const byRole = Object.fromEntries(run.comparisons.map((c) => [c.role, c]));
+        const groups = visibleGroups(run, catalog, teamView).map((g) => ({
+          ...g,
+          rows: g.roles.map((r) => byRole[r]).filter(Boolean),
+        }));
+        const grouped = groups.length > 1;
+        const shown = groups.flatMap((g) => g.rows);
+        const total = sum(shown);
         const review = run.breakdown.filter((r) => r.needs_review).length;
         return (
           <>
@@ -44,7 +58,9 @@ export default function SummaryPage() {
               title="Ringkasan FTE"
               description={`${run.project.name || "Proyek"} · ${date(run.project.start)} s.d. ${date(run.project.end)} · FTE rata-rata periode`}
               actions={
-                run.approved ? (
+                <>
+                <TeamFilter run={run} />
+                {run.approved ? (
                   <StatusBadge tone="good">
                     <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> Disetujui
                   </StatusBadge>
@@ -52,7 +68,8 @@ export default function SummaryPage() {
                   <Button variant="secondary" onClick={() => current && update({ ...current, approved: true })}>
                     Setujui hasil
                   </Button>
-                )
+                )}
+                </>
               }
             />
 
@@ -67,8 +84,23 @@ export default function SummaryPage() {
               </div>
             )}
 
-            <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {run.comparisons.map((c) => (
+            {groups.map((g) => {
+              const t = sum(g.rows);
+              return (
+            <section key={g.key} aria-label={`Tim ${g.label}`} className="mb-6">
+              {grouped || teamView !== "all" ? (
+                <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="text-base font-semibold text-ink">
+                    Tim {g.label} <span className="text-sm font-normal text-muted">· {g.rows.length} role</span>
+                  </h2>
+                  <p className="tabular text-sm text-muted">
+                    Bottom-up <span className="font-medium text-ink">{fte(t.bu)}</span> · UCP <span className="font-medium text-ink">{fte(t.ucp)}</span> · diminta{" "}
+                    <span className="font-medium text-ink">{fte(t.req)}</span> FTE
+                  </p>
+                </div>
+              ) : null}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {g.rows.map((c) => (
                 <div key={c.role} className="rounded-xl border border-line bg-surface p-5">
                   <div className="flex items-center justify-between">
                     <RoleBadge role={c.role} />
@@ -106,6 +138,9 @@ export default function SummaryPage() {
                 </div>
               ))}
             </div>
+            </section>
+              );
+            })}
 
             <Card
               title="Perbandingan per role"
@@ -115,7 +150,7 @@ export default function SummaryPage() {
                 <table className="w-full min-w-[900px] text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs text-muted">
-                      <th className="py-2 pr-3 font-medium">Role</th>
+                      <th className="sticky left-0 bg-surface py-2 pr-3 font-medium">Role</th>
                       <th className="py-2 pr-3 text-right font-medium">Diminta</th>
                       <th className="py-2 pr-3 text-right font-medium">Existing</th>
                       <th className="py-2 pr-3 text-right font-medium">Pembanding</th>
@@ -133,11 +168,22 @@ export default function SummaryPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {run.comparisons.map((c) => {
+                    {groups.map((g) => {
+                      const t = sum(g.rows);
+                      return (
+                    <Fragment key={g.key}>
+                    {grouped && (
+                      <tr className="border-b border-line">
+                        <th colSpan={11} scope="colgroup" className="pt-4 pb-1.5 text-left text-xs font-semibold tracking-wide text-muted uppercase">
+                          Tim {g.label}
+                        </th>
+                      </tr>
+                    )}
+                    {g.rows.map((c) => {
                       const e = estimates[c.role];
                       return (
-                        <tr key={c.role} className="border-b border-line last:border-0">
-                          <td className="py-2.5 pr-3">
+                        <tr key={c.role} className="border-b border-line">
+                          <td className="sticky left-0 bg-surface py-2.5 pr-3">
                             <RoleBadge role={c.role} name={roleName(c.role, catalog?.roles)} />
                           </td>
                           <td className="tabular py-2.5 pr-3 text-right">{fte(c.requested_fte)}</td>
@@ -157,8 +203,23 @@ export default function SummaryPage() {
                         </tr>
                       );
                     })}
+                    {grouped && (
+                      <tr className="border-b border-line text-muted">
+                        <td className="py-2 pr-3 text-xs">Subtotal {g.label}</td>
+                        <td className="tabular py-2 pr-3 text-right">{fte(t.req)}</td>
+                        <td className="tabular py-2 pr-3 text-right">{fte(t.existing)}</td>
+                        <td className="py-2 pr-3" />
+                        <td className="tabular py-2 pr-3 text-right">{fte(t.ucp)}</td>
+                        <td className="py-2 pr-3" />
+                        <td className="tabular py-2 pr-3 text-right">{fte(t.bu)}</td>
+                        <td colSpan={4} />
+                      </tr>
+                    )}
+                    </Fragment>
+                      );
+                    })}
                     <tr className="bg-canvas font-medium">
-                      <td className="py-2.5 pr-3">Total</td>
+                      <td className="py-2.5 pr-3">{teamView === "all" ? "Total" : `Total ${groups[0]?.label ?? ""}`}</td>
                       <td className="tabular py-2.5 pr-3 text-right">{fte(total.req)}</td>
                       <td className="tabular py-2.5 pr-3 text-right">{fte(total.existing)}</td>
                       <td className="py-2.5 pr-3" />
@@ -172,10 +233,10 @@ export default function SummaryPage() {
               </div>
               <div className="mt-4 grid gap-4 border-t border-line pt-4 text-sm sm:grid-cols-3">
                 <p className="text-muted">
-                  Man-hours UCP <span className="tabular font-medium text-ink">{num(run.estimates.reduce((a, e) => a + e.ucp_hours, 0))}</span> jam
+                  Man-hours UCP <span className="tabular font-medium text-ink">{num(shown.reduce((a, c) => a + (estimates[c.role]?.ucp_hours ?? 0), 0))}</span> jam
                 </p>
                 <p className="text-muted">
-                  Man-hours bottom-up <span className="tabular font-medium text-ink">{num(run.estimates.reduce((a, e) => a + e.bu_hours, 0))}</span> jam
+                  Man-hours bottom-up <span className="tabular font-medium text-ink">{num(shown.reduce((a, c) => a + (estimates[c.role]?.bu_hours ?? 0), 0))}</span> jam
                 </p>
                 <p className="text-muted">
                   PHM <span className="tabular font-medium text-ink">{fte(run.parameters.phm, 1)}</span> jam/UCP · {run.breakdown.length} baris

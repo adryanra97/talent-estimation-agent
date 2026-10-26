@@ -227,7 +227,13 @@ async def create_run(
         wbs_bytes = build_demo_wbs()
         request_text, supporting_text = REQUEST_TEXT, NOTES_TEXT
         options.project = options.project.model_copy(
-            update={"name": PROJECT_NAME, "start": None, "end": None, "reference": ""}
+            update={
+                "name": PROJECT_NAME,
+                "start": None,
+                "end": None,
+                "reference": "",
+                "scope": "all",
+            }
         )
     else:
         wbs_bytes = await _read(wbs)

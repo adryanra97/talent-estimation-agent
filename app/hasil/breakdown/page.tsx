@@ -3,17 +3,20 @@
 import { ChevronDown, Loader2, RefreshCw, Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useMemo, useState } from "react";
-import { WithRun } from "@/components/result-guard";
+import { WithRun, roleName } from "@/components/result-guard";
+import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, PageHeader, RoleBadge, StatusBadge, inputBase, inputClass } from "@/components/ui";
 import { date, fte, num } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { visibleRoles } from "@/lib/teams";
 import type { BreakdownRow, Classification, Involvement, RunResult } from "@/lib/types";
 
 const CLASSES: Classification[] = ["Simple", "Average", "Complex"];
 
 function Table({ run }: { run: RunResult }) {
   const params = useSearchParams();
-  const { update, reclassify, busy } = useStore();
+  const { update, reclassify, busy, catalog, teamView } = useStore();
+  const inView = useMemo(() => visibleRoles(run, catalog, teamView), [run, catalog, teamView]);
   const [role, setRole] = useState("all");
   const [reviewOnly, setReviewOnly] = useState(params.get("review") === "1");
   const [query, setQuery] = useState("");
@@ -25,11 +28,12 @@ function Table({ run }: { run: RunResult }) {
     () =>
       run.breakdown.filter(
         (r) =>
+          inView.includes(r.role) &&
           (role === "all" || r.role === role) &&
           (!reviewOnly || r.needs_review) &&
           (!query || `${r.item_id} ${r.item_name} ${r.description}`.toLowerCase().includes(query.toLowerCase())),
       ),
-    [run.breakdown, role, reviewOnly, query],
+    [run.breakdown, inView, role, reviewOnly, query],
   );
 
   const key = (r: BreakdownRow) => `${r.item_id}|${r.role}`;
@@ -75,9 +79,9 @@ function Table({ run }: { run: RunResult }) {
           </div>
           <select aria-label="Filter role" className={`${inputBase} w-auto`} value={role} onChange={(e) => setRole(e.target.value)}>
             <option value="all">Semua role</option>
-            {run.roles.map((r) => (
+            {inView.map((r) => (
               <option key={r} value={r}>
-                {r}
+                {roleName(r, catalog?.roles)}
               </option>
             ))}
           </select>
@@ -234,6 +238,7 @@ export default function BreakdownPage() {
           <PageHeader
             title="Breakdown WBS"
             description="Satu baris = satu item WBS untuk satu role. Ubah peran, klasifikasi, atau alokasi; semua total dihitung ulang tanpa memanggil model. Pilih baris untuk dinilai ulang oleh agent."
+            actions={<TeamFilter run={run} />}
           />
           <Suspense>
             <Table run={run} />

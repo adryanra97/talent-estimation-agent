@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
+import { TeamFilter } from "@/components/team-filter";
 import { Card, EmptyState, InfoTip, PageHeader, RoleBadge, StatusBadge, inputBase, inputClass } from "@/components/ui";
 import { fte, pct } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { visibleGroups } from "@/lib/teams";
 
 export default function AiPage() {
-  const { catalog, update } = useStore();
+  const { catalog, update, teamView } = useStore();
   const [role, setRole] = useState("all");
   const [confidence, setConfidence] = useState("all");
   const labels = useMemo(
@@ -27,19 +29,30 @@ export default function AiPage() {
             />
           );
         }
+        const groups = visibleGroups(run, catalog, teamView);
+        const inView = new Set(groups.flatMap((g) => g.roles));
+        const summaries = Object.fromEntries(run.ai_summary.map((a) => [a.role, a]));
         const names = Object.fromEntries(run.breakdown.map((r) => [`${r.item_id}|${r.role}`, r.item_name]));
         const tasks = run.ai_tasks
           .map((t, index) => ({ ...t, index }))
-          .filter((t) => (role === "all" || t.role === role) && (confidence === "all" || t.confidence === confidence))
+          .filter((t) => inView.has(t.role) && (role === "all" || t.role === role) && (confidence === "all" || t.confidence === confidence))
           .filter((t) => t.saving > 0);
         return (
           <>
             <PageHeader
               title="Peluang Bantuan AI"
               description="Skenario: bagian pekerjaan yang dapat dipercepat dengan bantuan AI. Angka dasar di Ringkasan FTE tidak berubah. AI membantu tugas tertentu; tanggung jawab peran tetap pada talent."
+              actions={<TeamFilter run={run} />}
             />
-            <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {run.ai_summary.map((a) => (
+            {groups.map((g) => (
+            <section key={g.key} aria-label={`Tim ${g.label}`} className="mb-6">
+              {(groups.length > 1 || teamView !== "all") && (
+                <h2 className="mb-3 text-base font-semibold text-ink">
+                  Tim {g.label} <span className="text-sm font-normal text-muted">· {g.roles.length} role</span>
+                </h2>
+              )}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {g.roles.map((r) => summaries[r]).filter(Boolean).map((a) => (
                 <div key={a.role} className="rounded-xl border border-line bg-surface p-5">
                   <div className="flex items-center justify-between">
                     <RoleBadge role={a.role} />
@@ -69,6 +82,8 @@ export default function AiPage() {
                 </div>
               ))}
             </div>
+            </section>
+            ))}
 
             <Card
               title="Detail tugas"
@@ -77,8 +92,8 @@ export default function AiPage() {
                 <div className="flex gap-2">
                   <select aria-label="Filter role" className={`${inputBase} w-auto`} value={role} onChange={(e) => setRole(e.target.value)}>
                     <option value="all">Semua role</option>
-                    {run.roles.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                    {[...inView].map((r) => (
+                      <option key={r} value={r}>{roleName(r, catalog?.roles)}</option>
                     ))}
                   </select>
                   <select aria-label="Filter keyakinan" className={`${inputBase} w-auto`} value={confidence} onChange={(e) => setConfidence(e.target.value)}>

@@ -40,21 +40,33 @@ WBS_ROWS: list[tuple[str, str, str, str, date | None, date | None]] = [
     ("4.1.2", "Monitoring kualitas data", "Data quality monitoring, freshness, latency dan alerting threshold", "Data Engineer, Backend Developer", date(2027, 3, 15), date(2027, 4, 30)),
     ("4.1.3", "Layanan AI bersama", "AI service, orchestration, context handling dan RAG", "AI Engineer", date(2027, 3, 1), date(2027, 4, 30)),
     ("4.1.4", "Evaluasi AI", "Prompt evaluation dan tuning, evaluasi akurasi atau halusinasi", "AI Engineer", date(2027, 4, 5), date(2027, 4, 30)),
-    ("5.0", "Uji dan Serah Terima", "Pengujian dan serah terima", "", date(2027, 4, 12), date(2027, 4, 30)),
-    ("5.1.1", "User acceptance test", "Skenario uji, eksekusi UAT, perbaikan", "QA Engineer, Business Analyst", date(2027, 4, 12), date(2027, 4, 23)),
-    ("5.1.2", "Dokumentasi dan transfer pengetahuan", "Dokumentasi teknis, panduan pengguna, sesi transfer pengetahuan", "Business Analyst", date(2027, 4, 19), date(2027, 4, 30)),
+    ("5.0", "Pengalaman Pengguna", "Riset dan desain pengalaman pengguna", "", date(2027, 2, 1), date(2027, 4, 16)),
+    ("5.1", "Riset dan Desain", "Riset pengguna, alur, dan antarmuka", "", date(2027, 2, 1), date(2027, 4, 16)),
+    ("5.1.1", "Riset pengguna", "Rencana riset, wawancara pengguna, survei pengguna, sintesis insight dan persona", "UX Researcher", date(2027, 2, 1), date(2027, 2, 26)),
+    ("5.1.2", "Alur dan prototipe", "Information architecture, user flow, wireframe dan prototipe interaktif", "UX Designer", date(2027, 2, 15), date(2027, 3, 12)),
+    ("5.1.3", "Desain antarmuka dashboard", "Design system, komponen UI, mockup high-fidelity, desain responsif dan handoff", "UI Designer", date(2027, 3, 1), date(2027, 3, 26)),
+    ("5.1.4", "Uji usability", "Skenario uji, usability testing dengan pengguna, analisis temuan dan iterasi desain", "UX Researcher, UX Designer", date(2027, 4, 5), date(2027, 4, 16)),
+    ("6.0", "Uji dan Serah Terima", "Pengujian dan serah terima", "", date(2027, 4, 12), date(2027, 4, 30)),
+    ("6.1.1", "User acceptance test", "Skenario uji, eksekusi UAT, perbaikan", "QA Engineer, Business Analyst", date(2027, 4, 12), date(2027, 4, 23)),
+    ("6.1.2", "Dokumentasi dan transfer pengetahuan", "Dokumentasi teknis, panduan pengguna, sesi transfer pengetahuan", "Business Analyst", date(2027, 4, 19), date(2027, 4, 30)),
 ]  # fmt: skip
 
 REQUEST_TEXT = """DOKUMEN PERMINTAAN TALENT (CONTOH)
 
-Perihal: Permintaan dukungan talent tim data untuk Platform Analitik Layanan Publik.
+Perihal: Permintaan dukungan talent tim data dan desain untuk Platform Analitik Layanan Publik.
 
 Sehubungan dengan pengembangan platform analitik untuk dua use case (pengaduan warga dan
-transportasi publik), tim produk memohon dukungan tambahan talent sebagai berikut:
+transportasi publik), tim produk memohon dukungan tambahan talent tim data dan tim desain
+sebagai berikut:
 - 1 Data Engineer
 - 0,5 FTE Data Analyst
 - 1 Data Scientist
 - 0,5 FTE AI Engineer
+
+Untuk tim desain:
+- 0,5 FTE UX Researcher
+- 1 UX Designer
+- 1 UI Designer
 
 Periode penugasan 1 Februari 2027 sampai 30 April 2027. WBS terlampir.
 """

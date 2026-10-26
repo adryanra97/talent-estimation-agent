@@ -64,8 +64,8 @@ export default function HomePage() {
           Validasi permintaan talent dari WBS, dengan angka yang bisa ditelusuri
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">
-          Unggah WBS dan dokumen permintaan. Agent menilai setiap item, menghitung kebutuhan Data Engineer, Data Analyst, Data
-          Scientist, dan AI Engineer dengan dua metode, lalu menyiapkan Excel yang siap direview.
+          Unggah WBS dan dokumen permintaan. Agent menilai setiap item, menghitung kebutuhan tiap role tim data dan tim desain dengan dua
+          metode, lalu menyiapkan Excel yang siap direview.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Button onClick={() => router.push("/validasi")} className="px-5 py-2.5">

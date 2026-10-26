@@ -37,6 +37,9 @@ export const ROLE_STYLE: Record<string, string> = {
   DA: "bg-teal-50 text-teal-800 ring-teal-200",
   DS: "bg-amber-50 text-amber-800 ring-amber-200",
   AI: "bg-accent-50 text-accent-700 ring-accent-200",
+  UXR: "bg-pink-50 text-pink-800 ring-pink-200",
+  UX: "bg-orange-50 text-orange-800 ring-orange-200",
+  UI: "bg-lime-50 text-lime-800 ring-lime-200",
 };
 
 export const ROLE_COLOR: Record<string, string> = {
@@ -44,7 +47,17 @@ export const ROLE_COLOR: Record<string, string> = {
   DA: "#0d9488",
   DS: "#d97706",
   AI: "#6d28d9",
+  UXR: "#db2777",
+  UX: "#ea580c",
+  UI: "#65a30d",
 };
+
+/** Fallback colors for roles from an uploaded catalog. */
+const EXTRA_COLORS = ["#475569", "#0891b2", "#be123c", "#4d7c0f", "#7c3aed", "#b45309"];
+
+export function roleColor(role: string, index: number): string {
+  return ROLE_COLOR[role] ?? EXTRA_COLORS[index % EXTRA_COLORS.length];
+}
 
 export const FINDING_LABEL: Record<string, string> = {
   gap: "Gap WBS",

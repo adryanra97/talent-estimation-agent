@@ -7,7 +7,7 @@ from talent_estimation.catalog import load_catalog_file
 
 def test_default_catalog(catalog):
     assert catalog.roles_for_scope("data") == ["DE", "DA", "DS", "AI"]
-    assert catalog.roles_for_scope("design") == []
+    assert catalog.roles_for_scope("design") == ["UXR", "UX", "UI"]
     assert catalog.match_role("DE1 (Data Engineer), Business Analyst") == ["DE"]
     assert {c.key for c in catalog.ai_categories} >= {"routine_code", "judgment"}
     assert all(c.min_saving <= c.default_saving <= c.max_saving for c in catalog.ai_categories)

@@ -15,7 +15,7 @@ teams:
     roles: [DE, DA, DS, AI]
   design:
     label: Design
-    roles: []   # UX Researcher, UI Designer, UX Writer are planned.
+    roles: [UXR, UX, UI]
 
 roles:
   DE:
@@ -228,6 +228,139 @@ roles:
       Analytics & Reporting: [Data Analytics & Exploration, Dashboard & Visualization, BI & Reporting, Executive Dashboard Development]
       Governance & Compliance: [Audit Trail & Logging, AI Governance & Ethics]
 
+  UXR:
+    name: UX Researcher
+    team: design
+    aliases: [ux researcher, user researcher, ux research, user research, peneliti ux, design researcher]
+    summary: >-
+      Memahami pengguna lewat riset agar keputusan produk dan desain berdiri di
+      atas bukti, bukan asumsi.
+    capability_areas:
+      Research Planning: Merumuskan pertanyaan riset, memilih metode, menyusun rencana dan rekrutmen partisipan.
+      Qualitative Research: Wawancara, observasi kontekstual, diary study, dan tes konsep.
+      Quantitative Research: Survei, analisis perilaku, dan pengukuran metrik pengalaman seperti SUS atau task success.
+      Usability Evaluation: Usability testing moderated maupun unmoderated, heuristic evaluation, dan benchmark.
+      Synthesis & Communication: Sintesis temuan menjadi insight, persona, journey map, dan rekomendasi yang dapat ditindaklanjuti.
+    in_scope: >-
+      Rencana riset dan rekrutmen partisipan; wawancara pengguna dan
+      stakeholder untuk kebutuhan pengalaman; observasi kontekstual; survei
+      pengguna; usability testing dan heuristic evaluation; tes konsep dan
+      validasi prototipe; analisis dan sintesis temuan (affinity mapping);
+      persona, journey map, dan jobs-to-be-done; metrik pengalaman (SUS, task
+      success, time on task); laporan dan presentasi insight riset.
+    out_of_scope: >-
+      Desain alur dan wireframe (UX Designer); desain visual dan komponen UI (UI
+      Designer); analisis data operasional dan KPI bisnis (Data Analyst); UAT
+      fungsional dan pengujian sistem (QA); pengumpulan kebutuhan fungsional
+      sistem (Business Analyst).
+    primary_keywords: >-
+      user research, riset pengguna, riset ux, ux research, wawancara pengguna,
+      user interview, interview pengguna, survei pengguna, user survey,
+      usability testing, uji usability, usability test, heuristic evaluation,
+      evaluasi heuristik, persona, journey map, customer journey, affinity
+      mapping, sintesis insight, insight pengguna, diary study, observasi
+      kontekstual, contextual inquiry, tes konsep, concept test, validasi
+      prototipe, rekrutmen partisipan, system usability scale, SUS
+    usually_supporting_on: >-
+      Pengumpulan kebutuhan dan kriteria penerimaan (perspektif pengguna);
+      desain alur dan prototipe (validasi asumsi); evaluasi relevansi fitur AI
+      atau insight dari sisi pengguna; UAT bersama pengguna.
+    substitutes: >-
+      UX Designer dapat menutup usability testing sederhana dan sintesis
+      ringan. Data Analyst dapat menutup analisis survei kuantitatif.
+    pillars:
+      Research Planning: [Research Question Framing, Method Selection, Participant Recruitment]
+      Qualitative Methods: [User Interview, Contextual Inquiry, Diary Study, Concept Testing]
+      Quantitative Methods: [Survey Design, Behavioral Analytics, UX Metrics (SUS, Task Success)]
+      Usability Evaluation: [Moderated Usability Testing, Unmoderated Testing, Heuristic Evaluation]
+      Synthesis & Communication: [Affinity Mapping, Persona & Journey Map, Insight Reporting, Stakeholder Workshop]
+
+  UX:
+    name: UX Designer
+    team: design
+    aliases: [ux designer, interaction designer, desainer ux, ux design, product designer]
+    summary: >-
+      Merancang cara pengguna menyelesaikan tugasnya: struktur informasi, alur,
+      dan interaksi, sampai menjadi prototipe yang bisa diuji.
+    capability_areas:
+      Information Architecture: Struktur konten, navigasi, taksonomi, dan pelabelan.
+      Interaction Design: User flow, task flow, state, dan pola interaksi termasuk penanganan error.
+      Wireframing & Prototyping: Wireframe low sampai mid-fidelity dan prototipe interaktif untuk diuji.
+      UX Writing & Content: Microcopy, label, dan pesan yang jelas di setiap langkah.
+      Accessibility & Heuristics: Penerapan prinsip usability dan aksesibilitas sejak rancangan.
+    in_scope: >-
+      Arsitektur informasi dan struktur navigasi; user flow dan task flow;
+      wireframe; prototipe interaktif; pola interaksi, state, dan penanganan
+      error; microcopy dan UX writing; penerapan heuristik usability dan
+      aksesibilitas; iterasi desain dari hasil uji; spesifikasi interaksi untuk
+      developer.
+    out_of_scope: >-
+      Riset pengguna mendalam (UX Researcher); desain visual akhir, design
+      system, dan aset (UI Designer); implementasi frontend; dashboard BI di tool
+      BI (Data Analyst).
+    primary_keywords: >-
+      ux design, user flow, alur pengguna, task flow, information architecture,
+      arsitektur informasi, wireframe, wireframing, prototipe interaktif,
+      interactive prototype, prototype, prototipe, interaction design, desain
+      interaksi, navigasi, sitemap, microcopy, ux writing, card sorting,
+      aksesibilitas, accessibility, iterasi desain
+    usually_supporting_on: >-
+      Riset dan usability testing (penyusunan skenario dan tugas uji); desain
+      antarmuka (konsistensi alur dan interaksi); kebutuhan dan kriteria
+      penerimaan (alur pengguna); dashboard analitik (struktur informasi).
+    substitutes: >-
+      UI Designer dapat menutup wireframe dan prototipe sederhana. UX
+      Researcher dapat menutup evaluasi heuristik.
+    pillars:
+      Information Architecture: [Content Structure, Navigation Design, Card Sorting & Tree Testing]
+      Interaction Design: [User & Task Flow, Interaction Patterns, Error & Empty States]
+      Wireframing & Prototyping: [Wireframing, Interactive Prototyping, Design Iteration]
+      UX Writing: [Microcopy, Content Hierarchy]
+      Accessibility & Heuristics: [Usability Heuristics, Accessibility Standards (WCAG)]
+
+  UI:
+    name: UI Designer
+    team: design
+    aliases: [ui designer, visual designer, desainer ui, ui design, interface designer]
+    summary: >-
+      Mewujudkan rancangan menjadi antarmuka visual yang konsisten, jelas, dan
+      siap diimplementasikan developer.
+    capability_areas:
+      Visual Design: Tipografi, warna, layout, grid, dan hierarki visual.
+      Design System: Komponen, token, varian, dan dokumentasi pemakaian agar antarmuka konsisten.
+      High-Fidelity Mockup: Mockup final untuk setiap layar dan state, termasuk responsif.
+      Data Visualization Design: Desain grafik dan tampilan data di dalam produk.
+      Handoff & QA Visual: Spesifikasi untuk developer, aset, dan review hasil implementasi.
+    in_scope: >-
+      Desain visual dan tampilan antarmuka; design system, komponen UI, dan
+      design token; mockup high-fidelity untuk setiap layar dan state; desain
+      responsif; ikon, ilustrasi, dan aset visual; desain tampilan grafik di
+      dalam produk; spesifikasi dan handoff ke developer; review visual hasil
+      implementasi.
+    out_of_scope: >-
+      Riset pengguna (UX Researcher); arsitektur informasi dan alur (UX
+      Designer); implementasi frontend; dashboard BI yang dibangun di tool BI
+      (Data Analyst), kecuali bila produk menuntut desain visual khusus.
+    primary_keywords: >-
+      ui design, desain ui, desain antarmuka, user interface, tampilan, desain
+      tampilan, visual design, desain visual, mockup, mock-up, high-fidelity,
+      hi-fi, design system, komponen ui, ui kit, design token, style guide,
+      tipografi, ikon, ilustrasi, aset visual, responsif, responsive design,
+      handoff, spesifikasi desain, figma
+    usually_supporting_on: >-
+      Wireframe dan prototipe (penerapan gaya visual); dashboard analitik
+      (konsistensi visual dengan produk); usability testing (perbaikan visual);
+      QA tampilan saat implementasi frontend.
+    substitutes: >-
+      UX Designer dapat menutup mockup sederhana dengan design system yang
+      sudah ada. Data Analyst dapat menutup tampilan dashboard di tool BI.
+    pillars:
+      Visual Design: [Typography & Color, Layout & Grid, Visual Hierarchy]
+      Design System: [Component Library, Design Tokens, Usage Documentation]
+      Mockup & Responsive: [High-Fidelity Mockup, Responsive Layout, States & Variants]
+      Data Visualization Design: [Chart Design, Dashboard Visual Layout]
+      Handoff & QA: [Developer Handoff, Asset Preparation, Visual QA]
+
 # Competency scale used when talent is assessed per skill.
 competency_scale:
   1: "Tidak ada pengalaman: belum pernah mempelajari."
@@ -350,6 +483,12 @@ ai_categories:
     max_saving: 0.20
     default_saving: 0.15
     examples: EDA awal, ringkasan statistik, profiling kualitas data
+  - key: design_variation
+    label: Variasi desain dan aset
+    min_saving: 0.10
+    max_saving: 0.25
+    default_saving: 0.15
+    examples: variasi layout awal, ikon dan ilustrasi draf, copy UI awal, wireframe kasar
   - key: text_analysis
     label: Ringkasan dan analisis teks
     min_saving: 0.20

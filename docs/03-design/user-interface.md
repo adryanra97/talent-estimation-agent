@@ -22,7 +22,18 @@ flowchart LR
     H1 -->|Unduh Excel| X[[Workbook]]
 ```
 
-The sidebar has seven top-level entries, starting with **Beranda** (home). All outputs sit under **Hasil**, which
+The sidebar has seven top-level entries, starting with **Beranda** (home).
+
+### Many roles
+
+Roles stay as rows, never as columns, so a longer role list grows the page
+downward instead of forcing horizontal scrolling, which users tend to miss.
+When a run covers more than one team, every result page shows the same
+segmented control (**Semua tim · Data · Design**). The choice is shared across
+pages so switching menu keeps the view. With all teams shown, cards and tables
+are grouped under a team heading with a subtotal. Only the monthly table can
+grow sideways for long projects; its role column stays fixed while the months
+scroll. All outputs sit under **Hasil**, which
 is disabled until a run exists. The header always shows the model status and
 the **Unduh Excel** button.
 

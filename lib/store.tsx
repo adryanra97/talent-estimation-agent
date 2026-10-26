@@ -86,6 +86,8 @@ interface Store {
   exportExcel: () => Promise<void>;
   notice: string | null;
   setNotice: (n: string | null) => void;
+  teamView: string;
+  setTeamView: (v: string) => void;
 }
 
 const Context = createContext<Store | null>(null);
@@ -124,6 +126,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [run, setRun] = useState<RunResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [teamView, setTeamView] = useState("all");
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -165,6 +168,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEvents([]);
       setError(null);
       setDemo(useDemo);
+      setTeamView("all");
       setStartedAt(Date.now());
       const role_inputs = Object.entries(team).map(([role, t]) => ({
         role,
@@ -267,12 +271,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       resetCatalog, project, setProject, parameters, setParameters, team, setTeam, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
       error, startedAt, demo, run, setRun, start, cancel, busy, update, reclassify, exportExcel,
-      notice, setNotice,
+      notice, setNotice, teamView, setTeamView,
     }),
     [
       provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, project,
       parameters, team, aiEnabled, aiTools, files, preview, status, events, error, startedAt, demo,
-      run, start, cancel, busy, update, reclassify, exportExcel, notice,
+      run, start, cancel, busy, update, reclassify, exportExcel, notice, teamView,
     ],
   );
 

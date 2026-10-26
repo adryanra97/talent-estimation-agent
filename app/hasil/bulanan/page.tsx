@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { WithRun } from "@/components/result-guard";
+import { WithRun, roleName } from "@/components/result-guard";
+import { TeamFilter } from "@/components/team-filter";
 import { Card, PageHeader, RoleBadge } from "@/components/ui";
-import { ROLE_COLOR, date, fte, month } from "@/lib/format";
+import { date, fte, month, roleColor } from "@/lib/format";
+import { useStore } from "@/lib/store";
+import { visibleGroups } from "@/lib/teams";
 
 export default function MonthlyPage() {
   const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");
+  const { catalog, teamView } = useStore();
   return (
     <WithRun>
       {(run) => {
         const data = run.monthly.map((m) => ({ month: month(m.month), ...m[method] }));
+        const groups = visibleGroups(run, catalog, teamView);
+        const roles = groups.flatMap((g) => g.roles);
+        const grouped = groups.length > 1;
+        const monthTotal = (m: (typeof run.monthly)[number], list: string[]) => list.reduce((a, r) => a + (m[method][r] ?? 0), 0);
         const { start, end } = run.project;
         const outside = new Set(
           run.breakdown
@@ -24,6 +32,8 @@ export default function MonthlyPage() {
               title="Per Bulan"
               description="Effort tiap item disebar ke bulan sesuai hari kerjanya. FTE bulan = person-days bulan dibagi hari kerja efektif bulan itu."
               actions={
+                <>
+                <TeamFilter run={run} />
                 <div className="inline-flex rounded-lg border border-line bg-canvas p-1" role="group" aria-label="Metode">
                   {(
                     [
@@ -41,6 +51,7 @@ export default function MonthlyPage() {
                     </button>
                   ))}
                 </div>
+                </>
               }
             />
             {outside.size > 0 && (
@@ -62,8 +73,8 @@ export default function MonthlyPage() {
                     <YAxis tick={{ fontSize: 12, fill: "#5b6475" }} />
                     <Tooltip formatter={(v: number) => fte(v)} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    {run.roles.map((r) => (
-                      <Bar key={r} dataKey={r} stackId="a" fill={ROLE_COLOR[r] ?? "#64748b"} name={r} isAnimationActive={false} />
+                    {roles.map((r) => (
+                      <Bar key={r} dataKey={r} stackId="a" fill={roleColor(r, run.roles.indexOf(r))} name={roleName(r, catalog?.roles)} isAnimationActive={false} />
                     ))}
                   </BarChart>
                 </ResponsiveContainer>
@@ -72,7 +83,7 @@ export default function MonthlyPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs text-muted">
-                      <th className="py-2 pr-3 font-medium">Role</th>
+                      <th className="sticky left-0 bg-surface py-2 pr-3 font-medium">Role</th>
                       {run.monthly.map((m) => (
                         <th key={m.month} className="py-2 pr-3 text-right font-medium">
                           {month(m.month)}
@@ -82,29 +93,49 @@ export default function MonthlyPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {run.roles.map((r) => {
-                      const values = run.monthly.map((m) => m[method][r] ?? 0);
-                      return (
-                        <tr key={r} className="border-b border-line">
-                          <td className="py-2 pr-3"><RoleBadge role={r} /></td>
-                          {values.map((v, i) => (
-                            <td key={i} className="tabular py-2 pr-3 text-right">{fte(v)}</td>
-                          ))}
-                          <td className="tabular py-2 text-right font-medium">{fte(Math.max(0, ...values))}</td>
-                        </tr>
-                      );
-                    })}
+                    {groups.map((g) => (
+                      <Fragment key={g.key}>
+                        {grouped && (
+                          <tr className="border-b border-line">
+                            <th colSpan={run.monthly.length + 2} scope="colgroup" className="sticky left-0 bg-surface pt-4 pb-1.5 text-left text-xs font-semibold tracking-wide text-muted uppercase">
+                              Tim {g.label}
+                            </th>
+                          </tr>
+                        )}
+                        {g.roles.map((r) => {
+                          const values = run.monthly.map((m) => m[method][r] ?? 0);
+                          return (
+                            <tr key={r} className="border-b border-line">
+                              <td className="sticky left-0 bg-surface py-2 pr-3"><RoleBadge role={r} name={roleName(r, catalog?.roles)} /></td>
+                              {values.map((v, i) => (
+                                <td key={i} className="tabular py-2 pr-3 text-right">{fte(v)}</td>
+                              ))}
+                              <td className="tabular py-2 text-right font-medium">{fte(Math.max(0, ...values))}</td>
+                            </tr>
+                          );
+                        })}
+                        {grouped && (
+                          <tr className="border-b border-line text-muted">
+                            <td className="sticky left-0 bg-surface py-2 pr-3 text-xs">Subtotal {g.label}</td>
+                            {run.monthly.map((m) => (
+                              <td key={m.month} className="tabular py-2 pr-3 text-right">{fte(monthTotal(m, g.roles))}</td>
+                            ))}
+                            <td className="tabular py-2 text-right">{fte(Math.max(0, ...run.monthly.map((m) => monthTotal(m, g.roles))))}</td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
                     <tr className="bg-canvas font-medium">
-                      <td className="py-2 pr-3">Total</td>
+                      <td className="sticky left-0 bg-canvas py-2 pr-3">{teamView === "all" ? "Total" : `Total ${groups[0]?.label ?? ""}`}</td>
                       {run.monthly.map((m) => (
                         <td key={m.month} className="tabular py-2 pr-3 text-right">
-                          {fte(Object.values(m[method]).reduce((a, b) => a + b, 0))}
+                          {fte(monthTotal(m, roles))}
                         </td>
                       ))}
-                      <td />
+                      <td className="tabular py-2 text-right">{fte(Math.max(0, ...run.monthly.map((m) => monthTotal(m, roles))))}</td>
                     </tr>
                     <tr className="text-xs text-muted">
-                      <td className="py-2 pr-3">Hari kerja</td>
+                      <td className="sticky left-0 bg-surface py-2 pr-3">Hari kerja</td>
                       {run.monthly.map((m) => (
                         <td key={m.month} className="tabular py-2 pr-3 text-right">{m.capacity_days}</td>
                       ))}

@@ -1,21 +1,27 @@
 "use client";
 
 import { WithRun } from "@/components/result-guard";
+import { TeamFilter } from "@/components/team-filter";
 import { Card, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
 import { FINDING_LABEL } from "@/lib/format";
+import { useStore } from "@/lib/store";
+import { visibleRoles } from "@/lib/teams";
 
 const ORDER = ["Tinggi", "Sedang", "Rendah"];
 
 export default function FindingsPage() {
+  const { catalog, teamView } = useStore();
   return (
     <WithRun>
       {(run) => {
-        const findings = [...run.findings].sort((a, b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity));
+        const inView = new Set(visibleRoles(run, catalog, teamView));
+        const findings = run.findings.filter((f) => !f.role || inView.has(f.role)).sort((a, b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity));
         return (
           <>
             <PageHeader
               title="Temuan & Asumsi"
               description="Temuan dari Reviewer Agent dan cek perhitungan, beserta jejak keputusan setiap agent."
+              actions={<TeamFilter run={run} />}
             />
             <div className="grid gap-6 lg:grid-cols-5">
               <Card className="lg:col-span-3" title={`Temuan (${findings.length})`}>

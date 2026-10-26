@@ -6,17 +6,18 @@
 flowchart LR
     S((start)) --> I[intake]
     I --> E[estimator]
-    E -->|always| R[reviewer]
-    E -->|if AI enabled| M[augmentation]
+    E --> R[reviewer]
     R -->|rows to re-judge and round < 2| C[reclassify]
     C --> R
-    R -->|done| P[report]
+    R -->|done, AI enabled| M[augmentation]
+    R -->|done, AI disabled| P[report]
     M --> P
     P --> X((end))
 ```
 
-`report` is a deferred node: it waits until both branches have finished, even
-when the reviewer loops. The graph is compiled per request without a
+The agents run in sequence. Augmentation runs after the review loop so that
+the AI tasks are mapped to the final, reviewed breakdown rather than to rows
+the reviewer may still change. The graph is compiled per request without a
 checkpointer.
 
 ## Where agents decide

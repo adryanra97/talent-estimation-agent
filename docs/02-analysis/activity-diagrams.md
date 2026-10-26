@@ -14,14 +14,12 @@ flowchart TD
     key -- Yes --> intake[Intake: read WBS and request]
     intake --> est[Estimator: judge items, assess factors]
     est --> calc[Calculate UCP, bottom-up, monthly]
-    calc --> fork{{Parallel}}
-    fork --> rev[Reviewer: reconcile and check quality]
-    fork --> aug[Augmentation: map AI assistance]
+    calc --> rev[Reviewer: reconcile and check quality]
     rev --> again{Rows to re-judge and round < 2?}
     again -- Yes --> rej[Estimator: re-judge rows] --> rev
-    again -- No --> join{{Join}}
-    aug --> join
-    join --> rep[Report: recalculate, draft message]
+    again -- No --> ai{AI scenario enabled?}
+    ai -- Yes --> aug[Augmentation: map AI assistance] --> rep
+    ai -- No --> rep[Report: recalculate, draft message]
     rep --> show[Show results]
     show --> stop((End))
 ```

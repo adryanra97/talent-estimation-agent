@@ -27,6 +27,8 @@ async def test_demo_pipeline(demo_inputs):
     assert any(f.kind == "gap" and f.role == "UI" for f in run.findings)
     assert any(f.kind == "gap" for f in run.findings)
     assert run.ai_summary and run.message_draft
+    order = list(dict.fromkeys(e["agent"] for e in events))
+    assert order.index("Reviewer Agent") < order.index("Augmentation Agent") < order.index("Report")
 
 
 async def test_llm_pipeline_with_review_loop(demo_inputs, scripted_llm):

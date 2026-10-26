@@ -55,7 +55,7 @@ export default function ProcessPage() {
     <>
       <PageHeader
         title="Proses"
-        description={demo ? "Mode demo: proyek fiktif dengan penilai berbasis aturan. Jeda tiap langkah disimulasikan agar alurnya terlihat; dengan model asli, lamanya bergantung pada jumlah item." : "Agent bekerja secara berurutan. Reviewer dan Augmentation berjalan paralel."}
+        description={demo ? "Mode demo: proyek fiktif dengan penilai berbasis aturan. Jeda tiap langkah disimulasikan agar alurnya terlihat; dengan model asli, lamanya bergantung pada jumlah item." : "Agent bekerja berurutan. Reviewer bisa mengirim baris kembali ke Estimator sampai dua putaran."}
         actions={
           status === "running" ? (
             <Button variant="danger" onClick={cancel}>

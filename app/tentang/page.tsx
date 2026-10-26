@@ -56,7 +56,7 @@ const STRENGTHS = [
 ];
 
 const STACK = [
-  ["Agent", "Python 3.12, LangGraph", "Graph dengan cabang paralel, loop review terbatas, dan node yang menunggu semua cabang"],
+  ["Agent", "Python 3.12, LangGraph", "Graph berurutan dengan loop review terbatas dan cabang opsional untuk skenario AI"],
   ["Kontrak data", "Pydantic v2", "Setiap jawaban model divalidasi skema; jawaban tidak valid dicoba ulang dengan pesan galat"],
   ["Model", "LangChain chat models", "Satu antarmuka structured output untuk lima jenis penyedia"],
   ["API", "FastAPI di Vercel Python Functions", "Stateless, streaming progres per agent (NDJSON)"],
@@ -142,7 +142,7 @@ export default function AboutPage() {
           ))}
         </ol>
         <p className="mt-3 text-sm text-muted">
-          Reviewer dan Augmentation berjalan paralel. Review manusia dilakukan setelah agent selesai: setiap koreksi dihitung ulang tanpa memanggil model.
+          Augmentation berjalan setelah review selesai, jadi tugas AI dipetakan ke baris yang sudah final. Review manusia dilakukan setelah agent selesai: setiap koreksi dihitung ulang tanpa memanggil model.
         </p>
       </section>
 

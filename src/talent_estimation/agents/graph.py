@@ -254,7 +254,8 @@ def build_graph(llm: LLMClient | None):
     def after_review(state: GraphState) -> str:
         if state.get("pending") and state.get("review_round", 0) < MAX_REVIEW_ROUNDS:
             return "reclassify"
-        return "report"
+        # Augmentation reads the reviewed breakdown, so its tasks match the final rows.
+        return "augmentation" if state["inputs"].ai_enabled else "report"
 
     async def reclassify(state: GraphState) -> GraphState:
         inputs, run = state["inputs"], state["run"]
@@ -320,20 +321,17 @@ def build_graph(llm: LLMClient | None):
         _emit("Report", "done", "Hasil siap direview")
         return {"run": run}
 
-    def after_estimator(state: GraphState) -> list[str]:
-        return ["reviewer", "augmentation"] if state["inputs"].ai_enabled else ["reviewer"]
-
     graph = StateGraph(GraphState)
     graph.add_node("intake", intake)
     graph.add_node("estimator", estimator)
     graph.add_node("reviewer", reviewer)
     graph.add_node("reclassify", reclassify)
     graph.add_node("augmentation", augmentation)
-    graph.add_node("report", report, defer=True)
+    graph.add_node("report", report)
     graph.add_edge(START, "intake")
     graph.add_edge("intake", "estimator")
-    graph.add_conditional_edges("estimator", after_estimator, ["reviewer", "augmentation"])
-    graph.add_conditional_edges("reviewer", after_review, ["reclassify", "report"])
+    graph.add_edge("estimator", "reviewer")
+    graph.add_conditional_edges("reviewer", after_review, ["reclassify", "augmentation", "report"])
     graph.add_edge("reclassify", "reviewer")
     graph.add_edge("augmentation", "report")
     graph.add_edge("report", END)

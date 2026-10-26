@@ -6,6 +6,7 @@ import {
   CircleDashed,
   Download,
   FilePlus2,
+  Home,
   Info,
   Layers,
   Loader2,
@@ -84,7 +85,8 @@ function Sidebar() {
           </span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
-          <NavLink href="/" label="Validasi Baru" icon={<FilePlus2 className="h-4 w-4" aria-hidden />} />
+          <NavLink href="/" label="Beranda" icon={<Home className="h-4 w-4" aria-hidden />} />
+          <NavLink href="/validasi" label="Validasi Baru" icon={<FilePlus2 className="h-4 w-4" aria-hidden />} />
           <NavLink
             href="/proses"
             label="Proses"
@@ -121,7 +123,8 @@ function Sidebar() {
 function MobileNav() {
   const { run } = useStore();
   const links = [
-    { href: "/", label: "Validasi" },
+    { href: "/", label: "Beranda" },
+    { href: "/validasi", label: "Validasi" },
     ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }] : []),
     { href: "/pengaturan", label: "Pengaturan" },
   ];

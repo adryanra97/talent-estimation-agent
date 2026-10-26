@@ -4,7 +4,10 @@
 
 ```mermaid
 flowchart LR
-    V[Validasi Baru] --> P[Proses]
+    B[Beranda] --> V[Validasi Baru]
+    B -.->|demo| P
+    B -.->|hasil terakhir| H1
+    V --> P[Proses]
     P --> H{Hasil}
     H --> H1[Ringkasan FTE]
     H --> H2[Breakdown WBS]
@@ -19,7 +22,7 @@ flowchart LR
     H1 -->|Unduh Excel| X[[Workbook]]
 ```
 
-The sidebar has six top-level entries. All outputs sit under **Hasil**, which
+The sidebar has seven top-level entries, starting with **Beranda** (home). All outputs sit under **Hasil**, which
 is disabled until a run exists. The header always shows the model status and
 the **Unduh Excel** button.
 
@@ -27,6 +30,7 @@ the **Unduh Excel** button.
 
 | Screen | Purpose | Key elements |
 |---|---|---|
+| Beranda | Orient and route | One-line value statement; primary "Mulai validasi" and secondary demo button; resume banner when a run exists; three-step how it works; outputs preview; setup checklist (model, catalog, WBS sample); trust strip |
 | Validasi Baru | Start a run | File pickers with immediate WBS check; project fields; scope switch; AI toggle; collapsed advanced settings with a "n values changed" badge and reset; readiness checklist; run and demo buttons |
 | Proses | Show progress | Six-step stepper with status per agent; activity log; elapsed time; cancel |
 | Ringkasan FTE | Read the answer | Card per role (UCP, bottom-up, requested, existing, additional, conclusion); comparison table; review banner; approve |

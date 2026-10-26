@@ -37,7 +37,7 @@ export default function ProcessPage() {
       <EmptyState
         title="Belum ada proses berjalan"
         description="Mulai validasi dari halaman Validasi Baru atau coba mode demo."
-        href="/"
+        href="/validasi"
         action="Ke Validasi Baru"
       />
     );

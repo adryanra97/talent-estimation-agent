@@ -22,7 +22,7 @@ export default function AiPage() {
             <EmptyState
               title="Analisis bantuan AI dimatikan"
               description="Aktifkan Analisis peluang bantuan AI di halaman Validasi Baru, lalu jalankan ulang."
-              href="/"
+              href="/validasi"
               action="Ke Validasi Baru"
             />
           );

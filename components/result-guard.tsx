@@ -11,7 +11,7 @@ export function WithRun({ children }: { children: (run: RunResult) => React.Reac
       <EmptyState
         title="Belum ada hasil"
         description="Hasil muncul setelah validasi selesai. Mulai dari halaman Validasi Baru atau coba mode demo."
-        href="/"
+        href="/validasi"
         action="Ke Validasi Baru"
       />
     );

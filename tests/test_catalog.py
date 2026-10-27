@@ -56,13 +56,14 @@ def test_capabilities_keep_only_catalog_skills(catalog):
         allocation_fte=0.4,
         allocation_reason="",
         capabilities=[
-            CapabilityJudgement(pillar="x", skill="data validation", level=4),
-            CapabilityJudgement(pillar="ETL", skill="Skill karangan", level=5),
-            CapabilityJudgement(pillar="y", skill="Data Validation", level=2),
+            CapabilityJudgement(pillar="x", skill="data validation"),
+            CapabilityJudgement(pillar="ETL", skill="Skill karangan"),
+            CapabilityJudgement(pillar="y", skill="Data Validation"),
+            CapabilityJudgement(pillar="", skill="Orchestration & Scheduling"),
         ],
     )
     needs = _capabilities(judgement, catalog)
-    assert [(n.pillar, n.skill, n.level) for n in needs] == [
-        ("Data Quality & Testing", "Data Validation", 4)
+    assert [(n.pillar, n.skill) for n in needs] == [
+        ("Data Quality & Testing", "Data Validation"),
+        ("ETL/ELT & Orchestration", "Orchestration & Scheduling"),
     ]
-    assert catalog.capability_levels[5].startswith("Ahli")

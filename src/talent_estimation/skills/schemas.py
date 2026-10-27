@@ -33,12 +33,11 @@ class RequestExtraction(BaseModel):
 
 
 class CapabilityJudgement(BaseModel):
-    """A skill the role needs on the item, with the level of depth required."""
+    """A skill the role needs on the item."""
 
     pillar: str = Field(description="Nama pilar dari pilar skill role di katalog.")
     skill: str = Field(description="Nama skill persis seperti di pilar katalog.")
-    level: int = Field(ge=1, le=5, description="Level kedalaman 1-5 sesuai rubrik level.")
-    reason: str = Field("", description="Alasan level, paling banyak 15 kata.")
+    reason: str = Field("", description="Bagian pekerjaan yang membutuhkannya, maks 12 kata.")
 
 
 class RoleJudgement(BaseModel):
@@ -54,7 +53,8 @@ class RoleJudgement(BaseModel):
     quantity: float = Field(1.0, ge=0)
     needs_review: bool = False
     capabilities: list[CapabilityJudgement] = Field(
-        default_factory=list, description="1-3 skill utama dari katalog role ini."
+        default_factory=list,
+        description="Semua skill dari katalog role ini yang dibutuhkan item, 1-5 skill.",
     )
 
 

@@ -131,16 +131,10 @@ class WbsItem(BaseModel):
 
 
 class CapabilityNeed(BaseModel):
-    """A catalog skill that a breakdown row needs, and how deep.
-
-    ``level`` follows the catalog's capability levels: 1 very simple, work a
-    beginner can do with guidance; 5 expert, critical work that needs high
-    reliability.
-    """
+    """A catalog skill that the work of a breakdown row needs."""
 
     pillar: str
     skill: str
-    level: int = Field(ge=1, le=5)
     reason: str = ""
 
 

@@ -58,7 +58,6 @@ FINDING_LABELS = {
     "data_quality": "Kualitas data",
     "assumption": "Asumsi",
     "reclassified": "Klasifikasi ulang",
-    "capability": "Level capability",
 }
 
 
@@ -1171,79 +1170,39 @@ class WorkbookBuilder:
         ws = self.wb.create_sheet("Capability")
         title(
             ws,
-            "KEBUTUHAN CAPABILITY PER ITEM",
-            "Skill dari katalog yang dibutuhkan tiap baris breakdown, dengan level 1-5. "
-            "Kolom Level bisa diubah; ringkasan di kanan ikut berubah.",
-            15,
+            "CAPABILITY PER ITEM WBS",
+            "Satu baris = satu skill yang dibutuhkan satu role pada satu item WBS. Satu item "
+            "bisa punya beberapa baris. Pakai filter atau pivot untuk mengolahnya.",
+            9,
         )
         widths(
             ws,
-            {
-                "A": 5, "B": 10, "C": 30, "D": 8, "E": 24, "F": 30, "G": 7, "H": 44,
-                "I": 2, "J": 8, "K": 24, "L": 30, "M": 9, "N": 10, "O": 10,
-            },
+            {"A": 5, "B": 10, "C": 32, "D": 16, "E": 8, "F": 20, "G": 26, "H": 32, "I": 40},
+        )
+        header(
+            ws,
+            4,
+            ["No", "WBS ID", "Item WBS", "Kelompok", "Role", "Nama role", "Pilar", "Skill",
+             "Bagian pekerjaan"],
         )  # fmt: skip
-        header(ws, 4, ["No", "WBS ID", "Item WBS", "Role", "Pilar", "Skill", "Level", "Alasan"])
         ws.row_dimensions[4].height = 30
         detail = [(row, cap) for row in self.run.breakdown for cap in row.capabilities]
         first = 5
-        n = max(60, len(detail) + 20)
-        last = first + n - 1
+        n = max(40, len(detail) + 20)
         for i in range(n):
             r = first + i
             put(ws, f"A{r}", i + 1, align=CENTER, border=BORDER)
             entry = detail[i] if i < len(detail) else None
             values = (
-                (entry[0].item_id, entry[0].item_name, entry[0].role, entry[1].pillar,
-                 entry[1].skill, entry[1].level, entry[1].reason)
-                if entry else (None,) * 7
+                (entry[0].item_id, entry[0].item_name, entry[0].group, entry[0].role,
+                 self._name(entry[0].role), entry[1].pillar, entry[1].skill, entry[1].reason)
+                if entry else (None,) * 8
             )  # fmt: skip
-            for col, value in zip("BCDEFGH", values, strict=True):
+            for col, value in zip("BCDEFGHI", values, strict=True):
                 as_input(put(ws, f"{col}{r}", value))
-                if col in "CH":
+                if col in "CHI":
                     ws[f"{col}{r}"].alignment = WRAP
-                elif col == "G":
-                    ws[f"{col}{r}"].alignment = CENTER
-        levels = DataValidation(type="whole", operator="between", formula1="1", formula2="5")
-        levels.error = "Level harus bilangan bulat 1 sampai 5."
-        ws.add_data_validation(levels)
-        levels.add(f"G{first}:G{last}")
-
-        header(
-            ws,
-            4,
-            ["Role", "Pilar", "Skill", "Jumlah item", "Level tertinggi", "Rata-rata level"],
-            start_col=10,
-        )
-        role_order = {code: n for n, code in enumerate(self.roles)}
-        best: dict[tuple[str, str, str], int] = {}
-        for row, cap in detail:
-            key = (row.role, cap.pillar, cap.skill)
-            best[key] = max(best.get(key, 0), cap.level)
-        summary = sorted(best, key=lambda k: (role_order.get(k[0], 99), -best[k], k[1], k[2]))
-        rng = {c: f"${c}${first}:${c}${last}" for c in "DFG"}
-        for i, (role, pillar, skill) in enumerate(summary):
-            r = first + i
-            put(ws, f"J{r}", role, F_BOLD, border=BORDER, align=CENTER)
-            put(ws, f"K{r}", pillar, border=BORDER, align=WRAP)
-            put(ws, f"L{r}", skill, border=BORDER, align=WRAP)
-            match = f"{rng['D']},J{r},{rng['F']},L{r}"
-            as_calc(put(ws, f"M{r}", f"=COUNTIFS({match})"), "0")
-            as_calc(
-                put(ws, f"N{r}", f"=_xlfn.MAXIFS({rng['G']},{match})"),
-                "0",
-                fill=RES_FILL,
-                bold=True,
-            )
-            as_calc(put(ws, f"O{r}", f'=IFERROR(AVERAGEIFS({rng["G"]},{match}),"")'), "0.0")
-        legend_row = first + len(summary) + 2
-        put(ws, f"J{legend_row}", "Level", F_BOLD)
-        put(ws, f"K{legend_row}", "Arti", F_BOLD)
-        for i, (level, text) in enumerate(sorted(self.catalog.capability_levels.items())):
-            at = legend_row + 1 + i
-            put(ws, f"J{at}", level, align=CENTER, border=BORDER)
-            ws.merge_cells(f"K{at}:O{at}")
-            put(ws, f"K{at}", text, border=BORDER)
+        ws.auto_filter.ref = f"A4:I{first + n - 1}"
         ws.freeze_panes = "A5"
         page(ws)
 
@@ -1320,8 +1279,7 @@ class WorkbookBuilder:
             "1. Ringkasan: kebutuhan per role dari dua metode, dibandingkan dengan permintaan.",
             "2. Breakdown_WBS: asal setiap angka. Koreksi baris yang ditandai Perlu review; "
             "semua total ikut berubah.",
-            "3. Capability: skill yang dibutuhkan tiap baris dan levelnya (1 sangat sederhana, "
-            "5 ahli).",
+            "3. Capability: skill yang dibutuhkan tiap item WBS per role, siap difilter.",
             "4. UCP per role: aktor dan rating faktor. Rating selain 3 wajib punya bukti.",
             "5. Fase_Bulanan: sebaran kebutuhan per bulan dan puncaknya.",
             "6. Peluang_AI: skenario bantuan AI per tugas dan capability.",

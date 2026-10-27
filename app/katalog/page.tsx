@@ -179,29 +179,6 @@ export default function CatalogPage() {
             </ul>
           </section>
 
-          {Object.keys(catalog.capability_levels ?? {}).length > 0 && (
-            <section aria-labelledby="level">
-              <h2 id="level" className="text-base font-semibold text-ink">
-                Level capability
-              </h2>
-              <p className="mb-3 text-sm text-muted">Seberapa dalam keahlian yang dibutuhkan sebuah pekerjaan.</p>
-              <ol className="rounded-xl border border-line bg-surface px-5 text-sm">
-                {Object.entries(catalog.capability_levels).map(([level, text]) => {
-                  const [name, ...rest] = text.split(":");
-                  return (
-                    <li key={level} className="flex gap-4 border-b border-line py-2.5 last:border-0">
-                      <span className="tabular w-4 font-semibold text-accent-700">{level}</span>
-                      <span>
-                        <span className="font-medium text-ink">{name}</span>
-                        {rest.length > 0 && <span className="text-muted">, {rest.join(":").trim()}</span>}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          )}
-
           {Object.keys(catalog.competency_scale ?? {}).length > 0 && (
             <section aria-labelledby="skala">
               <h2 id="skala" className="text-base font-semibold text-ink">

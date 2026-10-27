@@ -120,27 +120,12 @@ def _item_line(item: WbsItem, legend: dict[str, str]) -> str:
     )
 
 
-MAX_CAPABILITIES = 3
+MAX_CAPABILITIES = 5
 """Skills kept per breakdown row."""
-
-_LEVEL_FROM_CLASS = {"Simple": 2, "Average": 3, "Complex": 4}
-_DEEP_WORK = (
-    "forecasting",
-    "anomaly",
-    "rag",
-    "orchestration",
-    "streaming",
-    "real-time",
-    "multi-agent",
-    "halusinasi",
-    "tuning",
-    "design system",
-)
-"""Words that suggest deeper expertise, used only by the rule-based judge."""
 
 
 def _capabilities(j: RoleJudgement, catalog: Catalog | None) -> list[CapabilityNeed]:
-    """Keep only skills listed for the role in the catalog, at most three."""
+    """Keep only skills listed for the role in the catalog, at most five."""
     needs: list[CapabilityNeed] = []
     seen: set[str] = set()
     for cap in j.capabilities:
@@ -148,21 +133,12 @@ def _capabilities(j: RoleJudgement, catalog: Catalog | None) -> list[CapabilityN
         if match is None or match[1] in seen:
             continue
         seen.add(match[1])
-        needs.append(
-            CapabilityNeed(
-                pillar=match[0],
-                skill=match[1],
-                level=min(5, max(1, cap.level)),
-                reason=cap.reason,
-            )
-        )
+        needs.append(CapabilityNeed(pillar=match[0], skill=match[1], reason=cap.reason))
     return needs[:MAX_CAPABILITIES]
 
 
-def _heuristic_capabilities(
-    text: str, role: str, catalog: Catalog, classification: str, involvement: str
-) -> list[CapabilityJudgement]:
-    """Pick skills whose words appear in the item, with a level from its class."""
+def _heuristic_capabilities(text: str, role: str, catalog: Catalog) -> list[CapabilityJudgement]:
+    """Pick the skills whose words appear in the item text."""
     profile = catalog.roles[role]
     words = _words(text)
     scored = []
@@ -175,20 +151,9 @@ def _heuristic_capabilities(
     if not scored and profile.pillars:
         pillar, skills = next(iter(profile.pillars.items()))
         scored = [(0, 0, pillar, skills[0])] if skills else []
-    deep = any(re.search(rf"\b{re.escape(w)}\b", text.lower()) for w in _DEEP_WORK)
-    level = (
-        _LEVEL_FROM_CLASS.get(classification, 3)
-        + (1 if deep else 0)
-        - (1 if involvement == "Pendukung" else 0)
-    )
     return [
-        CapabilityJudgement(
-            pillar=pillar,
-            skill=skill,
-            level=min(5, max(1, level)),
-            reason=f"Diturunkan dari kelas {classification} dan kata kunci item.",
-        )
-        for _, _, pillar, skill in scored[:2]
+        CapabilityJudgement(pillar=pillar, skill=skill, reason="Dari kata kunci item.")
+        for _, _, pillar, skill in scored[:3]
     ]
 
 
@@ -319,9 +284,7 @@ def _heuristic_item(
                 allocation_fte=allocation,
                 allocation_reason=f"Nilai tengah panduan alokasi untuk {involvement} {classification}.",
                 needs_review=review,
-                capabilities=_heuristic_capabilities(
-                    text, code, catalog, classification, involvement
-                ),
+                capabilities=_heuristic_capabilities(text, code, catalog),
             )
         )
     return ItemJudgement(item_id=item.item_id, roles=judgements)
@@ -377,7 +340,6 @@ async def classify_items(
                 if feedback
                 else "",
                 items="\n".join(_item_line(i, legend) for i in batch),
-                levels="\n".join(f"{k}: {v}" for k, v in sorted(catalog.capability_levels.items())),
             )
             result = await llm.structured(
                 ClassificationBatch, prompts.BASE_SYSTEM, prompt, skill="classify_item"
@@ -518,26 +480,6 @@ def reconcile(
         for c in run.comparisons
         if c.divergence is not None and abs(c.divergence) > run.parameters.tolerance
     ]
-    for row in run.breakdown:
-        top = max((c.level for c in row.capabilities), default=None)
-        if top is None:
-            continue
-        if (row.classification == "Simple" and top >= 5) or (
-            row.classification == "Complex" and top <= 1
-        ):
-            findings.append(
-                Finding(
-                    kind="capability",
-                    item_id=row.item_id,
-                    role=row.role,
-                    message=(
-                        f"Kelas {row.classification} tetapi level capability tertinggi {top}. "
-                        "Periksa apakah kelas atau levelnya yang perlu disesuaikan."
-                    ),
-                    severity="Rendah",
-                    source="Reconciler",
-                )
-            )
     outside = outside_period(run)
     if outside:
         items = sorted({r.item_id for r, _ in outside})

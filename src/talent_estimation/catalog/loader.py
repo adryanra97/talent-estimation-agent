@@ -70,16 +70,6 @@ class Rule(BaseModel):
     text: str
 
 
-DEFAULT_CAPABILITY_LEVELS: dict[int, str] = {
-    1: "Sangat sederhana: bisa dikerjakan pemula dengan panduan.",
-    2: "Dasar: pola yang sudah umum, sedikit keputusan teknis.",
-    3: "Menengah: dikerjakan mandiri untuk kasus umum.",
-    4: "Mahir: kasus kompleks, banyak ketergantungan, perlu pengalaman.",
-    5: "Ahli: kritis atau baru, butuh kehandalan tinggi dan menjadi rujukan.",
-}
-"""Depth of a skill a piece of work needs, on the same 1-5 scale as talent."""
-
-
 class Catalog(BaseModel):
     """The full capability catalog."""
 
@@ -87,9 +77,6 @@ class Catalog(BaseModel):
     teams: dict[str, dict[str, Any]] = Field(default_factory=dict)
     roles: dict[str, RoleProfile]
     competency_scale: dict[int, str] = Field(default_factory=dict)
-    capability_levels: dict[int, str] = Field(
-        default_factory=lambda: dict(DEFAULT_CAPABILITY_LEVELS)
-    )
     rules: list[Rule] = Field(default_factory=list)
     allocation_guide: list[dict[str, str]] = Field(default_factory=list)
     classification_rubric: dict[str, str] = Field(default_factory=dict)

@@ -36,7 +36,6 @@ export interface RoleInput {
 export interface CapabilityNeed {
   pillar: string;
   skill: string;
-  level: number;
   reason: string;
 }
 
@@ -192,7 +191,6 @@ export interface Catalog {
   teams: Record<string, { label: string; roles: string[] }>;
   roles: Record<string, RoleProfile>;
   competency_scale: Record<string, string>;
-  capability_levels: Record<string, string>;
   rules: { id: string; title: string; text: string }[];
   allocation_guide: Record<string, string>[];
   classification_rubric: Record<string, string>;

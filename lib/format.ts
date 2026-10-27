@@ -67,5 +67,4 @@ export const FINDING_LABEL: Record<string, string> = {
   data_quality: "Kualitas data",
   assumption: "Asumsi",
   reclassified: "Klasifikasi ulang",
-  capability: "Level capability",
 };

@@ -2,7 +2,7 @@
 export const RESULT_LINKS = [
   { href: "/hasil/ringkasan", label: "Ringkasan FTE" },
   { href: "/hasil/breakdown", label: "Breakdown WBS" },
-  { href: "/hasil/capability", label: "Kebutuhan Capability" },
+  { href: "/hasil/capability", label: "Capability per WBS" },
   { href: "/hasil/bulanan", label: "Per Bulan" },
   { href: "/hasil/peluang-ai", label: "Peluang Bantuan AI" },
   { href: "/hasil/temuan", label: "Temuan & Asumsi" },

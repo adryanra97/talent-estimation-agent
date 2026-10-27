@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Loader2, RefreshCw, Search } from "lucide-react";
+import { ChevronDown, Loader2, RefreshCw, Search, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useMemo, useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
@@ -200,28 +200,21 @@ function Table({ run }: { run: RunResult }) {
                           {r.capabilities.length > 0 && (
                             <div className="mt-3">
                               <p className="text-xs font-medium text-muted">Capability yang dibutuhkan</p>
-                              <ul className="mt-1 space-y-1.5">
+                              <ul className="mt-1.5 flex flex-wrap gap-1.5">
                                 {r.capabilities.map((c, ci) => (
-                                  <li key={c.skill} className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                    <select
-                                      aria-label={`Level ${c.skill}`}
-                                      className="rounded-md border border-line bg-white px-2 py-0.5 text-sm"
-                                      value={c.level}
-                                      onChange={(e) =>
-                                        edit(r, {
-                                          capabilities: r.capabilities.map((x, xi) => (xi === ci ? { ...x, level: Number(e.target.value) } : x)),
-                                        })
-                                      }
+                                  <li
+                                    key={c.skill}
+                                    title={[c.pillar, c.reason].filter(Boolean).join(". ")}
+                                    className="inline-flex items-center gap-1 rounded-md bg-surface py-0.5 pr-1 pl-2 text-xs text-ink ring-1 ring-line"
+                                  >
+                                    {c.skill}
+                                    <button
+                                      aria-label={`Hapus ${c.skill}`}
+                                      className="rounded p-0.5 text-muted hover:bg-canvas hover:text-ink"
+                                      onClick={() => edit(r, { capabilities: r.capabilities.filter((_, xi) => xi !== ci) })}
                                     >
-                                      {[1, 2, 3, 4, 5].map((l) => (
-                                        <option key={l} value={l}>
-                                          Level {l}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    <span className="text-ink">{c.skill}</span>
-                                    <span className="text-xs text-muted">{c.pillar}</span>
-                                    {c.reason && <span className="w-full text-xs text-muted sm:w-auto">{c.reason}</span>}
+                                      <X className="h-3 w-3" aria-hidden />
+                                    </button>
                                   </li>
                                 ))}
                               </ul>

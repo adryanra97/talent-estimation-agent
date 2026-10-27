@@ -32,6 +32,15 @@ class RequestExtraction(BaseModel):
     notes: str = Field("", description="Konteks penting lain dari dokumen, maksimal 5 kalimat.")
 
 
+class CapabilityJudgement(BaseModel):
+    """A skill the role needs on the item, with the level of depth required."""
+
+    pillar: str = Field(description="Nama pilar dari pilar skill role di katalog.")
+    skill: str = Field(description="Nama skill persis seperti di pilar katalog.")
+    level: int = Field(ge=1, le=5, description="Level kedalaman 1-5 sesuai rubrik level.")
+    reason: str = Field("", description="Alasan level, paling banyak 15 kata.")
+
+
 class RoleJudgement(BaseModel):
     """Judgement of one role on one WBS item."""
 
@@ -44,6 +53,9 @@ class RoleJudgement(BaseModel):
     allocation_reason: str = Field(description="Alasan alokasi, 1 kalimat.")
     quantity: float = Field(1.0, ge=0)
     needs_review: bool = False
+    capabilities: list[CapabilityJudgement] = Field(
+        default_factory=list, description="1-3 skill utama dari katalog role ini."
+    )
 
 
 class ItemJudgement(BaseModel):

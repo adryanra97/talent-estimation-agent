@@ -19,6 +19,7 @@ from talent_estimation.domain.models import (
     Actor,
     AiTask,
     BreakdownRow,
+    CapabilityNeed,
     Classification,
     Finding,
     RoleFactors,
@@ -29,6 +30,7 @@ from talent_estimation.llm.client import LLMClient
 from talent_estimation.skills import prompts
 from talent_estimation.skills.schemas import (
     AiAssistBatch,
+    CapabilityJudgement,
     ClassificationBatch,
     FactorAssessment,
     ItemJudgement,
@@ -118,7 +120,79 @@ def _item_line(item: WbsItem, legend: dict[str, str]) -> str:
     )
 
 
-def _row_from(item: WbsItem, j: RoleJudgement) -> BreakdownRow:
+MAX_CAPABILITIES = 3
+"""Skills kept per breakdown row."""
+
+_LEVEL_FROM_CLASS = {"Simple": 2, "Average": 3, "Complex": 4}
+_DEEP_WORK = (
+    "forecasting",
+    "anomaly",
+    "rag",
+    "orchestration",
+    "streaming",
+    "real-time",
+    "multi-agent",
+    "halusinasi",
+    "tuning",
+    "design system",
+)
+"""Words that suggest deeper expertise, used only by the rule-based judge."""
+
+
+def _capabilities(j: RoleJudgement, catalog: Catalog | None) -> list[CapabilityNeed]:
+    """Keep only skills listed for the role in the catalog, at most three."""
+    needs: list[CapabilityNeed] = []
+    seen: set[str] = set()
+    for cap in j.capabilities:
+        match = catalog.find_skill(j.role, cap.skill, cap.pillar) if catalog else None
+        if match is None or match[1] in seen:
+            continue
+        seen.add(match[1])
+        needs.append(
+            CapabilityNeed(
+                pillar=match[0],
+                skill=match[1],
+                level=min(5, max(1, cap.level)),
+                reason=cap.reason,
+            )
+        )
+    return needs[:MAX_CAPABILITIES]
+
+
+def _heuristic_capabilities(
+    text: str, role: str, catalog: Catalog, classification: str, involvement: str
+) -> list[CapabilityJudgement]:
+    """Pick skills whose words appear in the item, with a level from its class."""
+    profile = catalog.roles[role]
+    words = _words(text)
+    scored = []
+    for order, (pillar, skills) in enumerate(profile.pillars.items()):
+        for skill in skills:
+            overlap = len(words & _words(f"{pillar} {skill}"))
+            if overlap:
+                scored.append((overlap, -order, pillar, skill))
+    scored.sort(reverse=True)
+    if not scored and profile.pillars:
+        pillar, skills = next(iter(profile.pillars.items()))
+        scored = [(0, 0, pillar, skills[0])] if skills else []
+    deep = any(re.search(rf"\b{re.escape(w)}\b", text.lower()) for w in _DEEP_WORK)
+    level = (
+        _LEVEL_FROM_CLASS.get(classification, 3)
+        + (1 if deep else 0)
+        - (1 if involvement == "Pendukung" else 0)
+    )
+    return [
+        CapabilityJudgement(
+            pillar=pillar,
+            skill=skill,
+            level=min(5, max(1, level)),
+            reason=f"Diturunkan dari kelas {classification} dan kata kunci item.",
+        )
+        for _, _, pillar, skill in scored[:2]
+    ]
+
+
+def _row_from(item: WbsItem, j: RoleJudgement, catalog: Catalog | None = None) -> BreakdownRow:
     needs_review = j.needs_review or item.workdays is None or item.start is None
     return BreakdownRow(
         item_id=item.item_id,
@@ -139,6 +213,7 @@ def _row_from(item: WbsItem, j: RoleJudgement) -> BreakdownRow:
         allocation_reason=j.allocation_reason,
         needs_review=needs_review,
         source=item.source,
+        capabilities=_capabilities(j, catalog),
     )
 
 
@@ -244,6 +319,9 @@ def _heuristic_item(
                 allocation_fte=allocation,
                 allocation_reason=f"Nilai tengah panduan alokasi untuk {involvement} {classification}.",
                 needs_review=review,
+                capabilities=_heuristic_capabilities(
+                    text, code, catalog, classification, involvement
+                ),
             )
         )
     return ItemJudgement(item_id=item.item_id, roles=judgements)
@@ -299,6 +377,7 @@ async def classify_items(
                 if feedback
                 else "",
                 items="\n".join(_item_line(i, legend) for i in batch),
+                levels="\n".join(f"{k}: {v}" for k, v in sorted(catalog.capability_levels.items())),
             )
             result = await llm.structured(
                 ClassificationBatch, prompts.BASE_SYSTEM, prompt, skill="classify_item"
@@ -318,7 +397,7 @@ async def classify_items(
             if role_judgement.role not in roles or key in seen:
                 continue
             seen.add(key)
-            rows.append(_row_from(item, role_judgement))
+            rows.append(_row_from(item, role_judgement, catalog))
     order = {i.item_id: n for n, i in enumerate(items)}
     rows.sort(key=lambda r: (order.get(r.item_id, 0), roles.index(r.role)))
     return rows
@@ -439,6 +518,26 @@ def reconcile(
         for c in run.comparisons
         if c.divergence is not None and abs(c.divergence) > run.parameters.tolerance
     ]
+    for row in run.breakdown:
+        top = max((c.level for c in row.capabilities), default=None)
+        if top is None:
+            continue
+        if (row.classification == "Simple" and top >= 5) or (
+            row.classification == "Complex" and top <= 1
+        ):
+            findings.append(
+                Finding(
+                    kind="capability",
+                    item_id=row.item_id,
+                    role=row.role,
+                    message=(
+                        f"Kelas {row.classification} tetapi level capability tertinggi {top}. "
+                        "Periksa apakah kelas atau levelnya yang perlu disesuaikan."
+                    ),
+                    severity="Rendah",
+                    source="Reconciler",
+                )
+            )
     outside = outside_period(run)
     if outside:
         items = sorted({r.item_id for r, _ in outside})

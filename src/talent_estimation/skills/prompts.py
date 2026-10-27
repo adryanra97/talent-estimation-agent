@@ -61,7 +61,14 @@ Untuk setiap item WBS di bawah, tentukan role dalam cakupan yang dibutuhkan. Unt
   Pertimbangkan jumlah hari kerja item. Jangan menyalin jumlah orang yang diminta (aturan R5).
 - needs_review: true bila ragu, bila role tidak disebut di kolom role WBS tetapi isi
   pekerjaannya jelas membutuhkan (aturan R4), atau bila item tampak tumpang tindih (R6).
+- capabilities: 1-3 skill utama yang dibutuhkan role ini pada item (aturan R13). Ambil pillar
+  dan skill PERSIS dari pilar skill role tersebut di katalog. Isi level 1-5 menurut rubrik
+  level di bawah dan alasan singkat. Level menggambarkan kedalaman keahlian, bukan besar
+  pekerjaan.
 Item yang tidak membutuhkan role dalam cakupan dikembalikan dengan daftar roles kosong.
+
+RUBRIK LEVEL CAPABILITY:
+{levels}
 Kolom "role di WBS" hanya petunjuk.
 {feedback}
 ITEM WBS:

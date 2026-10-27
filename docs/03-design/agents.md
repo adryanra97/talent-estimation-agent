@@ -45,7 +45,7 @@ the connection never looks idle.
 | `parse_wbs` | Intake | code | `.xlsx` bytes | `WbsReadResult` (items, legend) |
 | `parse_request` | Intake | LLM | request text | `RequestExtraction` |
 | `map_capability` | Intake | code | role hint, catalog | role codes |
-| `classify_item` | Estimator | LLM | items, catalog, context, feedback | `ClassificationBatch` to `BreakdownRow` |
+| `classify_item` | Estimator | LLM | items, catalog, context, feedback | `ClassificationBatch` to `BreakdownRow`, including 1-3 catalog skills with a level of 1-5 per row; skills not in the role's catalog are dropped by code |
 | `assess_factors` | Estimator | LLM | role rows, context | `FactorAssessment` to `RoleFactors` |
 | `ucp_calc`, `bu_calc` | Estimator | code | breakdown, factors, parameters | `RoleEstimate`, `MonthlyFte` |
 | `reconcile` | Reviewer | code | run | candidates, divergence findings |

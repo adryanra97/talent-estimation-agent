@@ -33,6 +33,13 @@ export interface RoleInput {
   reference_fte: number | null;
 }
 
+export interface CapabilityNeed {
+  pillar: string;
+  skill: string;
+  level: number;
+  reason: string;
+}
+
 export interface BreakdownRow {
   item_id: string;
   item_name: string;
@@ -52,6 +59,7 @@ export interface BreakdownRow {
   allocation_reason: string;
   needs_review: boolean;
   source: "wbs" | "additional";
+  capabilities: CapabilityNeed[];
 }
 
 export interface RoleEstimate {
@@ -184,6 +192,7 @@ export interface Catalog {
   teams: Record<string, { label: string; roles: string[] }>;
   roles: Record<string, RoleProfile>;
   competency_scale: Record<string, string>;
+  capability_levels: Record<string, string>;
   rules: { id: string; title: string; text: string }[];
   allocation_guide: Record<string, string>[];
   classification_rubric: Record<string, string>;

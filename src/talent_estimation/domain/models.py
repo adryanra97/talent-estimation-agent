@@ -130,6 +130,20 @@ class WbsItem(BaseModel):
     source: Literal["wbs", "additional"] = "wbs"
 
 
+class CapabilityNeed(BaseModel):
+    """A catalog skill that a breakdown row needs, and how deep.
+
+    ``level`` follows the catalog's capability levels: 1 very simple, work a
+    beginner can do with guidance; 5 expert, critical work that needs high
+    reliability.
+    """
+
+    pillar: str
+    skill: str
+    level: int = Field(ge=1, le=5)
+    reason: str = ""
+
+
 class BreakdownRow(BaseModel):
     """One WBS item for one role, the unit every number is traced back to."""
 
@@ -151,6 +165,7 @@ class BreakdownRow(BaseModel):
     allocation_reason: str = ""
     needs_review: bool = False
     source: Literal["wbs", "additional"] = "wbs"
+    capabilities: list[CapabilityNeed] = Field(default_factory=list)
 
     @property
     def key(self) -> str:

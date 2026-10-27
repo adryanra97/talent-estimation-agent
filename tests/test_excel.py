@@ -19,7 +19,15 @@ async def demo_run(inputs):
 async def test_workbook_structure(demo_inputs, catalog):
     run = await demo_run(demo_inputs)
     wb = load_workbook(io.BytesIO(build_workbook(run, catalog)))
-    assert wb.sheetnames[:4] == ["Petunjuk", "Parameter", "Ringkasan", "Breakdown_WBS"]
+    assert wb.sheetnames[:5] == [
+        "Petunjuk",
+        "Parameter",
+        "Ringkasan",
+        "Breakdown_WBS",
+        "Capability",
+    ]
+    caps = [(r, c) for r in run.breakdown for c in r.capabilities]
+    assert caps and wb["Capability"]["F5"].value == caps[0][1].skill
     assert {"UCP_DE", "UCP_AI", "Peluang_AI", "Asumsi_Log"} <= set(wb.sheetnames)
     assert wb["Breakdown_WBS"]["B7"].value == run.breakdown[0].item_id
 
@@ -43,3 +51,9 @@ async def test_excel_formulas_match_engine(demo_inputs, catalog, tmp_path):
         assert sheet[f"J{r}"].value == pytest.approx(e.bu_fte, abs=1e-6)
         assert sheet[f"H{r}"].value == pytest.approx(e.ucp_peak_fte, abs=1e-6)
         assert sheet[f"K{r}"].value == pytest.approx(e.bu_peak_fte, abs=1e-6)
+    cap = load_workbook(out / "run.xlsx", data_only=True)["Capability"]
+    role, skill = cap["J5"].value, cap["L5"].value
+    levels = [
+        c.level for r in run.breakdown for c in r.capabilities if (r.role, c.skill) == (role, skill)
+    ]
+    assert cap["M5"].value == len(levels) and cap["N5"].value == max(levels)

@@ -11,6 +11,7 @@ flowchart LR
     P --> H{Hasil}
     H --> H1[Ringkasan FTE]
     H --> H2[Breakdown WBS]
+    H --> H7[Kebutuhan Capability]
     H --> H3[Per Bulan]
     H --> H4[Peluang Bantuan AI]
     H --> H5[Temuan & Asumsi]
@@ -45,7 +46,8 @@ the **Unduh Excel** button.
 | Validasi Baru | Start a run | Multi-file pickers (up to 5 per field, 4 MB in total) with an immediate WBS check per file and a merged total; clashing item IDs across WBS files get a file prefix; project fields; scope switch; AI toggle; collapsed advanced settings with a "n values changed" badge and reset; readiness checklist; run and demo buttons |
 | Proses | Show progress | Six-step stepper with status per agent; activity log; elapsed time; cancel |
 | Ringkasan FTE | Read the answer | Card per role (UCP, bottom-up, requested, existing, additional, conclusion); comparison table; review banner; approve |
-| Breakdown WBS | Trace and correct | Filter by role and review status; search; inline edits; expandable reasons; select rows and ask the agent |
+| Breakdown WBS | Trace and correct | Filter by role and review status; search; inline edits; expandable reasons and capability levels; select rows and ask the agent |
+| Kebutuhan Capability | What kind of talent | Per role: skills from the catalog, highest and average level (1-5), and the items that need each skill; level legend |
 | Per Bulan | See the load over time | Stacked bars per role; table with peak and working days |
 | Peluang Bantuan AI | AI scenario | Baseline to assisted FTE per role; most assisted capabilities; task table with editable saving |
 | Temuan & Asumsi | Understand risks | Findings by severity; assumptions; agent trace |

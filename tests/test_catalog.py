@@ -41,3 +41,28 @@ def test_catalog_excel_round_trip(catalog):
         assert copy.substitutes == role.substitutes
         assert copy.aliases == role.aliases
         assert copy.pillars == role.pillars
+
+
+def test_capabilities_keep_only_catalog_skills(catalog):
+    from talent_estimation.skills.judgement import _capabilities
+    from talent_estimation.skills.schemas import CapabilityJudgement, RoleJudgement
+
+    judgement = RoleJudgement(
+        role="DE",
+        involvement="Utama",
+        steps=3,
+        classification="Simple",
+        classification_reason="",
+        allocation_fte=0.4,
+        allocation_reason="",
+        capabilities=[
+            CapabilityJudgement(pillar="x", skill="data validation", level=4),
+            CapabilityJudgement(pillar="ETL", skill="Skill karangan", level=5),
+            CapabilityJudgement(pillar="y", skill="Data Validation", level=2),
+        ],
+    )
+    needs = _capabilities(judgement, catalog)
+    assert [(n.pillar, n.skill, n.level) for n in needs] == [
+        ("Data Quality & Testing", "Data Validation", 4)
+    ]
+    assert catalog.capability_levels[5].startswith("Ahli")

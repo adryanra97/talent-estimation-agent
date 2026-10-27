@@ -70,6 +70,16 @@ class Rule(BaseModel):
     text: str
 
 
+DEFAULT_CAPABILITY_LEVELS: dict[int, str] = {
+    1: "Sangat sederhana: bisa dikerjakan pemula dengan panduan.",
+    2: "Dasar: pola yang sudah umum, sedikit keputusan teknis.",
+    3: "Menengah: dikerjakan mandiri untuk kasus umum.",
+    4: "Mahir: kasus kompleks, banyak ketergantungan, perlu pengalaman.",
+    5: "Ahli: kritis atau baru, butuh kehandalan tinggi dan menjadi rujukan.",
+}
+"""Depth of a skill a piece of work needs, on the same 1-5 scale as talent."""
+
+
 class Catalog(BaseModel):
     """The full capability catalog."""
 
@@ -77,6 +87,9 @@ class Catalog(BaseModel):
     teams: dict[str, dict[str, Any]] = Field(default_factory=dict)
     roles: dict[str, RoleProfile]
     competency_scale: dict[int, str] = Field(default_factory=dict)
+    capability_levels: dict[int, str] = Field(
+        default_factory=lambda: dict(DEFAULT_CAPABILITY_LEVELS)
+    )
     rules: list[Rule] = Field(default_factory=list)
     allocation_guide: list[dict[str, str]] = Field(default_factory=list)
     classification_rubric: dict[str, str] = Field(default_factory=dict)
@@ -99,6 +112,38 @@ class Catalog(BaseModel):
         if scope == "all":
             return list(self.roles)
         return [code for code, role in self.roles.items() if role.team == scope]
+
+    def find_skill(self, role: str, skill: str, pillar: str = "") -> tuple[str, str] | None:
+        """Match a skill name to the role's catalog, ignoring case and spacing.
+
+        Parameters
+        ----------
+        role : str
+            Role code.
+        skill : str
+            Skill name proposed by a model.
+        pillar : str, optional
+            Pillar proposed with it, used to break ties.
+
+        Returns
+        -------
+        tuple of (str, str) or None
+            Catalog pillar and skill, or ``None`` when the skill is not listed.
+        """
+        profile = self.roles.get(role)
+        if profile is None:
+            return None
+
+        def norm(text: str) -> str:
+            return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+        wanted, wanted_pillar = norm(skill), norm(pillar)
+        matches = [
+            (p, s) for p, skills in profile.pillars.items() for s in skills if norm(s) == wanted
+        ]
+        if not matches:
+            return None
+        return next((m for m in matches if norm(m[0]) == wanted_pillar), matches[0])
 
     def ai_category(self, key: str) -> AiCategory | None:
         """Return the AI category with the given key, if it exists."""

@@ -369,6 +369,15 @@ competency_scale:
   4: "Mahir: bisa menangani kasus kompleks dan me-review pekerjaan orang lain."
   5: "Ahli: menjadi rujukan tim, mampu menetapkan standar dan membimbing orang lain."
 
+# Depth of skill a piece of work needs. Same scale as competency, so needs and
+# talent can be compared.
+capability_levels:
+  1: "Sangat sederhana: bisa dikerjakan pemula dengan panduan."
+  2: "Dasar: pola yang sudah umum, sedikit keputusan teknis."
+  3: "Menengah: dikerjakan mandiri untuk kasus umum."
+  4: "Mahir: kasus kompleks, banyak ketergantungan, perlu pengalaman."
+  5: "Ahli: kritis atau baru, butuh kehandalan tinggi dan menjadi rujukan."
+
 # Decision rules followed by the Estimator and Reviewer agents.
 rules:
   - id: R1
@@ -440,6 +449,13 @@ rules:
       Scientist untuk pekerjaan machine learning saat AI Engineer terbatas),
       sebutkan alternatif itu di alasan, tetapi hitung pada role yang paling
       sesuai.
+  - id: R13
+    title: Capability dan level per baris
+    text: >-
+      Untuk tiap baris, sebut 1-3 skill utama dari pilar skill role tersebut
+      dan level kedalaman 1-5 yang dibutuhkan. Level menggambarkan keahlian,
+      bukan besar pekerjaan: pekerjaan kecil bisa butuh level tinggi. Item
+      Simple dengan level 5, atau Complex dengan level 1, perlu alasan jelas.
 
 allocation_guide:
   - {involvement: Utama, classification: Simple, range: "0,25 - 0,50", meaning: "Pekerjaan inti ringan, sekitar 1-2 hari per minggu"}

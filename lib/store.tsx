@@ -43,6 +43,9 @@ export interface TeamInput {
   reference: string;
 }
 
+/** Values filled from the documents, per role and field, with the quote they came from. */
+export type TeamAuto = Record<string, Partial<Record<"requested" | "existing", { value: string; evidence: string }>>>;
+
 export type RunStatus = "idle" | "running" | "done" | "error";
 
 export interface Files {
@@ -71,6 +74,8 @@ interface Store {
   setParameters: (p: Parameters) => void;
   team: Record<string, TeamInput>;
   setTeam: (t: Record<string, TeamInput>) => void;
+  teamAuto: TeamAuto;
+  setTeamAuto: (t: TeamAuto) => void;
   aiEnabled: boolean;
   setAiEnabled: (v: boolean) => void;
   aiTools: string;
@@ -153,6 +158,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   });
   const [parameters, setParameters] = useState<Parameters>(DEFAULT_PARAMETERS);
   const [team, setTeam] = useState<Record<string, TeamInput>>({});
+  const [teamAuto, setTeamAuto] = useState<TeamAuto>({});
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiTools, setAiTools] = useState("");
   const [files, setFiles] = useState<Files>({ wbs: [], request: [], supporting: [] });
@@ -323,14 +329,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Store>(
     () => ({
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
-      resetCatalog, project, setProject, parameters, setParameters, team, setTeam, aiEnabled,
+      resetCatalog, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
       error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
       provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, project,
-      parameters, team, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
+      parameters, team, teamAuto, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
       modelCalls, demo,
       run, start, cancel, busy, update, reclassify, exportExcel, notice, teamView,
     ],

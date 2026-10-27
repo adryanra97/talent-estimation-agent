@@ -141,6 +141,7 @@ def build_graph(llm: LLMClient | None):
             project.context = "\n".join(filter(None, [project.context, extraction.notes]))
         given = {r.role: r for r in inputs.role_inputs}
         extracted = {r.role: r.fte for r in extraction.requested}
+        extracted_existing = {r.role: r.fte for r in extraction.existing}
         role_inputs = [
             RoleInput(
                 role=code,
@@ -149,7 +150,9 @@ def build_graph(llm: LLMClient | None):
                     if code in given and given[code].requested_fte is not None
                     else extracted.get(code)
                 ),
-                existing_fte=given[code].existing_fte if code in given else 0.0,
+                existing_fte=(
+                    given[code].existing_fte if code in given else extracted_existing.get(code, 0.0)
+                ),
                 reference_fte=given[code].reference_fte if code in given else None,
             )
             for code in roles

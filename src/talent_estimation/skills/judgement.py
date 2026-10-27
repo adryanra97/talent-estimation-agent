@@ -183,23 +183,51 @@ def _row_from(item: WbsItem, j: RoleJudgement, catalog: Catalog | None = None) -
 
 
 # --------------------------------------------------------------- parse request
+_EXISTING_MARKERS = (
+    "existing",
+    "sudah ada",
+    "saat ini",
+    "tersedia",
+    "sedang bertugas",
+    "eksisting",
+)
+
+
+def _find_role_amount(text: str, aliases: list[str]) -> re.Match[str] | None:
+    for alias in aliases:
+        if len(alias) < 4:
+            continue
+        match = re.search(
+            rf"(\d+(?:[.,]\d+)?)\s*(?:orang|org|fte)?\s*{re.escape(alias)}", text
+        ) or re.search(rf"{re.escape(alias)}\s*[:=(]?\s*(\d+(?:[.,]\d+)?)", text)
+        if match:
+            return match
+    return None
+
+
 def _heuristic_request(text: str, catalog: Catalog, roles: list[str]) -> RequestExtraction:
-    requested: list[RequestedRole] = []
-    lowered = text.lower()
-    for code in roles:
-        role = catalog.roles[code]
-        for alias in sorted({role.name.lower(), *role.aliases}, key=len, reverse=True):
-            if len(alias) < 4:
+    """Read amounts per role line by line.
+
+    A line that mentions existing talent ("sudah ada", "saat ini", ...) counts
+    as existing; any other line counts as requested.
+    """
+    requested: dict[str, RequestedRole] = {}
+    existing: dict[str, RequestedRole] = {}
+    for line in text.lower().splitlines():
+        bucket = existing if any(m in line for m in _EXISTING_MARKERS) else requested
+        for code in roles:
+            if code in bucket:
                 continue
-            match = re.search(
-                rf"(\d+(?:[.,]\d+)?)\s*(?:orang|org|fte)?\s*{re.escape(alias)}", lowered
-            ) or re.search(rf"{re.escape(alias)}\s*[:=(]?\s*(\d+(?:[.,]\d+)?)", lowered)
+            role = catalog.roles[code]
+            aliases = sorted({role.name.lower(), *role.aliases}, key=len, reverse=True)
+            match = _find_role_amount(line, aliases)
             if match:
                 value = float(match.group(1).replace(",", "."))
-                requested.append(RequestedRole(role=code, fte=value, evidence=match.group(0)))
-                break
+                bucket[code] = RequestedRole(role=code, fte=value, evidence=match.group(0).strip())
     return RequestExtraction(
-        requested=requested, notes="Dibaca dengan aturan sederhana (tanpa model)."
+        requested=list(requested.values()),
+        existing=list(existing.values()),
+        notes="Dibaca dengan aturan sederhana (tanpa model).",
     )
 
 
@@ -236,6 +264,7 @@ async def parse_request(
         skill="parse_request",
     )
     result.requested = [r for r in result.requested if r.role in roles]
+    result.existing = [r for r in result.existing if r.role in roles]
     return result
 
 

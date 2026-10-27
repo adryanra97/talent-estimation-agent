@@ -63,6 +63,8 @@ sebagai berikut:
 - 1 Data Scientist
 - 0,5 FTE AI Engineer
 
+Saat ini tim sudah memiliki 0,5 FTE Data Analyst yang bertugas di proyek ini.
+
 Untuk tim desain:
 - 0,5 FTE UX Researcher
 - 1 UX Designer

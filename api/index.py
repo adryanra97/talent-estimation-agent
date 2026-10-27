@@ -47,6 +47,7 @@ from talent_estimation.llm import (
     test_connection,
 )
 from talent_estimation.skills import AGENT_CARDS
+from talent_estimation.skills.judgement import parse_request
 from talent_estimation.skills.schemas import ReclassifyRequest
 
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
@@ -305,6 +306,7 @@ async def create_run(
     if options.demo and not wbs_files:
         wbs_files = [("WBS_contoh.xlsx", build_demo_wbs())]
         request_text, supporting_text = REQUEST_TEXT, NOTES_TEXT
+        options.role_inputs = []
         options.project = options.project.model_copy(
             update={
                 "name": PROJECT_NAME,
@@ -388,6 +390,53 @@ async def create_run(
             task.cancel()
 
     return StreamingResponse(stream(), media_type="application/x-ndjson")
+
+
+class ExtractSettings(BaseModel):
+    """Settings for reading the request documents before a run."""
+
+    provider: ProviderConfig = Field(default_factory=ProviderConfig)
+    catalog: Catalog | None = None
+
+
+@app.post("/api/py/documents/extract")
+async def extract_documents(
+    settings: Annotated[str, Form()],
+    request_doc: Annotated[list[UploadFile] | None, File()] = None,
+    supporting_doc: Annotated[list[UploadFile] | None, File()] = None,
+    x_llm_api_key: Annotated[str | None, Header()] = None,
+) -> dict[str, Any]:
+    """Read requested and existing FTE per role from the uploaded documents.
+
+    The browser uses the answer to prefill the form; the user can change every
+    value before the run. With an API key the model reads the documents,
+    otherwise simple rules do. All catalog roles are read, so switching the
+    scope later keeps the values.
+    """
+    try:
+        options = ExtractSettings.model_validate(json.loads(settings))
+    except (json.JSONDecodeError, ValidationError) as exc:
+        raise HTTPException(status_code=422, detail=f"Pengaturan tidak valid: {exc}") from exc
+    request_files = await _read_all(request_doc, "Dokumen permintaan")
+    supporting_files = await _read_all(supporting_doc, "Dokumen pendukung")
+    _check_total(request_files, supporting_files)
+    text = "\n\n".join(
+        filter(None, [_documents_text(request_files), _documents_text(supporting_files)])
+    )
+    catalog = options.catalog or load_default_catalog()
+    llm = _client(options.provider, x_llm_api_key, demo=False) if x_llm_api_key else None
+    try:
+        found = await parse_request(text[:30000], catalog, list(catalog.roles), llm)
+    except LLMError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {
+        "method": "model" if llm else "aturan",
+        "project_name": found.project_name,
+        "period_start": found.period_start.isoformat() if found.period_start else None,
+        "period_end": found.period_end.isoformat() if found.period_end else None,
+        "requested": {r.role: {"fte": r.fte, "evidence": r.evidence} for r in found.requested},
+        "existing": {r.role: {"fte": r.fte, "evidence": r.evidence} for r in found.existing},
+    }
 
 
 @app.post("/api/py/recalculate")

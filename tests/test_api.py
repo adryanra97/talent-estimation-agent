@@ -93,3 +93,19 @@ def test_stream_sends_heartbeats_while_waiting(monkeypatch):
     res = client.post("/api/py/runs", data={"settings": json.dumps({"demo": True})})
     kinds = [json.loads(line)["type"] for line in res.text.splitlines() if line]
     assert "heartbeat" in kinds and kinds[-1] == "result"
+
+
+def test_extract_requested_and_existing_without_key():
+    doc = (
+        b"Mohon dukungan 1 Data Engineer dan 0,5 FTE Data Analyst.\n"
+        b"Saat ini sudah ada 1 Data Scientist di proyek."
+    )
+    res = client.post(
+        "/api/py/documents/extract",
+        data={"settings": "{}"},
+        files=[("request_doc", ("permintaan.txt", doc))],
+    )
+    body = res.json()
+    assert body["method"] == "aturan"
+    assert body["requested"]["DE"]["fte"] == 1.0 and body["requested"]["DA"]["fte"] == 0.5
+    assert body["existing"]["DS"]["fte"] == 1.0 and "DS" not in body["requested"]

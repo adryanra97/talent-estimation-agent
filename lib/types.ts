@@ -213,6 +213,20 @@ export interface ProviderConfig {
   structured_method: "auto" | "native" | "function_calling" | "json_mode" | "prompt";
 }
 
+export interface ExtractedAmount {
+  fte: number;
+  evidence: string;
+}
+
+export interface ExtractResult {
+  method: "model" | "aturan";
+  project_name: string;
+  period_start: string | null;
+  period_end: string | null;
+  requested: Record<string, ExtractedAmount>;
+  existing: Record<string, ExtractedAmount>;
+}
+
 export interface ConnectionResult {
   reply: string;
   max_tokens: number | null;

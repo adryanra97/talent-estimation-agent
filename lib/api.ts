@@ -1,4 +1,4 @@
-import type { Catalog, ConnectionResult, ProviderConfig, RunResult, WbsPreview } from "./types";
+import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RunResult, WbsPreview } from "./types";
 
 const BASE = "/api/py";
 
@@ -58,6 +58,22 @@ export async function testConnection(provider: ProviderConfig, apiKey: string): 
     headers: { "Content-Type": "application/json", ...keyHeader(apiKey) },
     body: JSON.stringify(provider),
   });
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function extractDocuments(
+  request: File[],
+  supporting: File[],
+  provider: ProviderConfig,
+  catalog: Catalog | null,
+  apiKey: string,
+): Promise<ExtractResult> {
+  const form = new FormData();
+  form.append("settings", JSON.stringify({ provider, catalog }));
+  for (const f of request) form.append("request_doc", f);
+  for (const f of supporting) form.append("supporting_doc", f);
+  const res = await fetch(`${BASE}/documents/extract`, { method: "POST", body: form, headers: keyHeader(apiKey) });
   if (!res.ok) throw await failure(res);
   return res.json();
 }

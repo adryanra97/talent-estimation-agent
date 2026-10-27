@@ -3,11 +3,11 @@
 import { AlertCircle, CheckCircle2, ChevronDown, FileSpreadsheet, FileText, Loader2, Plus, RotateCcw, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, Field, InfoTip, PageHeader, Toggle, inputBase, inputClass } from "@/components/ui";
-import { previewWbs } from "@/lib/api";
+import { extractDocuments, previewWbs } from "@/lib/api";
 import { date as fmtDate } from "@/lib/format";
-import { DEFAULT_PARAMETERS, MAX_FILES_PER_FIELD, MAX_TOTAL_BYTES, type TeamInput, useStore } from "@/lib/store";
+import { DEFAULT_PARAMETERS, MAX_FILES_PER_FIELD, MAX_TOTAL_BYTES, type TeamAuto, type TeamInput, useStore } from "@/lib/store";
 import type { Parameters, Scope } from "@/lib/types";
 
 function size(bytes: number): string {
@@ -184,7 +184,12 @@ export default function NewValidationPage() {
   const {
     catalog, project, setProject, parameters, setParameters, team, setTeam, aiEnabled, setAiEnabled,
     aiTools, setAiTools, files, setFiles, preview, setPreview, apiKey, start, status, setCatalog, catalogSource,
+    teamAuto, setTeamAuto, provider,
   } = store;
+  const [reading, setReading] = useState<"idle" | "reading" | "done" | "error">("idle");
+  const [readNote, setReadNote] = useState("");
+  const docKey = [...files.request, ...files.supporting].map((f) => `${f.name}:${f.size}:${f.lastModified}`).join("|");
+  const lastRead = useRef<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [wbsError, setWbsError] = useState<string | null>(null);
   const [advanced, setAdvanced] = useState(false);
@@ -199,11 +204,10 @@ export default function NewValidationPage() {
     let count = 0;
     for (const f of PARAM_FIELDS) if (parameters[f.key] !== DEFAULT_PARAMETERS[f.key]) count++;
     if (parameters.holidays.length) count++;
-    for (const t of Object.values(team)) if (t.requested || t.existing || t.reference) count++;
     if (aiTools.trim()) count++;
     if (catalogSource !== "bawaan") count++;
     return count;
-  }, [aiTools, catalogSource, parameters, team]);
+  }, [aiTools, catalogSource, parameters]);
 
   const periodError =
     project.start && project.end && project.start > project.end ? "Tanggal selesai harus setelah tanggal mulai." : null;
@@ -237,11 +241,71 @@ export default function NewValidationPage() {
   function updateTeam(role: string, key: keyof TeamInput, value: string) {
     const current = team[role] ?? { requested: "", existing: "", reference: "" };
     setTeam({ ...team, [role]: { ...current, [key]: value } });
+    if (key !== "reference" && teamAuto[role]?.[key]) {
+      const { [key]: _dropped, ...rest } = teamAuto[role];
+      setTeamAuto({ ...teamAuto, [role]: rest });
+    }
   }
+
+  /**
+   * Fill requested and existing FTE from the documents. Values the user typed
+   * are kept; values filled earlier from documents are replaced or cleared.
+   */
+  async function readDocuments() {
+    const nextTeam: Record<string, TeamInput> = { ...team };
+    const nextAuto: TeamAuto = {};
+    // Clear earlier automatic values that the user has not changed.
+    for (const [role, fields] of Object.entries(teamAuto)) {
+      for (const [k, auto] of Object.entries(fields) as ["requested" | "existing", { value: string }][]) {
+        if (nextTeam[role]?.[k] === auto.value) nextTeam[role] = { ...nextTeam[role], [k]: "" };
+      }
+    }
+    if (!files.request.length && !files.supporting.length) {
+      setTeam(nextTeam);
+      setTeamAuto({});
+      setReading("idle");
+      return;
+    }
+    setReading("reading");
+    try {
+      const found = await extractDocuments(files.request, files.supporting, provider, catalog, apiKey);
+      for (const k of ["requested", "existing"] as const) {
+        for (const [role, amount] of Object.entries(found[k])) {
+          const current = nextTeam[role] ?? { requested: "", existing: "", reference: "" };
+          if (current[k]) continue;
+          const value = String(amount.fte).replace(".", ",");
+          nextTeam[role] = { ...current, [k]: value };
+          nextAuto[role] = { ...nextAuto[role], [k]: { value, evidence: amount.evidence } };
+        }
+      }
+      setTeam(nextTeam);
+      setTeamAuto(nextAuto);
+      if (!project.name && found.project_name) setProject({ ...project, name: found.project_name });
+      const filled = Object.values(nextAuto).reduce((a, f) => a + Object.keys(f).length, 0);
+      setReadNote(
+        filled
+          ? `${filled} angka terisi dari dokumen${found.method === "model" ? "" : " dengan aturan sederhana (belum ada API key)"}. Periksa dan ubah bila perlu.`
+          : "Tidak ada angka permintaan atau talent existing yang terbaca dari dokumen. Isi manual bila perlu.",
+      );
+      setReading("done");
+    } catch (err) {
+      setTeam(nextTeam);
+      setTeamAuto({});
+      setReadNote(`Dokumen tidak bisa dibaca otomatis: ${err instanceof Error ? err.message : String(err)} Isi manual.`);
+      setReading("error");
+    }
+  }
+
+  useEffect(() => {
+    if (lastRead.current === docKey) return;
+    lastRead.current = docKey;
+    if (!docKey && !Object.keys(teamAuto).length) return;
+    void readDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docKey]);
 
   function resetAdvanced() {
     setParameters(DEFAULT_PARAMETERS);
-    setTeam({});
     setAiTools("");
     store.resetCatalog();
   }
@@ -393,6 +457,71 @@ export default function NewValidationPage() {
             </div>
           </Card>
 
+          <Card
+            title="Permintaan dan talent"
+            description="Terisi otomatis dari dokumen permintaan dan pendukung. Semua angka bisa diubah."
+            actions={
+              (files.request.length > 0 || files.supporting.length > 0) && (
+                <Button size="sm" variant="ghost" onClick={() => void readDocuments()} disabled={reading === "reading"}>
+                  {reading === "reading" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <RotateCcw className="h-4 w-4" aria-hidden />}
+                  Baca ulang dokumen
+                </Button>
+              )
+            }
+          >
+            <p className={`mb-3 text-sm ${reading === "error" ? "text-red-700" : "text-muted"}`} role="status">
+              {reading === "reading"
+                ? "Membaca dokumen..."
+                : reading === "idle"
+                  ? "Unggah dokumen permintaan agar angka terisi otomatis, atau isi manual. Talent existing bawaan 0."
+                  : readNote}
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted">
+                    <th className="py-2 pr-4 font-medium">Role</th>
+                    <th className="py-2 pr-4 font-medium">
+                      <span className="inline-flex items-center gap-1">
+                        Diminta (FTE) <InfoTip text="Jumlah yang sedang divalidasi. Angka ini tidak dipakai sebagai dasar alokasi." />
+                      </span>
+                    </th>
+                    <th className="py-2 pr-4 font-medium">
+                      <span className="inline-flex items-center gap-1">
+                        Talent existing (FTE) <InfoTip text="Talent yang sudah ada mengurangi kebutuhan total menjadi kebutuhan tambahan, yang dibandingkan dengan permintaan." />
+                      </span>
+                    </th>
+                    <th className="py-2 font-medium">Pembanding (FTE)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roles.map((r) => (
+                    <tr key={r.code} className="border-t border-line">
+                      <td className="py-2 pr-4 font-medium text-ink">{r.name}</td>
+                      {(["requested", "existing", "reference"] as const).map((k) => {
+                        const auto = k === "reference" ? undefined : teamAuto[r.code]?.[k];
+                        return (
+                          <td key={k} className="py-2 pr-4 align-top">
+                            <input
+                              aria-label={`${k === "requested" ? "Diminta" : k === "existing" ? "Talent existing" : "Pembanding"} ${r.name}`}
+                              inputMode="decimal"
+                              className={`${inputClass} tabular max-w-28`}
+                              placeholder={k === "existing" ? "0" : "-"}
+                              title={auto ? `Dari dokumen: "${auto.evidence}"` : undefined}
+                              value={team[r.code]?.[k] ?? ""}
+                              onChange={(e) => updateTeam(r.code, k, e.target.value)}
+                            />
+                            {auto && <span className="mt-0.5 block text-xs text-accent-700">dari dokumen</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
           <section className="rounded-xl border border-line bg-surface">
             <button
               type="button"
@@ -402,7 +531,7 @@ export default function NewValidationPage() {
             >
               <span>
                 <span className="block text-base font-semibold text-ink">Pengaturan lanjutan</span>
-                <span className="block text-sm text-muted">Parameter hitung, kondisi tim, dan bantuan AI. Nilai bawaan sudah siap dipakai.</span>
+                <span className="block text-sm text-muted">Parameter hitung, hari libur, dan bantuan AI. Nilai bawaan sudah siap dipakai.</span>
               </span>
               <span className="flex items-center gap-3">
                 {changed > 0 && (
@@ -472,45 +601,6 @@ export default function NewValidationPage() {
                       ))}
                     </div>
                   )}
-                </div>
-
-                <div>
-                  <h3 className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-ink">
-                    Kondisi tim per role
-                    <InfoTip text="Talent existing mengurangi kebutuhan total menjadi kebutuhan tambahan, yang dibandingkan dengan permintaan. FTE diminta yang diisi di sini menimpa hasil baca dokumen." />
-                  </h3>
-                  <p className="mb-3 text-xs text-muted">Kosongkan bila tidak ada. Talent existing bawaan 0.</p>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-xs text-muted">
-                          <th className="py-2 pr-4 font-medium">Role</th>
-                          <th className="py-2 pr-4 font-medium">Talent existing (FTE)</th>
-                          <th className="py-2 pr-4 font-medium">FTE diminta (timpa)</th>
-                          <th className="py-2 font-medium">Usulan pembanding (FTE)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {roles.map((r) => (
-                          <tr key={r.code} className="border-t border-line">
-                            <td className="py-2 pr-4 font-medium text-ink">{r.name}</td>
-                            {(["existing", "requested", "reference"] as const).map((k) => (
-                              <td key={k} className="py-2 pr-4">
-                                <input
-                                  aria-label={`${k} ${r.name}`}
-                                  inputMode="decimal"
-                                  className={`${inputClass} tabular max-w-32`}
-                                  placeholder={k === "existing" ? "0" : "-"}
-                                  value={team[r.code]?.[k] ?? ""}
-                                  onChange={(e) => updateTeam(r.code, k, e.target.value)}
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
 
                 {aiEnabled && catalog && (

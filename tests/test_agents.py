@@ -24,6 +24,7 @@ async def test_demo_pipeline(demo_inputs):
     } <= agents
     assert {c.role for c in run.comparisons} == {"DE", "DA", "DS", "AI", "UXR", "UX", "UI"}
     assert {r.requested_fte for r in run.role_inputs} == {1.0, 0.5}
+    assert next(r for r in run.role_inputs if r.role == "DA").existing_fte == 0.5
     assert any(f.kind == "gap" and f.role == "UI" for f in run.findings)
     assert any(f.kind == "gap" for f in run.findings)
     assert run.ai_summary and run.message_draft

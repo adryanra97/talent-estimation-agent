@@ -44,6 +44,7 @@ the **Unduh Excel** button.
 |---|---|---|
 | Beranda | Orient and route | One-line value statement; primary "Mulai validasi" and secondary demo button; resume banner when a run exists; three-step how it works; outputs preview; setup checklist (model, catalog, WBS sample); trust strip |
 | Validasi Baru | Start a run | Multi-file pickers (up to 5 per field, 4 MB in total) with an immediate WBS check per file and a merged total; clashing item IDs across WBS files get a file prefix; project fields; scope switch; AI toggle; collapsed advanced settings with a "n values changed" badge and reset; readiness checklist; run and demo buttons |
+| (Validasi Baru) Permintaan dan talent | Requested and existing FTE per role | Filled from the request and supporting documents right after upload (model with a key, rules without), marked "dari dokumen"; every value stays editable, and a typed value is never overwritten |
 | Proses | Show progress | Six-step stepper with status per agent; activity log; elapsed time; cancel |
 | Ringkasan FTE | Read the answer | Card per role (UCP, bottom-up, requested, existing, additional, conclusion); comparison table; review banner; approve |
 | Breakdown WBS | Trace and correct | Filter by role and review status; search; inline edits; expandable reasons and capabilities (removable); select rows and ask the agent |

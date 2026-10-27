@@ -40,6 +40,8 @@ Role yang dikenal (gunakan kodenya): {roles}
 Aturan:
 - Isi `requested` hanya untuk role di atas yang jumlahnya disebut jelas. Jika jumlah orang
   disebut tanpa FTE, anggap 1 orang = 1 FTE dan tulis itu di evidence.
+- Isi `existing` untuk talent yang SUDAH ada atau sedang bertugas di proyek (misalnya "saat ini
+  sudah ada 1 Data Engineer"). Jangan campur dengan jumlah yang diminta.
 - Isi periode hanya jika tanggal disebut jelas.
 - Abaikan nama orang. Jangan menyalin data pribadi.
 

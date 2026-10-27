@@ -29,6 +29,10 @@ class RequestExtraction(BaseModel):
     period_start: date | None = None
     period_end: date | None = None
     requested: list[RequestedRole] = Field(default_factory=list)
+    existing: list[RequestedRole] = Field(
+        default_factory=list,
+        description="Talent yang sudah ada atau sedang bertugas di proyek ini, per role.",
+    )
     notes: str = Field("", description="Konteks penting lain dari dokumen, maksimal 5 kalimat.")
 
 

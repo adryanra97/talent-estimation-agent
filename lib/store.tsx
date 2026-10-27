@@ -83,6 +83,8 @@ interface Store {
   events: ProgressEvent[];
   error: string | null;
   startedAt: number | null;
+  endedAt: number | null;
+  modelCalls: number;
   demo: boolean;
   run: RunResult | null;
   setRun: (r: RunResult) => void;
@@ -159,6 +161,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [events, setEvents] = useState<ProgressEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [endedAt, setEndedAt] = useState<number | null>(null);
+  const [modelCalls, setModelCalls] = useState(0);
   const [demo, setDemo] = useState(false);
   const [run, setRun] = useState<RunResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -207,6 +211,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setDemo(useDemo);
       setTeamView("all");
       setStartedAt(Date.now());
+      setEndedAt(null);
+      setModelCalls(0);
       const role_inputs = Object.entries(team).map(([role, t]) => ({
         role,
         requested_fte: toNumber(t.requested),
@@ -229,12 +235,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const handle = (event: Record<string, unknown>) => {
         if (event.type === "progress") {
           setEvents((prev) => [...prev, { ...(event as unknown as ProgressEvent), at: Date.now() }]);
+        } else if (event.type === "heartbeat") {
+          setModelCalls(Number(event.calls) || 0);
         } else if (event.type === "result") {
           setRun(event.run as RunResult);
           setStatus("done");
+          setEndedAt(Date.now());
         } else if (event.type === "error") {
           setError(String(event.message));
           setStatus("error");
+          setEndedAt(Date.now());
         }
       };
       const queue: Record<string, unknown>[] = [];
@@ -252,6 +262,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           handle(event);
         }
       } catch (err) {
+        setEndedAt(Date.now());
         if (controller.signal.aborted) {
           setStatus("idle");
           setError("Run dibatalkan.");
@@ -314,12 +325,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
       resetCatalog, project, setProject, parameters, setParameters, team, setTeam, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
-      error, startedAt, demo, run, setRun, start, cancel, busy, update, reclassify, exportExcel,
+      error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
       provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, project,
-      parameters, team, aiEnabled, aiTools, files, preview, status, events, error, startedAt, demo,
+      parameters, team, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
+      modelCalls, demo,
       run, start, cancel, busy, update, reclassify, exportExcel, notice, teamView,
     ],
   );

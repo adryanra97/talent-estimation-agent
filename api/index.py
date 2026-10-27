@@ -9,6 +9,7 @@ Routes are mounted under ``/api/py`` so the Next.js app can proxy them.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import sys
 from pathlib import Path
@@ -51,6 +52,11 @@ from talent_estimation.skills.schemas import ReclassifyRequest
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 """Total upload size per request. Vercel functions accept about 4.5 MB."""
 MAX_FILES_PER_FIELD = 5
+RUN_TIME_BUDGET_S = 270.0
+"""Seconds a run may take. Vercel stops the function at 300 seconds, so the
+agents wrap up early and return a result instead of being cut off."""
+HEARTBEAT_S = 10.0
+"""Seconds of silence after which the stream sends a heartbeat line."""
 
 app = FastAPI(
     title="Talent Estimation Agent API",
@@ -326,6 +332,7 @@ async def create_run(
         ai_enabled=options.ai_enabled,
         ai_tools=options.ai_tools,
         catalog=catalog,
+        time_budget_s=None if llm is None else RUN_TIME_BUDGET_S,
     )
 
     async def stream() -> Any:
@@ -344,16 +351,41 @@ async def create_run(
             )
             + "\n"
         )
+        # The pipeline runs in its own task and hands events over a queue, so
+        # the stream can send a heartbeat while a model call is still waiting.
+        # Without it the connection can look idle and be closed on the way.
+        queue: asyncio.Queue[Any] = asyncio.Queue()
+        done = object()
+
+        async def produce() -> None:
+            try:
+                async for event in run_pipeline(inputs, llm):
+                    await queue.put(event)
+            except Exception as exc:
+                await queue.put(exc)
+            finally:
+                await queue.put(done)
+
+        task = asyncio.create_task(produce())
         try:
-            async for event in run_pipeline(inputs, llm):
-                yield json.dumps(event, default=str) + "\n"
-        except LLMError as exc:
-            yield json.dumps({"type": "error", "message": str(exc)}) + "\n"
-        except Exception as exc:  # report, never leak the key
-            yield (
-                json.dumps({"type": "error", "message": f"Run gagal: {type(exc).__name__}: {exc}"})
-                + "\n"
-            )
+            while True:
+                try:
+                    item = await asyncio.wait_for(queue.get(), timeout=HEARTBEAT_S)
+                except TimeoutError:
+                    calls = getattr(llm, "calls", 0)
+                    yield json.dumps({"type": "heartbeat", "calls": calls}) + "\n"
+                    continue
+                if item is done:
+                    break
+                if isinstance(item, LLMError):
+                    yield json.dumps({"type": "error", "message": str(item)}) + "\n"
+                elif isinstance(item, Exception):  # report, never leak the key
+                    message = f"Run gagal: {type(item).__name__}: {item}"
+                    yield json.dumps({"type": "error", "message": message}) + "\n"
+                else:
+                    yield json.dumps(item, default=str) + "\n"
+        finally:
+            task.cancel()
 
     return StreamingResponse(stream(), media_type="application/x-ndjson")
 

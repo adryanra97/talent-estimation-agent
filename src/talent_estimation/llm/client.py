@@ -229,7 +229,7 @@ class LangChainClient:
         Maximum number of parallel model calls.
     """
 
-    def __init__(self, config: ProviderConfig, api_key: str, max_concurrency: int = 4) -> None:
+    def __init__(self, config: ProviderConfig, api_key: str, max_concurrency: int = 8) -> None:
         self.config = config
         self._api_key = api_key
         self._send_temperature = config.send_temperature

@@ -77,3 +77,19 @@ def test_too_many_files(demo_wbs):
     files = [("wbs", (f"w{i}.xlsx", demo_wbs)) for i in range(6)]
     res = client.post("/api/py/runs", data={"settings": json.dumps({"demo": True})}, files=files)
     assert res.status_code == 400
+
+
+def test_stream_sends_heartbeats_while_waiting(monkeypatch):
+    import asyncio
+
+    import api.index as api_module
+
+    async def slow_pipeline(inputs, llm):
+        await asyncio.sleep(0.2)
+        yield {"type": "result", "run": {}}
+
+    monkeypatch.setattr(api_module, "HEARTBEAT_S", 0.05)
+    monkeypatch.setattr(api_module, "run_pipeline", slow_pipeline)
+    res = client.post("/api/py/runs", data={"settings": json.dumps({"demo": True})})
+    kinds = [json.loads(line)["type"] for line in res.text.splitlines() if line]
+    assert "heartbeat" in kinds and kinds[-1] == "result"

@@ -116,14 +116,14 @@ DOKUMEN TAMBAHAN:
 
 AI_ASSIST = """{catalog}
 
-Untuk setiap baris breakdown di bawah, uraikan pekerjaan role pada item menjadi 2-5 tugas.
+Untuk setiap baris breakdown di bawah, uraikan pekerjaan role pada item menjadi 2-4 tugas utama.
 Untuk tiap tugas:
 - weight: porsi tugas dalam baris (total per baris = 1);
 - pillar dan skill: ambil dari pilar skill role di katalog;
 - category: pilih SATU kunci dari kategori bantuan AI di bawah, sesuai sifat tugasnya;
 - confidence: Tinggi, Sedang, atau Rendah;
 - prerequisite: syarat agar bantuan AI dapat dipakai (misalnya tool yang diizinkan);
-- reason: alasan singkat.
+- reason: alasan singkat, paling banyak 12 kata.
 Jangan menentukan persentase hemat; sistem memakai rentang dari kategori.
 
 KATEGORI BANTUAN AI:

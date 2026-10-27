@@ -48,3 +48,28 @@ async def test_llm_pipeline_with_review_loop(demo_inputs, scripted_llm):
     assert {t.category for t in run.ai_tasks} <= {"routine_code", "judgment"}
     assert scripted_llm.calls.count("check_quality") <= MAX_REVIEW_ROUNDS + 1
     assert run.message_draft == "Draf pesan uji."
+
+
+async def test_low_time_budget_still_returns_a_result(demo_inputs, scripted_llm):
+    inputs = demo_inputs.model_copy(update={"time_budget_s": 1.0})
+    events, run = await collect(inputs, scripted_llm)
+    assert run is not None and run.ai_tasks == []
+    assert any(e["agent"] == "Augmentation Agent" and e["status"] == "skipped" for e in events)
+    assert any("dilewati" in f.message for f in run.findings)
+    assert "assess_ai_assist" not in scripted_llm.calls
+
+
+async def test_failed_augmentation_keeps_the_estimate(demo_inputs, scripted_llm):
+    from talent_estimation.llm import LLMError
+
+    original = scripted_llm.structured
+
+    async def structured(schema, system, user, *, skill):
+        if skill == "assess_ai_assist":
+            raise LLMError("Budget API key sudah habis.")
+        return await original(schema, system, user, skill=skill)
+
+    scripted_llm.structured = structured
+    _, run = await collect(demo_inputs, scripted_llm)
+    assert run.estimates and run.ai_tasks == []
+    assert any("Analisis peluang bantuan AI dilewati" in f.message for f in run.findings)

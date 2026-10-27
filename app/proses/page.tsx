@@ -30,7 +30,7 @@ function Elapsed({ since, running, until }: { since: number | null; running: boo
 
 export default function ProcessPage() {
   const router = useRouter();
-  const { status, events, error, startedAt, cancel, run, aiEnabled, demo } = useStore();
+  const { status, events, error, startedAt, endedAt, modelCalls, cancel, run, aiEnabled, demo } = useStore();
 
   if (status === "idle" && events.length === 0 && !run) {
     return (
@@ -46,6 +46,7 @@ export default function ProcessPage() {
   const stateOf = (agent: string, optional?: boolean) => {
     const mine = events.filter((e) => e.agent === agent);
     if (optional && !aiEnabled) return "skipped";
+    if (mine.at(-1)?.status === "skipped") return "skipped";
     if (mine.some((e) => e.status === "done") && !(status === "running" && mine.at(-1)?.status === "running")) return "done";
     if (mine.length > 0) return status === "error" ? "error" : "running";
     return status === "done" ? "done" : "waiting";
@@ -67,7 +68,8 @@ export default function ProcessPage() {
         }
       />
       <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3" title="Langkah agent" actions={<span className="text-sm text-muted"><Elapsed since={startedAt} running={status === "running"} until={events.at(-1)?.at} /></span>}>
+        <Card className="lg:col-span-3" title="Langkah agent" actions={<span className="text-sm text-muted"><Elapsed since={startedAt} running={status === "running"} until={endedAt ?? undefined} />
+                {modelCalls > 0 && <span className="tabular">, {modelCalls} panggilan model</span>}</span>}>
           <ol className="space-y-1">
             {STEPS.map((step, i) => {
               const state = stateOf(step.agent, step.optional);

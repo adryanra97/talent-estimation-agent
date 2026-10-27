@@ -6,8 +6,11 @@ for recalculation or reclassification.
 
 Flow::
 
-    intake -> estimator -+-> reviewer <-> reclassify -+-> report
-                         +-> augmentation (optional) -+
+    intake -> estimator -> reviewer <-> reclassify -> augmentation (optional) -> report
+
+A run may carry a time budget. When it runs low, the reviewer falls back to
+rules, and augmentation and the message draft are skipped or simplified, so
+the run returns a result before the server stops it.
 """
 
 from __future__ import annotations
@@ -33,12 +36,19 @@ from talent_estimation.domain.models import (
     TraceEvent,
     WbsItem,
 )
-from talent_estimation.llm.client import LLMClient
+from talent_estimation.llm.client import LLMClient, LLMError
 from talent_estimation.skills import judgement as skills
 from talent_estimation.skills.schemas import ReclassifyRequest
 
 MAX_REVIEW_ROUNDS = 2
 """Maximum number of times the reviewer may send rows back to the estimator."""
+
+REVIEW_MIN_SECONDS = 60
+"""Below this much time left, the reviewer uses rules instead of the model."""
+AUGMENT_MIN_SECONDS = 50
+"""Below this much time left, augmentation is skipped."""
+REPORT_RESERVE_SECONDS = 25
+"""Time kept free for the report step after augmentation."""
 
 
 class RunInputs(BaseModel):
@@ -56,6 +66,8 @@ class RunInputs(BaseModel):
     ai_enabled: bool = True
     ai_tools: list[str] = Field(default_factory=list)
     catalog: Catalog
+    time_budget_s: float | None = None
+    """Seconds the whole run may take, or ``None`` for no limit."""
 
 
 class GraphState(TypedDict, total=False):
@@ -66,11 +78,29 @@ class GraphState(TypedDict, total=False):
     review_round: int
     pending: list[ReclassifyRequest]
     ai_tasks: list[AiTask]
+    deadline: float | None
 
 
 def _emit(agent: str, status: str, message: str, **extra: Any) -> None:
     writer = get_stream_writer()
     writer({"type": "progress", "agent": agent, "status": status, "message": message, **extra})
+
+
+def _remaining(state: GraphState) -> float:
+    """Seconds left before the run's deadline; infinite without a budget."""
+    deadline = state.get("deadline")
+    if deadline is None:
+        return float("inf")
+    return deadline - asyncio.get_running_loop().time()
+
+
+def _skip_finding(what: str, why: str) -> Finding:
+    return Finding(
+        kind="assumption",
+        message=f"{what} {why}",
+        severity="Sedang",
+        source="Orchestrator",
+    )
 
 
 def _trace(run: RunResult, agent: str, action: str, detail: str = "") -> None:
@@ -180,8 +210,18 @@ def build_graph(llm: LLMClient | None):
         documents = "\n\n".join(
             filter(None, [inputs.request_text[:15000], inputs.supporting_text[:20000]])
         )
-        review = await skills.check_quality(run, candidates, inputs.catalog, documents, llm)
+        low_time = _remaining(state) < REVIEW_MIN_SECONDS
+        review = await skills.check_quality(
+            run, candidates, inputs.catalog, documents, None if low_time else llm
+        )
         findings = [f for f in run.findings if f.kind != "divergence"]
+        if low_time and llm is not None:
+            findings.append(
+                _skip_finding(
+                    "Reviewer memakai aturan, bukan model,",
+                    "karena waktu proses hampir habis. Periksa baris yang ditandai secara manual.",
+                )
+            )
         existing = {(f.kind, f.item_id, f.role, f.message) for f in findings}
         for draft in review.findings:
             key = (draft.kind, draft.item_id, draft.role, draft.message)
@@ -236,7 +276,7 @@ def build_graph(llm: LLMClient | None):
             for r in breakdown
         ]
         run = recalculate(run.model_copy(update={"breakdown": breakdown, "findings": findings}))
-        pending = review.reclassify if round_no < MAX_REVIEW_ROUNDS else []
+        pending = review.reclassify if round_no < MAX_REVIEW_ROUNDS and not low_time else []
         _trace(
             run,
             "Reviewer Agent",
@@ -299,8 +339,39 @@ def build_graph(llm: LLMClient | None):
 
     async def augmentation(state: GraphState) -> GraphState:
         inputs, run = state["inputs"], state["run"]
-        _emit("Augmentation Agent", "running", "Memetakan tugas yang dapat dibantu AI")
-        tasks = await skills.assess_ai_assist(run.breakdown, inputs.catalog, inputs.ai_tools, llm)
+        left = _remaining(state)
+        reason = ""
+        tasks: list[AiTask] = []
+        if left < AUGMENT_MIN_SECONDS:
+            reason = "karena waktu proses hampir habis"
+        else:
+            _emit("Augmentation Agent", "running", "Memetakan tugas yang dapat dibantu AI")
+            limit = None if left == float("inf") else left - REPORT_RESERVE_SECONDS
+            try:
+                tasks = await asyncio.wait_for(
+                    skills.assess_ai_assist(run.breakdown, inputs.catalog, inputs.ai_tools, llm),
+                    timeout=limit,
+                )
+            except TimeoutError:
+                reason = "karena waktu proses hampir habis"
+            except LLMError as exc:
+                reason = f"karena panggilan model gagal ({exc})"
+        if reason:
+            message = f"Dilewati {reason.split(' (')[0]}"
+            _emit("Augmentation Agent", "skipped", message)
+            run = run.model_copy(
+                update={
+                    "findings": [
+                        *run.findings,
+                        _skip_finding(
+                            "Analisis peluang bantuan AI dilewati",
+                            f"{reason}. Angka FTE tidak terpengaruh. Jalankan ulang dengan WBS "
+                            "lebih kecil, atau matikan analisis ini, bila perlu.",
+                        ),
+                    ]
+                }
+            )
+            return {"run": run, "ai_tasks": []}
         _emit("Augmentation Agent", "done", f"{len(tasks)} tugas dipetakan ke capability")
         return {"ai_tasks": tasks}
 
@@ -315,7 +386,11 @@ def build_graph(llm: LLMClient | None):
                 "assess_ai_assist + calc_ai_savings",
                 f"{len(run.ai_tasks)} tugas",
             )
-        message = await skills.draft_message(run, inputs.catalog, llm)
+        use_llm = llm if _remaining(state) > REPORT_RESERVE_SECONDS else None
+        try:
+            message = await skills.draft_message(run, inputs.catalog, use_llm)
+        except LLMError:
+            message = await skills.draft_message(run, inputs.catalog, None)
         run = run.model_copy(update={"message_draft": message})
         _trace(run, "Report", "draft_message", "Draf pesan disusun")
         _emit("Report", "done", "Hasil siap direview")
@@ -356,8 +431,15 @@ async def run_pipeline(inputs: RunInputs, llm: LLMClient | None) -> AsyncIterato
     """
     graph = build_graph(llm)
     final: RunResult | None = None
+    deadline = (
+        asyncio.get_running_loop().time() + inputs.time_budget_s
+        if inputs.time_budget_s is not None
+        else None
+    )
     async for mode, chunk in graph.astream(
-        {"inputs": inputs}, stream_mode=["custom", "values"], config={"recursion_limit": 30}
+        {"inputs": inputs, "deadline": deadline},
+        stream_mode=["custom", "values"],
+        config={"recursion_limit": 30},
     ):
         if mode == "custom":
             yield chunk

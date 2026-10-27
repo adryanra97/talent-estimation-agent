@@ -20,6 +20,14 @@ the AI tasks are mapped to the final, reviewed breakdown rather than to rows
 the reviewer may still change. The graph is compiled per request without a
 checkpointer.
 
+Runs with a model have a time budget of 270 seconds, because Vercel stops the
+function at 300. With less than 60 seconds left the reviewer uses rules, with
+less than 50 seconds augmentation is skipped, and the message draft falls back
+to a template. Skipped steps are recorded as findings, and the FTE numbers are
+always returned. A failed augmentation call is handled the same way. While a
+model call is pending, the stream sends a heartbeat line every 10 seconds so
+the connection never looks idle.
+
 ## Where agents decide
 
 | Agent | Decision | Bounded by |

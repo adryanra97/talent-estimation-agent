@@ -217,7 +217,7 @@ export interface ConnectionResult {
 export interface ProgressEvent {
   type: "progress";
   agent: string;
-  status: "running" | "done" | "error";
+  status: "running" | "done" | "error" | "skipped";
   message: string;
   at?: number;
 }

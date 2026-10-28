@@ -13,6 +13,7 @@ from collections.abc import Iterable
 from datetime import date
 
 from talent_estimation.catalog.loader import Catalog
+from talent_estimation.domain.fmt import day, num, pct, short
 from talent_estimation.domain.models import (
     EF_FACTORS,
     TCF_FACTORS,
@@ -42,6 +43,16 @@ from talent_estimation.skills.schemas import (
     RowTasks,
     TaskJudgement,
 )
+
+FINDING_LABELS = {
+    "gap": "gap WBS",
+    "overlap": "tumpang tindih",
+    "outside_wbs": "di luar WBS",
+    "divergence": "selisih metode",
+    "data_quality": "kualitas data",
+    "assumption": "asumsi",
+    "reclassified": "klasifikasi ulang",
+}
 
 BATCH_SIZE = 12
 """Number of WBS items classified per model call."""
@@ -500,8 +511,9 @@ def reconcile(
             kind="divergence",
             role=c.role,
             message=(
-                f"UCP {c.ucp_fte:.2f} FTE dan bottom-up {c.bu_fte:.2f} FTE berbeda "
-                f"{c.divergence:+.0%}, di atas toleransi {run.parameters.tolerance:.0%}."
+                f"UCP {num(c.ucp_fte)} FTE dan bottom-up {num(c.bu_fte)} FTE berbeda "
+                f"{pct(c.divergence, signed=True)}, di atas toleransi "
+                f"{pct(run.parameters.tolerance)}."
             ),
             severity="Sedang",
             source="Reconciler",
@@ -518,7 +530,7 @@ def reconcile(
                 kind="data_quality",
                 message=(
                     f"{len(items)} item punya hari kerja di luar periode analisis "
-                    f"{run.project.start:%d %b %Y} s.d. {run.project.end:%d %b %Y} ({shown}). "
+                    f"{day(run.project.start)} s.d. {day(run.project.end)} ({shown}). "
                     "Effort-nya tetap masuk FTE rata-rata, tetapi tidak tampil di sebaran "
                     "bulanan dan FTE puncak. Periksa periode proyek."
                 ),
@@ -538,7 +550,7 @@ def _words(text: str) -> set[str]:
     return {w for w in re.findall(r"[a-z]{4,}", text.lower())}
 
 
-def _heuristic_quality(run: RunResult) -> QualityReview:
+def _heuristic_quality(run: RunResult, catalog: Catalog | None = None) -> QualityReview:
     from talent_estimation.skills.schemas import FindingDraft
 
     findings: list[FindingDraft] = []
@@ -549,7 +561,8 @@ def _heuristic_quality(run: RunResult) -> QualityReview:
                     kind="gap",
                     item_id=row.item_id,
                     role=row.role,
-                    message=f"Isi pekerjaan '{row.item_name}' cocok dengan lingkup {row.role}, "
+                    message=f"Isi pekerjaan '{row.item_name}' cocok dengan lingkup "
+                    f"{catalog.roles[row.role].name if catalog and row.role in catalog.roles else row.role}, "
                     "tetapi role ini tidak disebut di WBS.",
                 )
             )
@@ -594,7 +607,7 @@ async def check_quality(
         supporting documents.
     """
     if llm is None:
-        return _heuristic_quality(run)
+        return _heuristic_quality(run, catalog)
     lines = "\n".join(
         f"- [{r.item_id}] {r.role} {r.involvement} {r.classification} alokasi {r.allocation_fte:g} "
         f"| {r.item_name}: {r.description} | {r.start} s.d. {r.end} | review={r.needs_review}"
@@ -780,18 +793,21 @@ def summary_text(run: RunResult, catalog: Catalog) -> str:
     """Return a factual summary of a run used for the reply draft."""
     lines = [f"Proyek: {run.project.name or '-'}"]
     if run.project.start and run.project.end:
-        lines.append(f"Periode: {run.project.start:%d %b %Y} s.d. {run.project.end:%d %b %Y}")
+        lines.append(f"Periode: {day(run.project.start)} s.d. {day(run.project.end)}")
     for c in run.comparisons:
         name = catalog.roles[c.role].name if c.role in catalog.roles else c.role
-        requested = f"{c.requested_fte:g}" if c.requested_fte is not None else "tidak disebut"
+        requested = (
+            f"{short(c.requested_fte)} FTE" if c.requested_fte is not None else "tidak disebut"
+        )
+        low, high = sorted((c.ucp_additional_fte, c.bu_additional_fte))
         lines.append(
-            f"- {name}: total UCP {c.ucp_fte:.2f} FTE, bottom-up {c.bu_fte:.2f} FTE; existing "
-            f"{c.existing_fte:g}; tambahan {c.ucp_additional_fte:.2f}-{c.bu_additional_fte:.2f}; "
-            f"diminta {requested}; {c.conclusion}."
+            f"- {name}: kebutuhan total UCP {num(c.ucp_fte)} FTE dan bottom-up {num(c.bu_fte)} "
+            f"FTE; talent existing {short(c.existing_fte)} FTE; kebutuhan tambahan "
+            f"{num(low)} sampai {num(high)} FTE; diminta {requested}. {c.conclusion}."
         )
     important = [f for f in run.findings if f.severity == "Tinggi"] or run.findings
     for f in important[:5]:
-        lines.append(f"- Temuan ({f.kind}): {f.message}")
+        lines.append(f"- Temuan ({FINDING_LABELS.get(f.kind, f.kind)}): {f.message}")
     return "\n".join(lines)
 
 

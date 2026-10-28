@@ -25,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from talent_estimation.calc.engine import recalculate, ucp_person_days_by_row
 from talent_estimation.catalog.loader import Catalog
+from talent_estimation.domain.fmt import day, short
 from talent_estimation.domain.models import (
     AiTask,
     BreakdownRow,
@@ -165,13 +166,13 @@ def build_graph(llm: LLMClient | None):
             items=inputs.items,
             ai_enabled=inputs.ai_enabled,
         )
-        found = ", ".join(f"{r.role} {r.fte:g}" for r in extraction.requested) or "tidak ada"
+        found = ", ".join(f"{r.role} {short(r.fte)}" for r in extraction.requested) or "tidak ada"
         _trace(run, "Intake Agent", "parse_wbs", f"{len(inputs.items)} item level terbawah")
         _trace(run, "Intake Agent", "parse_request", f"Permintaan terbaca: {found}")
         _emit(
             "Intake Agent",
             "done",
-            f"Periode {project.start} s.d. {project.end}; permintaan: {found}",
+            f"Periode {day(project.start)} s.d. {day(project.end)}; permintaan: {found}",
         )
         return {"run": run, "review_round": 0, "pending": [], "ai_tasks": []}
 
@@ -329,8 +330,9 @@ def build_graph(llm: LLMClient | None):
                         kind="reclassified",
                         item_id=row.item_id,
                         role=row.role,
-                        message=f"Dinilai ulang: {row.classification} {row.allocation_fte:g} FTE "
-                        f"menjadi {new.classification} {new.allocation_fte:g} FTE.",
+                        message=f"Dinilai ulang: {row.classification} "
+                        f"{short(row.allocation_fte)} FTE menjadi {new.classification} "
+                        f"{short(new.allocation_fte)} FTE.",
                         severity="Rendah",
                         source="Reviewer Agent",
                     )

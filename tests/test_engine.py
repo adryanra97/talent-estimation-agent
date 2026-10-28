@@ -123,3 +123,10 @@ def test_outside_period_detects_items_beyond_the_period():
     outside = {r.item_id: share for r, share in outside_period(run)}
     assert set(outside) == {"1.1.2"}
     assert outside["1.1.2"] == pytest.approx(1.0)
+
+
+def test_indonesian_number_format():
+    from talent_estimation.domain.fmt import day, num, pct, short
+
+    assert num(1234.5) == "1.234,50" and short(0.5) == "0,5" and pct(0.54, signed=True) == "+54%"
+    assert day(date(2027, 5, 1)) == "1 Mei 2027"

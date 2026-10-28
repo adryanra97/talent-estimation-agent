@@ -406,7 +406,7 @@ export default function NewValidationPage() {
               </div>
               <fieldset className="sm:col-span-2">
                 <legend className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-ink">
-                  Cakupan role <InfoTip text="Hanya role dalam cakupan yang dinilai dan dihitung. Role Design akan tersedia setelah katalognya dilengkapi." />
+                  Cakupan role <InfoTip text="Hanya role dalam cakupan yang dinilai dan dihitung. Pilih Semua bila proyek melibatkan tim data dan tim desain." />
                 </legend>
                 <div className="inline-flex rounded-lg border border-line bg-canvas p-1">
                   {scopes.map((s) => (

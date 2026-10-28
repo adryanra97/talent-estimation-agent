@@ -97,6 +97,8 @@ interface Store {
   cancel: () => void;
   busy: boolean;
   update: (r: RunResult) => Promise<void>;
+  canUndo: boolean;
+  undo: () => Promise<void>;
   reclassify: (requests: { item_id: string; role: string; reason: string }[]) => Promise<void>;
   exportExcel: () => Promise<void>;
   notice: string | null;
@@ -175,6 +177,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [teamView, setTeamView] = useState("all");
   const abort = useRef<AbortController | null>(null);
+  const [history, setHistory] = useState<RunResult[]>([]);
 
   useEffect(() => {
     api
@@ -216,6 +219,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       setDemo(useDemo);
       setTeamView("all");
+      setHistory([]);
       setStartedAt(Date.now());
       setEndedAt(null);
       setModelCalls(0);
@@ -285,6 +289,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const update = useCallback(
     async (next: RunResult) => {
+      if (run) setHistory((h) => [...h.slice(-19), run]);
       setRun(next);
       setBusy(true);
       try {
@@ -295,14 +300,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setBusy(false);
       }
     },
-    [catalog],
+    [catalog, run],
   );
+
+  const undo = useCallback(async () => {
+    const previous = history.at(-1);
+    if (!previous) return;
+    setHistory((h) => h.slice(0, -1));
+    setRun(previous);
+    setNotice("Perubahan terakhir diurungkan.");
+  }, [history]);
 
   const reclassify = useCallback(
     async (requests: { item_id: string; role: string; reason: string }[]) => {
       if (!run) return;
       setBusy(true);
       try {
+        setHistory((h) => [...h.slice(-19), run]);
         setRun(await api.reclassify(run, catalog, requests, provider, demo ? "" : apiKey, demo));
         setNotice(`${requests.length} baris dinilai ulang oleh Estimator Agent.`);
       } catch (err) {
@@ -331,14 +345,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
       resetCatalog, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
-      error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, reclassify, exportExcel,
+      error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, canUndo: history.length > 0, undo, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
       provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, project,
       parameters, team, teamAuto, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
       modelCalls, demo,
-      run, start, cancel, busy, update, reclassify, exportExcel, notice, teamView,
+      run, start, cancel, busy, update, history, undo, reclassify, exportExcel, notice, teamView,
     ],
   );
 

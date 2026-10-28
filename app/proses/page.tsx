@@ -28,6 +28,22 @@ function Elapsed({ since, running, until }: { since: number | null; running: boo
   return <span className="tabular">{seconds} detik</span>;
 }
 
+/** Next step for the user, chosen from the kind of error. */
+function recovery(error: string): string {
+  const text = error.toLowerCase();
+  if (text.includes("budget") || text.includes("kuota")) {
+    return "Budget atau kuota API key habis. Naikkan budget key di gateway, atau pakai key lain, lalu jalankan ulang.";
+  }
+  if (text.includes("network") || text.includes("failed to fetch") || text.includes("load failed")) {
+    return "Sambungan ke server terputus. Coba jalankan ulang; untuk WBS besar, matikan Analisis peluang bantuan AI agar lebih cepat.";
+  }
+  if (text.includes("401") || text.includes("api key")) {
+    return "Periksa API key dan penyedia model di Pengaturan, lalu jalankan ulang.";
+  }
+  if (text.includes("dibatalkan")) return "Jalankan ulang dari Validasi Baru bila perlu.";
+  return "Periksa pengaturan model di Pengaturan, lalu jalankan ulang. Data contoh tetap bisa dicoba.";
+}
+
 export default function ProcessPage() {
   const router = useRouter();
   const { status, events, error, startedAt, endedAt, modelCalls, cancel, run, aiEnabled, demo } = useStore();
@@ -101,9 +117,7 @@ export default function ProcessPage() {
             <div role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
               <p className="font-medium">Proses berhenti</p>
               <p className="mt-1">{error}</p>
-              <p className="mt-2 text-red-700">
-                Periksa API key dan model di Pengaturan, lalu jalankan ulang. Data contoh tetap bisa dicoba.
-              </p>
+              <p className="mt-2 text-red-700">{recovery(error)}</p>
             </div>
           )}
         </Card>

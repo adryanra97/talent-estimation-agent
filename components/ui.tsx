@@ -4,6 +4,7 @@ import { Info } from "lucide-react";
 import Link from "next/link";
 import { useId } from "react";
 import { ROLE_STYLE } from "@/lib/format";
+import { useStore } from "@/lib/store";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -155,10 +156,13 @@ export function Toggle({
 }
 
 export function RoleBadge({ role, name }: { role: string; name?: string }) {
+  const { catalog } = useStore();
+  const full = catalog?.roles[role]?.name ?? role;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${ROLE_STYLE[role] ?? "bg-slate-50 text-slate-700 ring-slate-200"}`}
-      title={name}
+      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap ring-1 ring-inset ${ROLE_STYLE[role] ?? "bg-slate-50 text-slate-700 ring-slate-200"}`}
+      title={full}
+      aria-label={name ? undefined : full}
     >
       {role}
       {name && <span className="font-normal">{name}</span>}

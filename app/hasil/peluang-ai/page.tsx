@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
-import { Card, EmptyState, InfoTip, PageHeader, RoleBadge, StatusBadge, inputBase, inputClass } from "@/components/ui";
+import { Button, Card, EmptyState, InfoTip, PageHeader, RoleBadge, StatusBadge, inputBase, inputClass } from "@/components/ui";
 import { fte, pct } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
@@ -12,6 +12,8 @@ export default function AiPage() {
   const { catalog, update, teamView } = useStore();
   const [role, setRole] = useState("all");
   const [confidence, setConfidence] = useState("all");
+  const [showAll, setShowAll] = useState(false);
+  const LIMIT = 25;
   const labels = useMemo(
     () => Object.fromEntries((catalog?.ai_categories ?? []).map((c) => [c.key, c.label])),
     [catalog],
@@ -58,7 +60,7 @@ export default function AiPage() {
                     <RoleBadge role={a.role} />
                     <span className="text-xs text-muted">{roleName(a.role, catalog?.roles)}</span>
                   </div>
-                  <p className="mt-4 text-xs text-muted">Bottom-up, dasar ke dengan bantuan AI</p>
+                  <p className="mt-4 text-xs text-muted">FTE bottom-up, sekarang lalu dengan bantuan AI</p>
                   <p className="tabular text-2xl font-semibold text-ink">
                     {fte(a.bu_fte)} <span className="text-muted">→</span> {fte(a.bu_fte_assisted)}
                   </p>
@@ -74,7 +76,7 @@ export default function AiPage() {
                       <p className="text-xs font-medium text-muted">Capability paling terbantu</p>
                       <ul className="mt-1 space-y-0.5 text-xs text-ink">
                         {a.top_skills.slice(0, 3).map((s) => (
-                          <li key={s}>{s}</li>
+                          <li key={s}>{s.split(" · ").at(-1)}</li>
                         ))}
                       </ul>
                     </div>
@@ -121,7 +123,7 @@ export default function AiPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tasks.map((t) => (
+                    {(showAll ? tasks : tasks.slice(0, LIMIT)).map((t) => (
                       <tr key={t.index} className="border-b border-line align-top">
                         <td className="py-2.5 pr-3">
                           <p className="text-ink">{t.task}</p>
@@ -161,7 +163,16 @@ export default function AiPage() {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-3 text-xs text-muted">Tugas dengan hemat 0% (desain, keputusan, koordinasi) disembunyikan.</p>
+              {tasks.length > LIMIT && (
+                <div className="mt-3 flex justify-center">
+                  <Button variant="secondary" size="sm" onClick={() => setShowAll(!showAll)}>
+                    {showAll ? `Tampilkan ${LIMIT} tugas pertama` : `Tampilkan semua ${tasks.length} tugas`}
+                  </Button>
+                </div>
+              )}
+              <p className="mt-3 text-xs text-muted">
+                Tugas dengan hemat 0% (desain, keputusan, koordinasi) disembunyikan. Pakai filter role untuk mempersempit daftar.
+              </p>
             </Card>
           </>
         );

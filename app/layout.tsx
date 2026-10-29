@@ -5,7 +5,8 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Talent Estimation Agent",
+  metadataBase: new URL("https://talentlens.adryanrizkyalviano.me"),
+  title: "TalentLens — Talent Estimation Agent",
   description:
     "Validasi kebutuhan talent dari WBS dengan Use Case Points dan bottom-up, dibantu agent AI.",
 };

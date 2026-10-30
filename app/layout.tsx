@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Shell } from "@/components/shell";
 import { StoreProvider } from "@/lib/store";
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <StoreProvider>
           <Shell>{children}</Shell>
         </StoreProvider>
+        <Analytics />
       </body>
     </html>
   );

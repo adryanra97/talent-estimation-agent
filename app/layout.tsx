@@ -4,6 +4,7 @@ import { Shell } from "@/components/shell";
 import { StoreProvider } from "@/lib/store";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
+import "./editorial.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://talentlens.adryanrizkyalviano.me"),

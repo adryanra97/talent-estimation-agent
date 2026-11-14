@@ -9,6 +9,7 @@ import {
   Home,
   Info,
   Layers,
+  GitBranch,
   Loader2,
   Settings,
   X,
@@ -65,11 +66,11 @@ function Sidebar() {
   const { run, status } = useStore();
   const hasRun = Boolean(run);
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-line bg-surface lg:block">
+    <aside className="tl-app-sidebar hidden w-64 shrink-0 border-r border-line bg-surface lg:block">
       <div className="sticky top-0 flex h-screen flex-col">
-        <Link href="/" className="flex items-center gap-2.5 border-b border-line px-5 py-4">
-          <span aria-hidden className="h-5 w-1 rounded-full bg-accent-600" />
-          <span className="text-[15px] font-semibold text-ink">TalentLens</span>
+        <Link href="/" className="tl-app-brand flex items-center gap-3 border-b border-line px-5 py-5">
+          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-md bg-[#123b55] text-[#bce9f1]"><GitBranch size={18}/></span>
+          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[10px] font-semibold tracking-[.08em] text-muted">CAPABILITY INTELLIGENCE</small></span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
           <NavLink href="/" label="Beranda" icon={<Home className="h-4 w-4" aria-hidden />} />
@@ -137,7 +138,7 @@ function Header() {
     openai_compatible: "Endpoint kustom",
   };
   return (
-    <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-4 border-b border-line bg-surface/95 px-6 py-2.5 backdrop-blur">
+    <header className="tl-app-header sticky top-0 z-10 flex min-h-14 items-center justify-between gap-4 border-b border-line bg-surface/95 px-6 py-2.5 backdrop-blur">
       <div className="flex min-w-0 items-center gap-3 text-sm">
         {demo && run ? (
           <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-amber-900 ring-1 ring-amber-200">
@@ -211,7 +212,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
         <MobileNav />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+        <main className="tl-app-main mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
         <Footer />
       </div>
       <Notice />

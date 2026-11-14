@@ -126,9 +126,13 @@ export default function ProcessPage() {
             {events.length === 0 ? (
               <li className="py-7 text-muted">Menunggu event pertama.</li>
             ) : events.map((event, i) => (
-              <li key={i} className="border-l-2 border-accent-200 py-1 pl-3">
-                <span className="font-semibold text-ink">{event.agent}</span>
-                <span className="block leading-relaxed text-muted">{event.message}</span>
+              <li key={i} className={"tl-log-entry is-" + event.status}>
+                <div className="tl-log-heading">
+                  <strong>{event.agent}</strong>
+                  <span className="tl-log-pill">{event.status === "running" ? "Bekerja" : event.status === "done" ? "Selesai" : event.status === "skipped" ? "Dilewati" : "Gagal"}</span>
+                  {event.at && <time dateTime={new Date(event.at).toISOString()}>{new Date(event.at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time>}
+                </div>
+                <p>{event.message}</p>
               </li>
             ))}
           </ul>

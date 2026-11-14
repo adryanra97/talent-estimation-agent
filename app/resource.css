@@ -115,7 +115,7 @@
 .tl-about-strength svg{color:#2a7897;width:21px;height:21px}
 .tl-about-strength h3{font-size:14px;line-height:1.45;color:#153f56;font-weight:780}
 .tl-about-strength p{font-size:12px;line-height:1.75;color:#58798b;margin-top:6px}
-.tl-about-journey{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border-top:2px solid #76a9bf;border-bottom:1px solid #dce8ee}
+.tl-about-journey{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border-top:2px solid #76a9bf;border-bottom:1px solid #dce8ee}
 .tl-about-journey li{padding:19px 12px 18px 0;border-right:1px solid #d9e6ec}
 .tl-about-journey li+li{padding-left:12px}
 .tl-about-journey li:last-child{border-right:0}
@@ -181,4 +181,10 @@
  .tl-method-checklist{grid-template-columns:1fr;gap:22px;padding:21px 17px}
  .tl-method-augmentation{grid-template-columns:40px 1fr}
  .tl-method-augmentation .tl-resource-action-link{grid-column:2}
+}
+
+@media(min-width:721px) and (max-width:1100px){
+ .tl-about-journey{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .tl-about-journey li:nth-child(3n){border-right:0}
+ .tl-about-journey li:nth-child(n+4){border-top:1px solid #d9e6ec}
 }

@@ -80,6 +80,21 @@ a,button{ -webkit-tap-highlight-color:transparent }
 .tl-journey-pause:hover{background:#e0eff5}
 .tl-journey-pause:focus-visible{outline:3px solid #4594b7;outline-offset:2px}
 .tl-journey-timing{font-size:10px;color:#49758d;font-weight:740}
+/* Six event-driven stages; never a guessed completion percentage. */
+.tl-journey-stage-track{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;background:#edf5f8;padding:0 18px 12px}
+.tl-stage-segment{height:5px;border-radius:2px;background:#cddfe8;transition:background .2s ease}
+.tl-stage-segment.is-done{background:#56af98}
+.tl-stage-segment.is-running{background:linear-gradient(90deg,#267da4,#6dd1d7,#267da4);background-size:200% 100%;animation:tl-stage-flow 1.3s linear infinite}
+.tl-stage-segment.is-skipped{background:repeating-linear-gradient(90deg,#9aafba 0 7px,#e6eff3 7px 11px)}
+.tl-stage-segment.is-error{background:#cc7068}
+@keyframes tl-stage-flow{to{background-position:-200% 0}}
+.tl-agent-node.is-running::after{content:"";position:absolute;inset:-4px;border:1px solid #53adc4;border-radius:10px;pointer-events:none;animation:tl-node-pulse 1.7s ease-in-out infinite}
+@keyframes tl-node-pulse{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.75;transform:scale(1.012)}}
+.tl-agent-node.is-error .tl-agent-state{color:#b84343}
+.tl-agent-node.is-skipped .tl-agent-state{color:#768d9a}
+.tl-journey.is-paused .tl-agent-spin,
+.tl-journey.is-paused .tl-stage-segment.is-running,
+.tl-journey.is-paused .tl-agent-node.is-running::after{animation-play-state:paused}
 .tl-journey-canvas{
   background-color:#fff;
   background-image:radial-gradient(#c6dfeb 1px,transparent 1px);
@@ -192,7 +207,7 @@ a,button{ -webkit-tap-highlight-color:transparent }
  .tl-output-note{grid-column:1/-1}
 }
 @media(prefers-reduced-motion:reduce){
- .tl-doc-mascot,.tl-journey-packet,.tl-agent-spin{animation:none!important}
+ .tl-doc-mascot,.tl-journey-packet,.tl-agent-spin,.tl-stage-segment,.tl-agent-node.is-running::after{animation:none!important}
  .tl-agent-node,.tl-button-primary{transition:none!important;transform:none!important}
 }
 

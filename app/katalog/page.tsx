@@ -185,7 +185,7 @@ export default function CatalogPage() {
                         <span className="tl-catalog-role-summary">{r.summary}</span>
                         <span className="tl-catalog-role-tags">
                           {Object.keys(r.capability_areas ?? {}).map((area) => (
-                            <span key={area} >
+                            <span key={area}>
                               {area}
                             </span>
                           ))}
@@ -207,14 +207,14 @@ export default function CatalogPage() {
               description="Aturan yang digunakan Estimator dan Reviewer dalam mengklasifikasi pekerjaan. Buka setiap aturan untuk detailnya." />
             <ul className="tl-catalog-reference">
               {catalog.rules.map((rule) => (
-                <li key={rule.id} >
+                <li key={rule.id}>
                   <details className="tl-catalog-rule group">
-                    <summary >
+                    <summary>
                       <span className="tl-rule-id">{rule.id}</span>
-                      <span >{rule.title}</span>
+                      <strong>{rule.title}</strong>
                       <ChevronDown className="h-4 w-4" aria-hidden />
                     </summary>
-                    <p >{rule.text}</p>
+                    <p>{rule.text}</p>
                   </details>
                 </li>
               ))}
@@ -229,8 +229,8 @@ export default function CatalogPage() {
                 {Object.entries(catalog.competency_scale).map(([level, text]) => {
                   const [name, ...rest] = text.split(":");
                   return (
-                    <li key={level} >
-                      <span >{level}</span>
+                    <li key={level}>
+                      <strong>{level}</strong>
                       <span>
                         <span className="font-medium text-ink">{name}</span>
                         {rest.length > 0 && <span className="text-muted">, {rest.join(":").trim()}</span>}

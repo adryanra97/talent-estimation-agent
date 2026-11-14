@@ -61,9 +61,9 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
         <span className="tl-report-nav-position" aria-hidden="true">{activeIndex < 0 ? "—" : String(activeIndex + 1).padStart(2, "0")} / {String(RESULT_LINKS.length).padStart(2, "0")}</span>
       </nav>
 
-      <main className="tl-report-content" id="report-content">
+      <div className="tl-report-content" id="report-content">
         {children}
-      </main>
+      </div>
       <footer className="tl-report-footer">
         <p>TalentLens <span aria-hidden="true">/</span> Perhitungan oleh kode, penilaian berbasis konteks, keputusan akhir oleh manusia.</p>
         <Link href="/metodologi">Baca metodologi <ArrowRight size={14} aria-hidden /></Link>

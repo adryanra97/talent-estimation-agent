@@ -73,9 +73,8 @@ export default function SummaryPage() {
                   {run.approved ? (
                     <StatusBadge tone="good"><CheckCircle2 size={14} aria-hidden /> Disetujui</StatusBadge>
                   ) : (
-                    <Button variant="secondary" disabled={reviewAll > 0} title={reviewAll ? "Selesaikan baris perlu review sebelum menyetujui hasil" : undefined}
-                      onClick={() => current && void update({ ...current, approved: true })}>
-                      {reviewAll > 0 ? `${reviewAll} review belum selesai` : "Setujui hasil"}
+                    <Button variant="secondary" onClick={() => current && void update({ ...current, approved: true })}>
+                      Setujui hasil
                     </Button>
                   )}
                 </>

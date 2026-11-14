@@ -195,3 +195,46 @@ a,button{ -webkit-tap-highlight-color:transparent }
  .tl-doc-mascot,.tl-journey-packet,.tl-agent-spin{animation:none!important}
  .tl-agent-node,.tl-button-primary{transition:none!important;transform:none!important}
 }
+
+
+/* Make the moving document -> agent story the first full-width visual experience. */
+.tl-home-intro{grid-template-columns:minmax(0,1fr)!important;gap:43px}
+.tl-home-intro>div:first-child{max-width:1000px}
+.tl-home-intro>div:last-child{width:100%;min-width:0}
+.tl-home-intro .tl-journey-canvas{
+  grid-template-columns:minmax(120px,.82fr) 50px minmax(0,3.4fr) minmax(140px,.84fr);
+  gap:15px;min-height:330px;padding:24px 22px;
+}
+.tl-home-intro .tl-journey-output{display:flex}
+.tl-home-intro .tl-agent-counter{display:block}
+.tl-home-intro .tl-agent-node{min-height:95px;padding:12px 9px}
+.tl-home-intro .tl-agent-icon{width:29px;height:29px}
+.tl-home-intro .tl-agent-icon svg{width:19px}
+.tl-home-intro .tl-agent-info strong{font-size:11px}
+.tl-home-intro .tl-agent-info small{font-size:10px}
+.tl-sample-status{display:inline-block;border-radius:4px;padding:4px 7px;font-size:10px;white-space:nowrap;font-weight:760}
+.tl-sample-status.is-good{background:#e1f3eb;color:#17694d}
+.tl-sample-status.is-low{background:#e6f0f9;color:#236283}
+.tl-sample-status.is-high{background:#fff0df;color:#8c571a}
+.tl-app-sidebar .tl-app-brand{background:#fff}
+.tl-app-sidebar nav{scrollbar-color:#c5dce7 transparent}
+.tl-app-sidebar nav a[aria-current=page]{box-shadow:inset 3px 0 #2e82a5;border-radius:5px}
+.tl-app-header{box-shadow:0 2px 12px #0f355209}
+.tl-app-main{padding-top:31px}
+@media(min-width:1400px){
+  .tl-home-intro .tl-journey-canvas{padding:31px 30px;gap:21px}
+}
+@media(max-width:850px){
+  .tl-home-intro .tl-journey-canvas{grid-template-columns:1fr;gap:16px}
+  .tl-home-intro .tl-journey-output{display:grid}
+  .tl-home-intro .tl-agent-node{min-height:85px}
+}
+@media(max-width:600px){
+  .tl-home-intro{gap:24px}
+  .tl-home-intro .tl-journey-canvas{padding:18px 11px}
+  .tl-home-intro .tl-agent-counter{display:none}
+  .tl-home-intro .tl-journey-output{display:grid}
+  .tl-home-intro .tl-agent-node{min-height:87px}
+  .tl-home-intro .tl-agent-icon{width:26px;height:26px}
+  .tl-home-intro .tl-agent-info strong{font-size:11px}
+}

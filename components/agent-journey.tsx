@@ -3,7 +3,7 @@
 import {
   ArrowRight, BrainCircuit, Check, Circle, ClipboardCheck,
   FileCheck2, FileSpreadsheet, FileText, GitBranch,
-  Loader2, Pause, Play, Search, Sparkles,
+  AlertCircle, Loader2, MinusCircle, Pause, Play, Search, Sparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { ProgressEvent } from "@/lib/types";
@@ -75,7 +75,7 @@ export default function AgentJourney({
   className = "",
 }: Props) {
   const preview = mode === "preview";
-  const [previewIndex, setPreviewIndex] = useState(1);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [reduceMotion, setReduceMotion] = useState(false);
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function AgentJourney({
 
   return (
     <section
-      className={"tl-journey " + (preview ? "tl-journey-preview " : "tl-journey-live ") + className}
+      className={"tl-journey " + (preview ? "tl-journey-preview " : "tl-journey-live ") + (preview && (!playing || reduceMotion) ? "is-paused " : "") + className}
       aria-label={preview ? "Pratinjau animasi alur TalentLens" : "Status agent yang sedang memproses dokumen"}
     >
       <div className="tl-journey-toolbar">
@@ -125,6 +125,13 @@ export default function AgentJourney({
         ) : (
           <span className="tl-journey-timing">{complete ? "Analisis selesai" : failed ? "Proses terhenti" : status === "running" ? "Mengikuti event backend" : "Siap"}</span>
         )}
+      </div>
+      {/* Each segment is derived from the same real events as the nodes below.
+          This is a stage indicator, not an estimated completion percentage. */}
+      <div className="tl-journey-stage-track" aria-hidden="true">
+        {states.map((stageState, i) => (
+          <span key={AGENT_STEPS[i].agent} className={"tl-stage-segment is-" + stageState} />
+        ))}
       </div>
 
       <div className="tl-journey-canvas">
@@ -161,7 +168,7 @@ export default function AgentJourney({
                   <small>{step.detail}</small>
                 </span>
                 <span className="tl-agent-state" aria-label={LABEL[state]}>
-                  {state === "done" ? <Check size={14} aria-hidden /> : state === "running" ? <Loader2 size={15} className="tl-agent-spin" aria-hidden /> : <Circle size={12} aria-hidden />}
+                  {state === "done" ? <Check size={14} aria-hidden /> : state === "running" ? <Loader2 size={15} className="tl-agent-spin" aria-hidden /> : state === "skipped" ? <MinusCircle size={14} aria-hidden /> : state === "error" ? <AlertCircle size={14} aria-hidden /> : <Circle size={12} aria-hidden />}
                 </span>
                 <span className="sr-only">Status: {LABEL[state]}</span>
               </div>

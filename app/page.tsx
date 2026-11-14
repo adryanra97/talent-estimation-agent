@@ -21,7 +21,7 @@ const SAMPLE = [
 
 export default function HomePage() {
   const router = useRouter();
-  const { apiKey, provider, run, status, start, catalogSource } = useStore();
+  const { apiKey, provider, run, status, start, catalogSource, catalog } = useStore();
   const ready = Boolean(apiKey);
   const reviews = run?.breakdown.filter(item => item.needs_review).length ?? 0;
 
@@ -145,10 +145,10 @@ export default function HomePage() {
           <ul className="tl-readiness-list">
             <li>
               {ready ? <CheckCircle2 size={18} color="#25856b" aria-label="Siap"/> : <Circle size={18} color="#99b3c0" aria-label="Belum"/>}
-              <div><strong>Model bahasa</strong><p>{ready ? provider.model + " sudah diatur." : "Belum diatur. Data contoh tetap bisa dicoba tanpa API key."}</p><Link href="/pengaturan">{ready ? "Ubah pengaturan" : "Atur model"}</Link></div>
+              <div><strong>Model bahasa</strong><p>{ready ? "API key diisi untuk " + provider.model + ". Uji koneksi di Pengaturan." : "Belum diatur. Data contoh tetap bisa dicoba tanpa API key."}</p><Link href="/pengaturan">{ready ? "Ubah pengaturan" : "Atur model"}</Link></div>
             </li>
-            <li><CheckCircle2 size={18} color="#25856b" aria-label="Siap"/>
-              <div><strong>Katalog capability</strong><p>{catalogSource === "bawaan" ? "Katalog bawaan tersedia." : "Menggunakan " + catalogSource + "."}</p><Link href="/katalog">Lihat katalog</Link></div>
+            <li>{catalog ? <CheckCircle2 size={18} color="#25856b" aria-label="Tersedia"/> : <Circle size={18} color="#99b3c0" aria-label="Belum tersedia"/>}
+              <div><strong>Katalog capability</strong><p>{!catalog ? "Katalog belum berhasil dimuat. Periksa koneksi ke API." : catalogSource === "bawaan" ? "Katalog bawaan tersedia." : "Menggunakan " + catalogSource + "."}</p><Link href="/katalog">Lihat katalog</Link></div>
             </li>
             <li><FileSpreadsheet size={18} color="#286895" aria-hidden/>
               <div><strong>WBS Excel</strong><p>Gunakan file sendiri atau unduh template data contoh.</p><a href="/api/py/demo/wbs">Unduh contoh WBS</a></div>

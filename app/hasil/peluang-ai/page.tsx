@@ -99,7 +99,7 @@ export default function AiPage() {
               title="Detail tugas"
               description="Persentase hemat diambil dari tabel kategori, bukan dari model. Boleh diubah."
               actions={
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <select aria-label="Filter role" className={`${inputBase} w-auto`} value={role} onChange={(e) => setRole(e.target.value)}>
                     <option value="all">Semua role</option>
                     {[...inView].map((r) => (
@@ -112,10 +112,17 @@ export default function AiPage() {
                     <option>Sedang</option>
                     <option>Rendah</option>
                   </select>
+                  {(role !== "all" || confidence !== "all") && (
+                    <button type="button" className="text-xs font-semibold text-accent-700 underline underline-offset-4"
+                      onClick={() => { setRole("all"); setConfidence("all"); setShowAll(false); }}>
+                      Hapus filter
+                    </button>
+                  )}
                 </div>
               }
             >
-              <div className="overflow-x-auto">
+              <p className="mb-3 text-xs text-muted">{tasks.length} tugas sesuai filter · Geser tabel pada layar kecil untuk melihat semua atribut.</p>
+              <div className="overflow-x-auto" role="region" aria-label="Tabel potensi bantuan AI per tugas" tabIndex={0}>
                 <table className="w-full min-w-[960px] text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs text-muted">

@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
@@ -121,7 +122,7 @@ export default function CapabilityPage() {
                     </Button>
                   </div>
                 )}
-                <p className="tl-report-footnote">Daftar lengkap tersedia di sheet Capability pada ekspor Excel. Capability yang kurang tepat dapat diperbaiki dari rincian item di <a className="underline text-accent-700" href="/hasil/breakdown">Breakdown WBS</a>.</p>
+                <p className="tl-report-footnote">Daftar lengkap tersedia di sheet Capability pada ekspor Excel. Capability yang kurang tepat dapat diperbaiki dari rincian item di <Link className="underline text-accent-700" href="/hasil/breakdown">Breakdown WBS</Link>.</p>
               </>
             )}
           </>

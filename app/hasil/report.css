@@ -11,8 +11,8 @@
 .tl-report-cover-copy{min-width:0;max-width:720px}
 .tl-report-issue{font-size:10px;letter-spacing:.16em;font-weight:760;color:#9dc8d5}
 .tl-report-issue span{margin:0 6px;color:#6ea1b2}
-.tl-report-cover h2{font-size:clamp(32px,4.3vw,59px);line-height:1.06;font-weight:730;letter-spacing:-.045em;color:white;margin:12px 0 18px;text-wrap:balance}
-.tl-report-cover h2 em{color:#a5dce2;font:italic 400 1em/1.07 Georgia,"Times New Roman",serif;letter-spacing:-.04em}
+.tl-report-cover .tl-report-title{font-size:clamp(32px,4.3vw,59px);line-height:1.06;font-weight:730;letter-spacing:-.045em;color:white;margin:12px 0 18px;text-wrap:balance}
+.tl-report-cover .tl-report-title em{color:#a5dce2;font:italic 400 1em/1.07 Georgia,"Times New Roman",serif;letter-spacing:-.04em}
 .tl-report-project{font-size:15px;color:#e7f3f7;font-weight:620;line-height:1.5;overflow-wrap:anywhere}
 .tl-report-dates{font-size:12px;color:#a8c4d0;margin-top:5px;line-height:1.55}
 .tl-report-dates span{padding:0 7px}
@@ -134,7 +134,7 @@
 @media(max-width:760px){
  .tl-report-cover{padding:22px 20px 28px}
  .tl-report-edition{display:none}
- .tl-report-cover h2{font-size:clamp(29px,7vw,44px)}
+ .tl-report-cover .tl-report-title{font-size:clamp(29px,7vw,44px)}
  .tl-report-cover-actions{align-items:stretch;flex-direction:column;width:100%}
  .tl-report-export{width:100%}
  .tl-report-nav{top:56px;padding:0 7px}
@@ -162,7 +162,7 @@
 @media print{
  .tl-report-nav,.tl-report-cover-actions,.tl-report-pager,.tl-report-footer{display:none!important}
  .tl-report-cover{background:#fff!important;color:#12344d!important;padding:0 0 15px}
- .tl-report-cover h2{color:#12344d!important}
+ .tl-report-cover .tl-report-title{color:#12344d!important}
  .tl-report-cover p{color:#12344d!important}
  .tl-report-content{padding:10px 0}
  .tl-report-content table thead th{position:static}
@@ -197,3 +197,12 @@
  .tl-report-writing-guide{grid-template-columns:1fr}
  .tl-ai-role-savings{text-align:left}
 }
+/* Readable secondary copy at small text sizes on light report surfaces. */
+.tl-report-nav-link{color:#4c6a7a}
+.tl-report-nav-link.is-active{color:#154f71}
+.tl-report-nav-number{opacity:.85}
+.tl-summary-metric small,.tl-summary-role-title small,.tl-summary-role-status small,
+.tl-summary-group-head p,.tl-ai-role-change small,.tl-ai-role-savings small,
+.tl-ai-role>div:first-child small,.tl-report-footer,.tl-report-content .tl-ui-card-heading p,
+.tl-report-content .tl-ui-pageheader p,.tl-report-footnote{color:#526d7e}
+.tl-results-scope-stat span{color:#526e7e}

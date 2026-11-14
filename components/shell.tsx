@@ -128,6 +128,7 @@ function MobileNav() {
 }
 
 function Header() {
+  const pathname = usePathname();
   const { provider, apiKey, demo, run, exportExcel, busy } = useStore();
   const connected = Boolean(apiKey);
   const providerName: Record<string, string> = {
@@ -155,7 +156,7 @@ function Header() {
             : "Model belum diatur"}
         </Link>
       </div>
-      {run && (
+      {run && !pathname.startsWith("/hasil") && (
         <Button size="sm" onClick={exportExcel} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
           <span className="sm:hidden">Excel</span>

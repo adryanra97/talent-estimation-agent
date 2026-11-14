@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   CheckCircle2,
   CircleDashed,
   Cpu,
@@ -10,7 +11,9 @@ import {
   Scale,
   Sparkles,
 } from "lucide-react";
-import { Card, PageHeader } from "@/components/ui";
+import { Card } from "@/components/ui";
+import { ResourceHero, ResourceHeading } from "@/components/resource-page";
+import Link from "next/link";
 
 const STRENGTHS = [
   {
@@ -71,7 +74,7 @@ const CHECKS = [
   ["Ruff lint", "Gaya kode, impor, pola bug, docstring NumPy"],
   ["Ruff format", "Format kode konsisten"],
   ["mypy", "Kebenaran tipe seluruh package"],
-  ["pytest + coverage", "23 test unit, integrasi, dan API; coverage 94%"],
+  ["pytest + coverage", "Tes unit, integrasi dan API; lihat status terbaru pada CI"],
   ["Uji rumus Excel", "LibreOffice menghitung ulang workbook; hasilnya harus sama dengan mesin hitung"],
   ["Golden test", "Mesin hitung mereproduksi workbook yang dihitung manual pada proyek nyata, sampai 6 desimal"],
   ["Pipeline Kedro", "Pipeline evaluasi berjalan pada kasus contoh"],
@@ -99,128 +102,120 @@ const BEFORE_PRODUCTION = [
 
 export default function AboutPage() {
   return (
-    <>
-      <PageHeader
-        title="Tentang Aplikasi"
-        description="Apa yang dikerjakan aplikasi ini, bagaimana dibuat, dan bagaimana diuji."
+    <div className="tl-resource-page tl-about-page">
+      <ResourceHero eyebrow="ABOUT / PRODUCT & ENGINEERING"
+        title="TalentLens." accent="Behind the decisions."
+        description="Platform untuk menerjemahkan WBS menjadi estimasi kebutuhan talent dan capability yang dapat dijelaskan, ditinjau, dan ditindaklanjuti."
+        chapter="ABOUT / 04"
+        actions={<Link href="/validasi">Mulai analisis <ArrowRight size={16} aria-hidden /></Link>}
       />
+      <div className="tl-resource-body">
+        <section className="tl-about-intro" aria-labelledby="about-mission">
+          <div>
+            <p className="tl-resource-eyebrow">OUR PURPOSE</p>
+            <h2 id="about-mission">Dari kebutuhan proyek menjadi keputusan workforce yang bisa dipertanggungjawabkan.</h2>
+            <p>TalentLens menggabungkan pembacaan dokumen proyek, penilaian capability, dua pendekatan estimasi, dan review manusia dalam satu alur. Tujuannya bukan menggantikan pengambil keputusan, melainkan memperjelas bukti di balik alokasi talent.</p>
+          </div>
+          <div className="tl-about-intro-aside">
+            <strong>Peran AI dan manusia</strong>
+            <p>Agent menilai konteks dan menelusuri perbedaan. Perhitungan angka dilakukan oleh kode. Pengguna memeriksa asumsi, mengoreksi item, dan memutuskan hasil akhir.</p>
+            <Link href="/metodologi" className="tl-resource-action-link mt-4">Pelajari metodologi <ArrowRight size={15} aria-hidden /></Link>
+          </div>
+        </section>
 
-      <section aria-labelledby="keunggulan" className="mb-10">
-        <h2 id="keunggulan" className="mb-4 text-lg font-semibold text-ink">
-          Keunggulan
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {STRENGTHS.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="rounded-xl border border-line bg-surface p-5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-50 text-accent-700">
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <h3 className="mt-3 text-sm font-semibold text-ink">{title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+        <section aria-labelledby="about-strengths">
+          <ResourceHeading index="01" label="PRODUCT PRINCIPLES" title="Apa yang membedakan TalentLens"
+            id="about-strengths" description="Keputusan staffing lebih mudah direview ketika setiap angka mempunyai sumber, metode, dan konteks yang jelas." />
+          <div className="tl-about-strengths">
+            {STRENGTHS.map(({ icon: Icon, title, text }) => (
+              <article key={title} className="tl-about-strength">
+                <span aria-hidden><Icon /></span>
+                <div><h3>{title}</h3><p>{text}</p></div>
+              </article>
+            ))}
+          </div>
+        </section>
 
-      <section aria-labelledby="alur" className="mb-10">
-        <h2 id="alur" className="mb-4 text-lg font-semibold text-ink">
-          Cara kerja
-        </h2>
-        <ol className="grid gap-3 md:grid-cols-5">
-          {[
-            ["Intake Agent", "Membaca WBS dan dokumen permintaan"],
-            ["Estimator Agent", "Menilai role, kelas, dan alokasi per item; menghitung"],
-            ["Reviewer Agent", "Membandingkan dua metode; mengirim baris janggal untuk dinilai ulang"],
-            ["Augmentation Agent", "Memetakan peluang bantuan AI per capability"],
-            ["Report", "Menyusun ringkasan, Excel, dan draf pesan"],
-          ].map(([title, text], i) => (
-            <li key={title} className="rounded-xl border border-line bg-surface p-4">
-              <p className="text-xs font-semibold text-accent-700">Langkah {i + 1}</p>
-              <p className="mt-1 text-sm font-semibold text-ink">{title}</p>
-              <p className="mt-1 text-sm text-muted">{text}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-3 text-sm text-muted">
-          Augmentation berjalan setelah review selesai, jadi tugas AI dipetakan ke baris yang sudah final. Review manusia dilakukan setelah agent selesai: setiap koreksi dihitung ulang tanpa memanggil model.
-        </p>
-      </section>
-
-      <div className="mb-10 grid gap-6 lg:grid-cols-2">
-        <Card title="Stack teknologi">
-          <table className="w-full text-sm">
-            <tbody>
-              {STACK.map(([layer, tech, why]) => (
-                <tr key={layer} className="border-b border-line align-top last:border-0">
-                  <td className="w-28 py-2.5 pr-3 font-medium text-ink">{layer}</td>
-                  <td className="py-2.5">
-                    <p className="text-ink">{tech}</p>
-                    <p className="text-xs text-muted">{why}</p>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-        <Card
-          title="Verifikasi otomatis"
-          description="Berjalan otomatis di GitHub Actions setiap ada perubahan."
-          actions={
-            <a
-              href="https://github.com/adryanra97/talent-estimation-agent/actions/workflows/ci.yml"
-              className="text-sm font-medium text-accent-700 underline"
-            >
-              Lihat CI
-            </a>
-          }
-        >
-          <ul className="space-y-2.5 text-sm">
-            {CHECKS.map(([name, text]) => (
-              <li key={name} className="flex gap-2.5">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
-                <span>
-                  <span className="font-medium text-ink">{name}</span>
-                  <span className="text-muted"> · {text}</span>
-                </span>
+        <section aria-labelledby="about-flow">
+          <ResourceHeading index="02" label="AGENT JOURNEY" id="about-flow" title="Bagaimana keputusan disusun"
+            description="Setiap tahap punya tanggung jawab yang berbeda, dengan jalur pemeriksaan ulang ketika Reviewer menemukan hal yang perlu dievaluasi." />
+          <ol className="tl-about-journey">
+            {[
+              ["Orchestrator", "Mengatur alur dan koordinasi proses"],
+              ["Intake", "Membaca WBS dan dokumen permintaan"],
+              ["Estimator", "Menilai role, capability, kelas, dan alokasi"],
+              ["Reviewer", "Memeriksa selisih serta item yang janggal"],
+              ["AI Augmentation", "Memetakan peluang bantuan AI secara opsional"],
+              ["Report", "Menyusun hasil, Excel, dan draf komunikasi"],
+            ].map(([title, text], index) => (
+              <li key={title}>
+                <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{title}</h3><p>{text}</p>
               </li>
             ))}
-          </ul>
-        </Card>
-      </div>
+          </ol>
+          <p className="tl-resource-note mt-4">Tahap bantuan AI dapat dilewati. Jika Reviewer menemukan item yang perlu dinilai ulang, alur dapat kembali ke Estimator sebelum hasil akhir disusun.</p>
+        </section>
 
-      <section aria-labelledby="kesiapan">
-        <h2 id="kesiapan" className="mb-1 text-lg font-semibold text-ink">
-          Kesiapan produksi
-        </h2>
-        <p className="mb-4 max-w-3xl text-sm text-muted">
-          Fondasi teknisnya sudah siap untuk pilot. Beberapa langkah berikut perlu diselesaikan sebelum dipakai sebagai sistem produksi organisasi.
-        </p>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card title="Sudah siap">
-            <ul className="space-y-2.5 text-sm">
-              {READY.map((text) => (
-                <li key={text} className="flex gap-2.5">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-label="Siap" />
-                  <span className="text-ink">{text}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-          <Card title="Sebelum produksi">
-            <ul className="space-y-3 text-sm">
-              {BEFORE_PRODUCTION.map(([title, text]) => (
-                <li key={title} className="flex gap-2.5">
-                  <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-label="Belum" />
-                  <span>
-                    <span className="font-medium text-ink">{title}</span>
-                    <span className="block text-muted">{text}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </div>
-      </section>
-    </>
+        <section aria-labelledby="about-pilot">
+          <ResourceHeading index="03" label="READINESS & GOVERNANCE" title="Siap untuk pilot terkontrol"
+            id="about-pilot" description="Komponen dasar aplikasi tersedia untuk eksplorasi dan validasi. Kesiapan operasional organisasi memerlukan pengujian dan kontrol tambahan." />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <Card title="Fondasi yang tersedia" description="Fitur dan kontrol yang sudah dirancang dalam aplikasi.">
+              <ul className="space-y-3 text-sm">
+                {READY.map((text) => (
+                  <li key={text} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-label="Tersedia" />
+                    <span className="leading-relaxed text-ink">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card title="Sebelum penggunaan produksi" description="Prioritas yang perlu diselesaikan dalam konteks organisasi.">
+              <ul className="space-y-3 text-sm">
+                {BEFORE_PRODUCTION.map(([title, text]) => (
+                  <li key={title} className="flex items-start gap-2.5">
+                    <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-label="Perlu ditindaklanjuti" />
+                    <span><strong className="text-ink">{title}</strong><span className="mt-0.5 block leading-relaxed text-muted">{text}</span></span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </section>
+
+        <details className="tl-about-technical">
+          <summary>Untuk pembaca teknis: arsitektur, stack, dan pengujian</summary>
+          <div className="tl-about-technical-body grid gap-6 lg:grid-cols-2">
+            <Card title="Arsitektur dan teknologi" description="Komponen yang digunakan untuk membangun TalentLens.">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <tbody>
+                    {STACK.map(([layer, tech, why]) => (
+                      <tr key={layer} className="border-b border-line align-top last:border-0">
+                        <th scope="row" className="w-28 py-3 pr-4 text-left text-xs font-semibold text-ink">{layer}</th>
+                        <td className="py-3"><strong className="text-ink font-semibold">{tech}</strong><p className="mt-1 text-xs leading-relaxed text-muted">{why}</p></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+            <Card title="Verifikasi yang dikonfigurasi" description="Status run terbaru sebaiknya diperiksa langsung di GitHub Actions."
+              actions={<a href="https://github.com/adryanra97/talent-estimation-agent/actions/workflows/ci.yml" target="_blank" rel="noreferrer"
+                className="tl-resource-action-link">Lihat CI <ArrowRight size={14} aria-hidden /></a>}>
+              <ul className="space-y-3">
+                {CHECKS.map(([name, text]) => (
+                  <li key={name} className="border-b border-line pb-3 last:border-0">
+                    <strong className="text-xs text-ink">{name}</strong>
+                    <p className="mt-1 text-xs leading-relaxed text-muted">{text}</p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </details>
+      </div>
+    </div>
   );
 }

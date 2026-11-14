@@ -3,6 +3,7 @@
 import { ArrowDownToLine, ArrowRight, CheckCircle2, FileText, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { RESULT_LINKS } from "@/lib/nav";
 import { useStore } from "@/lib/store";
 import { date } from "@/lib/format";
@@ -10,7 +11,11 @@ import { date } from "@/lib/format";
 /** Shared, document-like presentation around every results route. All values come from the current run. */
 export function ResultsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const tabsRef = useRef<HTMLDivElement>(null);
   const { run, busy, exportExcel } = useStore();
+  useEffect(() => {
+    tabsRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname]);
   const pending = run?.breakdown.filter((row) => row.needs_review).length ?? 0;
   const activeIndex = RESULT_LINKS.findIndex((item) => item.href === pathname);
 
@@ -48,7 +53,7 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <nav className="tl-report-nav" aria-label="Bagian laporan hasil">
-        <div className="tl-report-nav-list">
+        <div ref={tabsRef} className="tl-report-nav-list">
           {RESULT_LINKS.map((item, i) => (
             <Link key={item.href} href={item.href}
               aria-current={pathname === item.href ? "page" : undefined}

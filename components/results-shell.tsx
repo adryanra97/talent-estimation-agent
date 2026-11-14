@@ -29,7 +29,7 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
         <div className="tl-report-cover-main">
           <div className="tl-report-cover-copy">
             <p className="tl-report-issue">PROJECT INTELLIGENCE <span aria-hidden="true">/</span> {run ? "HASIL ANALISIS" : "MENUNGGU ANALISIS"}</p>
-            <h2>Keputusan talent, <em>berbasis bukti.</em></h2>
+            <p className="tl-report-title">Keputusan talent, <em>berbasis bukti.</em></p>
             <p className="tl-report-project">{run?.project.name || "Laporan estimasi kebutuhan talent"}</p>
             {run && <p className="tl-report-dates">Periode {date(run.project.start)} – {date(run.project.end)} <span aria-hidden="true">·</span> {run.comparisons.length} role dianalisis</p>}
           </div>

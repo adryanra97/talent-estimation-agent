@@ -166,3 +166,19 @@
 @media(prefers-reduced-motion:reduce){
  .tl-catalog-role,.tl-catalog-rule summary svg{transition:none}
 }
+
+.tl-method-checklist{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.93fr);gap:40px;background:#edf5f8;border-left:3px solid #3986a5;padding:29px 30px;margin:35px 0}
+.tl-method-checklist h2{font-size:clamp(21px,2.5vw,28px);font-weight:750;letter-spacing:-.035em;color:#174058;margin-top:9px;line-height:1.24}
+.tl-method-checklist p:not(.tl-resource-eyebrow){font-size:13px;line-height:1.8;color:#577789;margin:10px 0 16px}
+.tl-method-checklist ol{display:grid;gap:12px}
+.tl-method-checklist li{display:flex;gap:11px;align-items:start;background:#fff;border:1px solid #d9e7ed;padding:12px 14px;font-size:12px;line-height:1.65;color:#3a6378}
+.tl-method-checklist li svg{color:#388c90;flex:none;margin-top:2px}
+.tl-method-augmentation{border-top:2px solid #9ebfce;border-bottom:1px solid #d8e6eb;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:17px;padding:24px 0}
+.tl-method-augmentation-symbol{display:grid;place-items:center;width:40px;height:40px;background:#e6f3f7;color:#2f7595}
+.tl-method-augmentation h3{color:#173f56;font-size:16px;font-weight:760}
+.tl-method-augmentation p{color:#557589;font-size:12px;line-height:1.75;margin-top:6px;max-width:675px}
+@media(max-width:760px){
+ .tl-method-checklist{grid-template-columns:1fr;gap:22px;padding:21px 17px}
+ .tl-method-augmentation{grid-template-columns:40px 1fr}
+ .tl-method-augmentation .tl-resource-action-link{grid-column:2}
+}

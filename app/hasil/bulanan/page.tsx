@@ -5,9 +5,11 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
 import { Card, PageHeader, RoleBadge } from "@/components/ui";
-import { date, fte, month, roleColor } from "@/lib/format";
+import { date, fte, month } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
+
+const REPORT_COLORS = ["#205a7b", "#3b8699", "#6bacb7", "#98c5cc", "#587e97", "#8da7ba", "#277e75", "#92beb4"];
 
 export default function MonthlyPage() {
   const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");
@@ -54,6 +56,11 @@ export default function MonthlyPage() {
                 </>
               }
             />
+            <div className="tl-results-scope" aria-label="Ringkasan distribusi bulanan">
+              <div className="tl-results-scope-stat"><strong>{run.monthly.length}</strong><span>Bulan analisis</span></div>
+              <div className="tl-results-scope-stat"><strong>{fte(Math.max(0, ...run.monthly.map((m) => monthTotal(m, roles))))}</strong><span>Puncak FTE · {method === "ucp" ? "UCP" : "bottom-up"}</span></div>
+              <div className="tl-results-scope-stat"><strong>{roles.length}</strong><span>Role pada grafik</span></div>
+            </div>
             {outside.size > 0 && (
               <div role="alert" className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 <p className="font-medium">{outside.size} item WBS berada di luar periode analisis ({date(start)} s.d. {date(end)}).</p>
@@ -68,18 +75,19 @@ export default function MonthlyPage() {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e4e7ec" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#5b6475" }} />
-                    <YAxis tick={{ fontSize: 12, fill: "#5b6475" }} />
-                    <Tooltip formatter={(v: number) => fte(v)} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e1eaee" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#607d8e" }} />
+                    <YAxis tick={{ fontSize: 12, fill: "#607d8e" }} />
+                    <Tooltip formatter={(v: number) => fte(v)} contentStyle={{ border: "1px solid #d7e5ec", borderRadius: 4, fontSize: 12 }} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     {roles.map((r) => (
-                      <Bar key={r} dataKey={r} stackId="a" fill={roleColor(r, run.roles.indexOf(r))} name={roleName(r, catalog?.roles)} isAnimationActive={false} />
+                      <Bar key={r} dataKey={r} stackId="a" fill={REPORT_COLORS[Math.max(0, run.roles.indexOf(r)) % REPORT_COLORS.length]} name={roleName(r, catalog?.roles)} isAnimationActive={false} />
                     ))}
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-6 overflow-x-auto">
+              <p className="tl-report-footnote">Grafik menunjukkan FTE bulanan hasil pembagian effort pada periode proyek. Angka puncak menunjukkan bulan dengan kebutuhan paling tinggi, bukan kebutuhan rata-rata.</p>
+              <div className="mt-6 overflow-x-auto" role="region" aria-label="Data FTE bulanan per role" tabIndex={0}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs text-muted">

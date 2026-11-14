@@ -51,7 +51,6 @@ export default function SummaryPage() {
         const displayedRoles = new Set(shown.map((c) => c.role));
         const total = sum(shown);
         const review = run.breakdown.filter((r) => displayedRoles.has(r.role) && r.needs_review).length;
-        const reviewAll = run.breakdown.filter((r) => r.needs_review).length;
         const hasRequested = shown.some((r) => r.requested_fte !== null);
         const maxFte = Math.max(.1, ...shown.flatMap((c) => [c.ucp_fte, c.bu_fte]));
         const maxDifference = [...shown].sort((a, b) => Math.abs(b.ucp_fte - b.bu_fte) - Math.abs(a.ucp_fte - a.bu_fte))[0];

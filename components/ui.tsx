@@ -74,14 +74,15 @@ export function PageHeader({
 }
 
 export function InfoTip({ text }: { text: string }) {
+  const id = useId();
   return (
     <span className="group relative inline-flex align-middle">
-      <Info aria-hidden className="h-3.5 w-3.5 text-muted" />
-      <span className="sr-only">{text}</span>
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-lg bg-ink px-3 py-2 text-xs leading-relaxed font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
-      >
+      <button type="button" aria-label="Penjelasan" aria-describedby={id}
+        className="inline-flex items-center rounded-sm text-muted focus-visible:outline-2 focus-visible:outline-accent-600">
+        <Info aria-hidden className="h-3.5 w-3.5" />
+      </button>
+      <span id={id} role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded bg-ink px-3 py-2 text-xs leading-relaxed font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         {text}
       </span>
     </span>

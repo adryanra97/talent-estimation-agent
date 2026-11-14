@@ -1,10 +1,11 @@
 "use client";
 
 import { Search } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
-import { EmptyState, PageHeader, RoleBadge, inputClass } from "@/components/ui";
+import { Button, EmptyState, PageHeader, RoleBadge, inputClass } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { visibleRoles } from "@/lib/teams";
 import type { BreakdownRow } from "@/lib/types";
@@ -19,6 +20,7 @@ interface ItemCapabilities {
 export default function CapabilityPage() {
   const { catalog, teamView } = useStore();
   const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
   return (
     <WithRun>
       {(run) => {
@@ -40,6 +42,9 @@ export default function CapabilityPage() {
             )
           : items;
         const total = items.reduce((a, i) => a + i.rows.reduce((b, r) => b + r.capabilities.length, 0), 0);
+        const unique = new Set(items.flatMap((item) => item.rows.flatMap((row) => row.capabilities.map((c) => c.skill)))).size;
+        const shownTotal = shown.reduce((a, i) => a + i.rows.reduce((b, row) => b + row.capabilities.length, 0), 0);
+        const displayed = showAll ? shown : shown.slice(0, 20);
         return (
           <>
             <PageHeader
@@ -47,6 +52,11 @@ export default function CapabilityPage() {
               description="Skill dari katalog yang dibutuhkan tiap item WBS, per role. Satu item bisa butuh beberapa capability."
               actions={<TeamFilter run={run} />}
             />
+            <div className="tl-results-scope" aria-label="Cakupan kebutuhan capability">
+              <div className="tl-results-scope-stat"><strong>{items.length}</strong><span>Item WBS dengan capability</span></div>
+              <div className="tl-results-scope-stat"><strong>{unique}</strong><span>Skill unik teridentifikasi</span></div>
+              <div className="tl-results-scope-stat"><strong>{total}</strong><span>Referensi capability pada item</span></div>
+            </div>
             {items.length === 0 ? (
               <EmptyState
                 title="Belum ada data capability"
@@ -64,15 +74,15 @@ export default function CapabilityPage() {
                       className={`${inputClass} pl-9`}
                       placeholder="Cari item atau skill"
                       value={query}
-                      onChange={(e) => setQuery(e.target.value)}
+                      onChange={(e) => { setQuery(e.target.value); setShowAll(false); }}
                     />
                   </div>
                   <span className="text-sm text-muted">
-                    {shown.length} item, {total} capability. Daftar lengkap ada di sheet Capability pada Excel.
+                    {shown.length} item, {shownTotal} capability sesuai filter.
                   </span>
                 </div>
                 <ul className="divide-y divide-line rounded-xl border border-line bg-surface">
-                  {shown.map((item) => (
+                  {displayed.map((item) => (
                     <li key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                       <div className="min-w-0">
                         <p className="font-medium text-ink">
@@ -104,7 +114,15 @@ export default function CapabilityPage() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-3 text-sm text-muted">Capability yang kurang tepat bisa dihapus dari rincian baris di Breakdown WBS.</p>
+                {shown.length === 0 && <p className="tl-results-empty-filter" role="status">Tidak ada item atau skill yang cocok. Coba kata kunci yang berbeda.</p>}
+                {shown.length > 20 && (
+                  <div className="mt-4 flex justify-center">
+                    <Button variant="secondary" size="sm" onClick={() => setShowAll(!showAll)}>
+                      {showAll ? "Tampilkan 20 item pertama" : `Tampilkan semua ${shown.length} item`}
+                    </Button>
+                  </div>
+                )}
+                <p className="tl-report-footnote">Daftar lengkap tersedia di sheet Capability pada ekspor Excel. Capability yang kurang tepat dapat diperbaiki dari rincian item di <Link className="underline text-accent-700" href="/hasil/breakdown">Breakdown WBS</Link>.</p>
               </>
             )}
           </>

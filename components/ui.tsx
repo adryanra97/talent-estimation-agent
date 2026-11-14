@@ -38,9 +38,9 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-xl border border-line bg-surface ${className}`}>
+    <section className={`tl-ui-card rounded-xl border border-line bg-surface ${className}`}>
       {(title || actions) && (
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-4">
+        <header className="tl-ui-card-heading flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-4">
           <div>
             {title && <h2 className="text-base font-semibold text-ink">{title}</h2>}
             {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
@@ -48,7 +48,7 @@ export function Card({
           {actions}
         </header>
       )}
-      <div className="p-5">{children}</div>
+      <div className="tl-ui-card-body p-5">{children}</div>
     </section>
   );
 }
@@ -63,25 +63,26 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="tl-ui-pageheader mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">{title}</h1>
+        <h1 className="tl-ui-pageheader-title text-2xl font-semibold text-ink">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-muted">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="tl-ui-pageheader-actions flex flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
 
 export function InfoTip({ text }: { text: string }) {
+  const id = useId();
   return (
     <span className="group relative inline-flex align-middle">
-      <Info aria-hidden className="h-3.5 w-3.5 text-muted" />
-      <span className="sr-only">{text}</span>
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-lg bg-ink px-3 py-2 text-xs leading-relaxed font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
-      >
+      <span tabIndex={0} role="img" aria-label="Informasi tambahan" aria-describedby={id}
+        className="inline-flex items-center rounded-sm text-muted focus-visible:outline-2 focus-visible:outline-accent-600">
+        <Info aria-hidden className="h-3.5 w-3.5" />
+      </span>
+      <span id={id} role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded bg-ink px-3 py-2 text-xs leading-relaxed font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         {text}
       </span>
     </span>

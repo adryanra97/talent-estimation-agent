@@ -46,52 +46,60 @@ export default function AiPage() {
               description="Skenario terpisah: bagian pekerjaan yang bisa lebih cepat dengan bantuan AI. Angka di Ringkasan FTE tidak berubah."
               actions={<TeamFilter run={run} />}
             />
-            {groups.map((g) => (
-            <section key={g.key} aria-label={`Tim ${g.label}`} className="mb-6">
-              {(groups.length > 1 || teamView !== "all") && (
-                <h2 className="mb-3 text-base font-semibold text-ink">
-                  Tim {g.label}
-                </h2>
-              )}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {g.roles.map((r) => summaries[r]).filter(Boolean).map((a) => (
-                <div key={a.role} className="rounded-xl border border-line bg-surface p-5">
-                  <div className="flex items-center justify-between">
-                    <RoleBadge role={a.role} />
-                    <span className="text-xs text-muted">{roleName(a.role, catalog?.roles)}</span>
-                  </div>
-                  <p className="mt-4 text-xs text-muted">FTE bottom-up, sekarang lalu dengan bantuan AI</p>
-                  <p className="tabular text-2xl font-semibold text-ink">
-                    {fte(a.bu_fte)} <span className="text-muted">→</span> {fte(a.bu_fte_assisted)}
-                  </p>
-                  <p className="tabular mt-1 text-sm text-muted">
-                    UCP {fte(a.ucp_fte)} → {fte(a.ucp_fte_assisted)}
-                  </p>
-                  <p className="mt-3 text-sm">
-                    <span className="font-medium text-accent-700">{pct(a.saving_share, 1)}</span>{" "}
-                    <span className="text-muted">effort terbantu</span>
-                  </p>
-                  {a.top_skills.length > 0 && (
-                    <div className="mt-3 border-t border-line pt-3">
-                      <p className="text-xs font-medium text-muted">Capability paling terbantu</p>
-                      <ul className="mt-1 space-y-0.5 text-xs text-ink">
-                        {a.top_skills.slice(0, 3).map((s) => (
-                          <li key={s}>{s.split(" · ").at(-1)}</li>
-                        ))}
-                      </ul>
-                    </div>
+            <div className="tl-results-scope" aria-label="Ringkasan skenario AI">
+              <div className="tl-results-scope-stat">
+                <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.bu_fte ?? 0), 0))}</strong>
+                <span>Baseline bottom-up · FTE</span>
+              </div>
+              <div className="tl-results-scope-stat">
+                <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.bu_fte_assisted ?? 0), 0))}</strong>
+                <span>Skenario dengan bantuan AI · FTE</span>
+              </div>
+              <div className="tl-results-scope-stat">
+                <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.saved_person_days ?? 0), 0), 1)}</strong>
+                <span>Potensi person-days terbantu</span>
+              </div>
+            </div>
+
+            <div className="tl-summary-section-head">
+              <div>
+                <p className="tl-summary-eyebrow">AI AUGMENTATION / SCENARIO</p>
+                <h2>Dampak bantuan AI per role</h2>
+              </div>
+              <p>Skenario menunjukkan potensi efisiensi, bukan keputusan otomatis untuk mengurangi talent. Baseline di Ringkasan tetap sama.</p>
+            </div>
+            <div className="tl-ai-role-list" aria-label="Perbandingan baseline dan skenario AI per role">
+              {groups.map((g) => (
+                <section key={g.key} className="tl-ai-role-group">
+                  {(groups.length > 1 || teamView !== "all") && (
+                    <h3 className="tl-ai-group-title">Tim {g.label}</h3>
                   )}
-                </div>
+                  {g.roles.map((roleCode) => summaries[roleCode]).filter(Boolean).map((a) => (
+                    <div key={a.role} className="tl-ai-role">
+                      <div>
+                        <strong>{roleName(a.role, catalog?.roles)}</strong>
+                        <small>{a.role}{a.top_skills.length ? ` · ${a.top_skills.slice(0, 2).map((s) => s.split(" · ").at(-1)).join(", ")}` : ""}</small>
+                      </div>
+                      <div className="tl-ai-role-change">
+                        <span><small>Baseline BU</small><strong>{fte(a.bu_fte)}</strong></span>
+                        <span className="tl-ai-role-arrow" aria-hidden="true">→</span>
+                        <span><small>Dengan AI</small><strong>{fte(a.bu_fte_assisted)}</strong></span>
+                      </div>
+                      <div className="tl-ai-role-savings"><strong>{pct(a.saving_share, 1)}</strong><small>effort berpotensi terbantu</small></div>
+                    </div>
+                  ))}
+                </section>
               ))}
             </div>
-            </section>
-            ))}
+            <p className="tl-report-footnote" style={{ marginBottom: 28 }}>
+              Angka tersebut menggunakan kategori dan asumsi penghematan tugas yang dapat diedit pada tabel di bawah. Hasil aktual tetap memerlukan validasi.
+            </p>
 
             <Card
               title="Detail tugas"
               description="Persentase hemat diambil dari tabel kategori, bukan dari model. Boleh diubah."
               actions={
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <select aria-label="Filter role" className={`${inputBase} w-auto`} value={role} onChange={(e) => setRole(e.target.value)}>
                     <option value="all">Semua role</option>
                     {[...inView].map((r) => (
@@ -104,10 +112,17 @@ export default function AiPage() {
                     <option>Sedang</option>
                     <option>Rendah</option>
                   </select>
+                  {(role !== "all" || confidence !== "all") && (
+                    <button type="button" className="text-xs font-semibold text-accent-700 underline underline-offset-4"
+                      onClick={() => { setRole("all"); setConfidence("all"); setShowAll(false); }}>
+                      Hapus filter
+                    </button>
+                  )}
                 </div>
               }
             >
-              <div className="overflow-x-auto">
+              <p className="mb-3 text-xs text-muted">{tasks.length} tugas sesuai filter · Geser tabel pada layar kecil untuk melihat semua atribut.</p>
+              <div className="overflow-x-auto" role="region" aria-label="Tabel potensi bantuan AI per tugas" tabIndex={0}>
                 <table className="w-full min-w-[960px] text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs text-muted">
@@ -141,7 +156,7 @@ export default function AiPage() {
                         <td className="tabular py-2.5 pr-3 text-right">{pct(t.weight)}</td>
                         <td className="py-2.5 pr-3 text-right">
                           <input
-                            aria-label="Persentase hemat"
+                            aria-label={`Persentase hemat untuk ${t.task}`}
                             type="number"
                             min={0}
                             max={100}
@@ -163,6 +178,9 @@ export default function AiPage() {
                   </tbody>
                 </table>
               </div>
+              {tasks.length === 0 && (
+                <p role="status" className="tl-results-empty-filter">Tidak ada tugas dengan potensi penghematan sesuai filter yang dipilih.</p>
+              )}
               {tasks.length > LIMIT && (
                 <div className="mt-3 flex justify-center">
                   <Button variant="secondary" size="sm" onClick={() => setShowAll(!showAll)}>

@@ -2,7 +2,8 @@
 
 import { CheckCircle2, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
-import { Button, Card, Field, PageHeader, Toggle, inputClass } from "@/components/ui";
+import { Button, Card, Field, Toggle, inputClass } from "@/components/ui";
+import { ResourceHero, ResourceHeading } from "@/components/resource-page";
 import { testConnection } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import type { Provider } from "@/lib/types";
@@ -39,8 +40,13 @@ export default function SettingsPage() {
   const [state, setState] = useState<"idle" | "testing" | "ok" | "fail">("idle");
   const [message, setMessage] = useState("");
   const [notes, setNotes] = useState<string[]>([]);
+  const [testedConfig, setTestedConfig] = useState<string | null>(null);
   const current = PROVIDERS.find((p) => p.value === provider.provider)!;
   const needsUrl = provider.provider === "azure" || provider.provider === "openai_compatible";
+  // A previous success cannot be shown as a successful test for changed credentials or endpoint.
+  const configFingerprint = JSON.stringify([provider.provider, provider.model, provider.base_url, provider.api_version, provider.extra_headers, apiKey, provider.mask_pii]);
+  const shownState = testedConfig === configFingerprint ? state : "idle";
+  const complete = Boolean(apiKey && provider.model.trim() && (!needsUrl || provider.base_url?.trim()));
 
   const AUTO = { send_temperature: true, structured_method: "auto" as const };
 
@@ -56,10 +62,12 @@ export default function SettingsPage() {
         structured_method: result.structured_method,
         max_tokens: result.max_tokens,
       });
+      setTestedConfig(configFingerprint);
       setState("ok");
       setNotes(result.adjustments);
       setMessage(`Terhubung. Model menjawab "${result.reply}".`);
     } catch (err) {
+      setTestedConfig(configFingerprint);
       setState("fail");
       const text = err instanceof Error ? err.message : String(err);
       setMessage(
@@ -71,10 +79,23 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
-      <PageHeader title="Pengaturan" description="Model bahasa yang dipakai agent. Key hanya tersimpan di tab ini." />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2" title="Model bahasa">
+    <div className="tl-resource-page tl-settings-page">
+      <ResourceHero eyebrow="CONFIGURATION / MODEL ACCESS" title="Pengaturan" accent="model AI."
+        description="Tentukan penyedia model, masukkan kredensial secara aman, lalu uji koneksi sebelum menganalisis dokumen proyek."
+        chapter="CONFIGURATION / 02"
+        footnote="API key tetap berada di memori tab browser; aplikasi tidak menyimpannya di database." />
+      <div className="tl-resource-body">
+        <div className="tl-settings-status" role="status">
+          <div><strong>{shownState === "ok" ? "Koneksi model berhasil diuji" : complete ? "Konfigurasi siap diuji" : "Lengkapi konfigurasi model"}</strong>
+            <p>{shownState === "ok" ? `${current.label} · ${provider.model}` : complete ? "Pengaturan sudah diisi. Jalankan tes untuk memastikan endpoint dapat merespons." : "Pilih model, isi API key dan endpoint bila dibutuhkan. Data demo dapat dicoba tanpa key."}</p>
+          </div>
+          <span className="tl-settings-status-tag"><i aria-hidden className={"tl-settings-status-dot" + (shownState === "ok" ? " is-ok" : "")} />
+            {shownState === "ok" ? "Terverifikasi lewat tes" : "Belum diverifikasi"}</span>
+        </div>
+        <ResourceHeading index="01" label="PROVIDER & CREDENTIALS" title="Hubungkan model bahasa"
+          description="Pilih penyedia dan model yang akan digunakan agent. Mulai dari pengaturan inti, lalu tes sebelum menjalankan validasi." />
+        <div className="tl-settings-main">
+        <Card title="Konfigurasi koneksi" description="Kredensial tidak tersimpan setelah halaman ditutup.">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Penyedia" hint={current.note}>
               {(id) => (
@@ -181,11 +202,11 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
-            <Button onClick={test} disabled={!apiKey || !provider.model || state === "testing"}>
+            <Button onClick={test} disabled={!complete || state === "testing"}>
               {state === "testing" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
               Tes koneksi
             </Button>
-            {state === "ok" && (
+            {shownState === "ok" && (
               <div className="text-sm" role="status">
                 <p className="flex items-center gap-1.5 text-emerald-800">
                   <CheckCircle2 className="h-4 w-4" aria-hidden /> {message}
@@ -197,22 +218,32 @@ export default function SettingsPage() {
                 )}
               </div>
             )}
-            {state === "fail" && (
+            {shownState === "fail" && (
               <p className="flex max-w-2xl items-start gap-1.5 text-sm text-red-700" role="alert">
                 <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> <span className="break-words">{message}</span>
               </p>
             )}
           </div>
         </Card>
-        <Card title="Privasi">
-          <ul className="space-y-3 text-sm text-ink">
-            <li>Server tidak punya database dan tidak menulis file. Setiap permintaan berdiri sendiri.</li>
-            <li>File WBS dan dokumen diproses di memori lalu dibuang.</li>
-            <li>Hasil run hanya ada di tab ini. Menutup tab berarti hasil hilang, jadi unduh Excel bila perlu.</li>
-            <li>Model hanya menerima teks yang dibutuhkan untuk menilai, bukan file asli.</li>
-          </ul>
-        </Card>
+        <aside className="tl-settings-aside">
+          <h3>Langkah konfigurasi</h3>
+          <ol>
+            <li><div><strong>Pilih penyedia</strong>Sesuaikan model dengan kebutuhan estimasi dan penyedia yang telah disetujui.</div></li>
+            <li><div><strong>Isi kredensial</strong>Masukkan API key dan endpoint bila diperlukan. Key hanya berlaku selama sesi tab ini.</div></li>
+            <li><div><strong>Jalankan tes koneksi</strong>Periksa respons model sebelum menggunakan dokumen proyek asli.</div></li>
+          </ol>
+          <div className="mt-8 border-t border-line pt-5">
+            <h3>Penanganan data</h3>
+            <ul className="mt-4 space-y-3 text-xs leading-relaxed text-muted">
+              <li><strong className="text-ink">Tanpa database:</strong> Server tidak menyimpan dokumen atau API key sebagai data persisten.</li>
+              <li><strong className="text-ink">Proses sementara:</strong> File diproses dalam memori permintaan, sedangkan hasil tersimpan di tab browser.</li>
+              <li><strong className="text-ink">Data ke model:</strong> Teks yang diperlukan untuk penilaian dikirim ke penyedia model; periksa kebijakan penyedia untuk dokumen sensitif.</li>
+              <li><strong className="text-ink">Hasil analisis:</strong> Ekspor Excel sebelum menutup tab jika ingin menyimpan hasilnya.</li>
+            </ul>
+          </div>
+        </aside>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

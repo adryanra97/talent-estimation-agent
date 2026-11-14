@@ -2,7 +2,7 @@
 
 import { WithRun } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
-import { Card, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
+import { Button, Card, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
 import { useState } from "react";
 import { FINDING_LABEL, fte } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -26,6 +26,7 @@ const ACTION_LABEL: Record<string, string> = {
 export default function FindingsPage() {
   const { catalog, teamView } = useStore();
   const [kind, setKind] = useState("all");
+  const [showTrace, setShowTrace] = useState(false);
   return (
     <WithRun>
       {(run) => {
@@ -42,6 +43,11 @@ export default function FindingsPage() {
               description="Hal yang perlu dicek, dan jejak keputusan setiap agent."
               actions={<TeamFilter run={run} />}
             />
+            <div className="tl-results-scope" aria-label="Ringkasan temuan">
+              <div className="tl-results-scope-stat"><strong>{inTeam.filter((f) => f.severity === "Tinggi").length}</strong><span>Prioritas tinggi</span></div>
+              <div className="tl-results-scope-stat"><strong>{inTeam.filter((f) => f.severity === "Sedang").length}</strong><span>Prioritas sedang</span></div>
+              <div className="tl-results-scope-stat"><strong>{inTeam.length}</strong><span>Total temuan untuk cakupan ini</span></div>
+            </div>
             <div className="grid gap-6 lg:grid-cols-5">
               <Card
                 className="lg:col-span-3"
@@ -99,7 +105,7 @@ export default function FindingsPage() {
                 </Card>
                 <Card title="Jejak keputusan agent">
                   <ol className="space-y-3 text-sm">
-                    {run.trace.map((t, i) => (
+                    {(showTrace ? run.trace : run.trace.slice(0, 8)).map((t, i) => (
                       <li key={i} className="border-l-2 border-accent-200 pl-3">
                         <p className="font-medium text-ink">
                           {t.agent} <span className="font-normal text-muted">{ACTION_LABEL[t.action] ?? t.action}</span>
@@ -108,6 +114,13 @@ export default function FindingsPage() {
                       </li>
                     ))}
                   </ol>
+                  {run.trace.length > 8 && (
+                    <div className="mt-5 border-t border-line pt-4">
+                      <Button variant="secondary" size="sm" onClick={() => setShowTrace(!showTrace)}>
+                        {showTrace ? "Tampilkan 8 langkah pertama" : `Lihat semua ${run.trace.length} jejak agent`}
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               </div>
             </div>

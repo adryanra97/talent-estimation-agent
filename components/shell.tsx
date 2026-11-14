@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { RESULT_LINKS } from "@/lib/nav";
 import { useStore } from "@/lib/store";
 import { Button } from "./ui";
@@ -109,25 +109,38 @@ function Sidebar() {
 }
 
 function MobileNav() {
+  const pathname = usePathname();
   const { run } = useStore();
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname]);
   const links = [
     { href: "/", label: "Beranda" },
     { href: "/validasi", label: "Validasi" },
     ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }] : []),
+    { href: "/katalog", label: "Katalog" },
     { href: "/pengaturan", label: "Pengaturan" },
+    { href: "/metodologi", label: "Metodologi" },
+    { href: "/tentang", label: "Tentang" },
   ];
   return (
-    <nav aria-label="Navigasi" className="flex gap-1 overflow-x-auto border-b border-line bg-surface px-4 py-2 lg:hidden">
-      {links.map((l) => (
-        <Link key={l.href} href={l.href} className="rounded-md px-3 py-1.5 text-sm text-muted hover:bg-canvas">
-          {l.label}
-        </Link>
-      ))}
+    <nav ref={navRef} aria-label="Navigasi utama mobile" className="tl-mobile-nav flex gap-1 overflow-x-auto border-b border-line bg-surface px-4 py-2 lg:hidden">
+      {links.map((l) => {
+        const active = l.href === "/hasil/ringkasan" ? pathname.startsWith("/hasil/") : pathname === l.href;
+        return (
+          <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}
+            className={`tl-mobile-navlink rounded-md px-3 py-1.5 text-sm whitespace-nowrap ${active ? "is-active" : "text-muted hover:bg-canvas"}`}>
+            {l.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
 
 function Header() {
+  const pathname = usePathname();
   const { provider, apiKey, demo, run, exportExcel, busy } = useStore();
   const connected = Boolean(apiKey);
   const providerName: Record<string, string> = {
@@ -155,7 +168,7 @@ function Header() {
             : "Model belum diatur"}
         </Link>
       </div>
-      {run && (
+      {run && !pathname.startsWith("/hasil") && (
         <Button size="sm" onClick={exportExcel} disabled={busy}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
           <span className="sm:hidden">Excel</span>

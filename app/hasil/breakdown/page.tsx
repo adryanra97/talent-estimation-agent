@@ -138,7 +138,13 @@ function Table({ run }: { run: RunResult }) {
             <input type="checkbox" className="h-4 w-4 accent-accent-600" checked={reviewOnly} onChange={(e) => setReviewOnly(e.target.checked)} />
             Hanya perlu review
           </label>
-          <span className="text-sm text-muted">{rows.length} baris</span>
+          <span className="text-sm text-muted" role="status">{rows.length} baris ditampilkan</span>
+          {(query || role !== "all" || reviewOnly) && (
+            <button type="button" onClick={() => { setQuery(""); setRole("all"); setReviewOnly(false); }}
+              className="text-xs font-semibold text-accent-700 underline underline-offset-4">
+              Hapus filter
+            </button>
+          )}
           {canUndo && (
             <Button size="sm" variant="ghost" onClick={() => void undo()} disabled={busy}>
               <Undo2 className="h-4 w-4" aria-hidden /> Urungkan
@@ -226,7 +232,7 @@ function Table({ run }: { run: RunResult }) {
                         </button>
                       </td>
                       <td className="py-2.5">
-                        <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} aria-label="Lihat alasan" className="text-muted hover:text-ink">
+                        <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} aria-label={`Lihat alasan untuk ${r.item_id} ${r.role}`} className="text-muted hover:text-ink">
                           <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
                         </button>
                       </td>
@@ -318,6 +324,11 @@ function Table({ run }: { run: RunResult }) {
             );
           })}
         </ul>
+        {rows.length === 0 && (
+          <p role="status" className="tl-results-empty-filter">
+            Tidak ada item yang sesuai filter. Ubah pencarian, pilih role lain, atau hapus filter.
+          </p>
+        )}
       </Card>
 
       {selected.size > 0 && (
@@ -343,6 +354,7 @@ function Table({ run }: { run: RunResult }) {
 }
 
 export default function BreakdownPage() {
+  const { catalog, teamView } = useStore();
   return (
     <WithRun>
       {(run) => (
@@ -352,6 +364,19 @@ export default function BreakdownPage() {
             description="Satu baris adalah satu item untuk satu role. Perubahan langsung dihitung ulang; centang baris untuk dinilai ulang agent."
             actions={<TeamFilter run={run} />}
           />
+          <div className="tl-results-scope" aria-label="Cakupan rincian pekerjaan">
+            {(() => {
+              const roles = new Set(visibleRoles(run, catalog, teamView));
+              const entries = run.breakdown.filter((row) => roles.has(row.role));
+              return (
+                <>
+                  <div className="tl-results-scope-stat"><strong>{entries.length}</strong><span>Baris item × role</span></div>
+                  <div className="tl-results-scope-stat"><strong>{new Set(entries.map((row) => row.item_id)).size}</strong><span>Item WBS unik</span></div>
+                  <div className="tl-results-scope-stat"><strong>{entries.filter((row) => row.needs_review).length}</strong><span>Perlu review</span></div>
+                </>
+              );
+            })()}
+          </div>
           <Suspense>
             <Table run={run} />
           </Suspense>

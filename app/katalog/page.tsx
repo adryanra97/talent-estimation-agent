@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Download, RotateCcw, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, RotateCcw, Search, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { Drawer } from "@/components/drawer";
-import { Button, PageHeader, RoleBadge } from "@/components/ui";
+import { Button, RoleBadge } from "@/components/ui";
+import { ResourceHero, ResourceHeading } from "@/components/resource-page";
 import { downloadCatalogExcel, parseCatalog } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import type { RoleProfile } from "@/lib/types";
@@ -54,6 +55,8 @@ export default function CatalogPage() {
   const input = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [openRole, setOpenRole] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [teamScope, setTeamScope] = useState("all");
 
   async function upload(file: File | undefined) {
     if (!file) return;
@@ -77,80 +80,118 @@ export default function CatalogPage() {
         .filter((t) => t.roles.length > 0)
     : [];
 
+  const roleCount = teams.reduce((sum, team) => sum + team.roles.length, 0);
+  const skillCount = catalog
+    ? new Set(Object.values(catalog.roles).flatMap((role) => Object.values(role.pillars ?? {}).flat())).size
+    : 0;
+  const filterQuery = query.trim().toLocaleLowerCase("id-ID");
+  const filteredTeams = teams
+    .filter((team) => teamScope === "all" || team.key === teamScope)
+    .map((team) => ({
+      ...team,
+      roles: team.roles.filter((role) => !filterQuery || [
+        role.code, role.name, role.summary, role.in_scope,
+        ...Object.keys(role.capability_areas ?? {}),
+        ...Object.values(role.pillars ?? {}).flat(),
+      ].join(" ").toLocaleLowerCase("id-ID").includes(filterQuery)),
+    }))
+    .filter((team) => team.roles.length > 0);
+  const filteredCount = filteredTeams.reduce((sum, team) => sum + team.roles.length, 0);
+
   return (
-    <>
-      <PageHeader
-        title="Katalog Capability"
-        description="Acuan agent saat menentukan role dari isi pekerjaan. Klik role untuk melihat rinciannya."
+    <div className="tl-resource-page">
+      <ResourceHero
+        eyebrow="ROLE & SKILL REFERENCE"
+        title="Katalog"
+        accent="capability."
+        description="Eksplorasi role, pilar skill, lingkup pekerjaan, dan aturan keputusan yang menjadi acuan agent saat menganalisis WBS."
+        chapter="REFERENCE / 01"
         actions={
           <>
             {custom && (
-              <Button variant="ghost" onClick={resetCatalog}>
+              <Button variant="secondary" onClick={resetCatalog}>
                 <RotateCcw className="h-4 w-4" aria-hidden /> Pakai bawaan
               </Button>
             )}
-            <Button
-              variant="secondary"
-              onClick={() => downloadCatalogExcel(catalog).catch((err) => setNotice(err instanceof Error ? err.message : String(err)))}
-              disabled={!catalog}
-            >
-              <Download className="h-4 w-4" aria-hidden /> Unduh katalog
+            <Button variant="secondary" onClick={() => void downloadCatalogExcel(catalog).catch((err) => setNotice(err instanceof Error ? err.message : String(err)))} disabled={!catalog}>
+              <Download className="h-4 w-4" aria-hidden /> Unduh Excel
             </Button>
             <Button variant="secondary" onClick={() => input.current?.click()} disabled={loading}>
-              <Upload className="h-4 w-4" aria-hidden /> Unggah katalog
+              <Upload className="h-4 w-4" aria-hidden /> {loading ? "Mengunggah…" : "Unggah katalog"}
             </Button>
-            <input
-              ref={input}
-              type="file"
-              accept=".xlsx,.yaml,.yml,.json"
-              className="sr-only"
-              aria-label="Unggah katalog"
-              onChange={(e) => upload(e.target.files?.[0])}
-            />
+            <input ref={input} type="file" accept=".xlsx,.yaml,.yml,.json" className="sr-only"
+              aria-label="Unggah katalog" onChange={(e) => void upload(e.target.files?.[0])} />
           </>
         }
       />
-      <p className="-mt-3 mb-8 text-sm text-muted">
-        {custom ? (
-          <>
-            Memakai katalog dari <span className="font-medium text-ink">{catalogSource}</span>, hanya untuk tab ini.
-          </>
-        ) : (
-          <>Memakai katalog bawaan. Untuk mengubahnya, unduh Excel, edit, lalu unggah kembali.</>
-        )}
-      </p>
-
+      <div className="tl-resource-body">
+        <div className="tl-resource-notice" role="status">
+          <span aria-hidden="true">◈</span>
+          <span>{custom ? <>Menggunakan katalog <strong>{catalogSource}</strong> hanya selama tab ini aktif.</> :
+            "Menggunakan katalog bawaan. Untuk menyesuaikan, unduh Excel, edit, lalu unggah file yang diperbarui."}</span>
+        </div>
       {!catalog ? (
-        <p className="text-sm text-muted">Memuat katalog.</p>
+        <div className="tl-resource-empty" role="status">Katalog belum tersedia. Periksa koneksi API, kemudian coba buka halaman ini kembali.</div>
       ) : (
-        <div className="space-y-10">
-          {teams.map((team) => (
-            <section key={team.key} aria-labelledby={`tim-${team.key}`}>
-              <h2 id={`tim-${team.key}`} className="mb-3 text-base font-semibold text-ink">
-                Tim {team.label}
-              </h2>
-              <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+        <>
+          <dl className="tl-resource-kpi-strip" aria-label="Cakupan katalog">
+            <div className="tl-resource-kpi"><dt>Role terdokumentasi</dt><dd>{roleCount}</dd><small>Role dalam tim yang tersedia</small></div>
+            <div className="tl-resource-kpi"><dt>Skill unik</dt><dd>{skillCount}</dd><small>Dari pilar kompetensi</small></div>
+            <div className="tl-resource-kpi"><dt>Aturan keputusan</dt><dd>{catalog.rules.length}</dd><small>Acuan klasifikasi dan review</small></div>
+          </dl>
+          <section aria-labelledby="catalog-roles">
+            <ResourceHeading index="01" label="ROLE DIRECTORY" title="Cari role dan capability"
+              id="catalog-roles" description="Telusuri role berdasarkan nama, skill, atau cakupan kerja. Pilih role untuk membaca penjelasan lengkap." />
+            <div className="tl-resource-toolbar">
+              <label className="tl-search">
+                <span className="sr-only">Cari role, area capability, atau skill</span>
+                <Search size={17} aria-hidden />
+                <input type="search" value={query} onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Cari role, skill, atau area…" />
+              </label>
+              <label>
+                <span className="sr-only">Filter tim</span>
+                <select value={teamScope} onChange={(e) => setTeamScope(e.target.value)}>
+                  <option value="all">Semua tim</option>
+                  {teams.map((team) => <option value={team.key} key={team.key}>{team.label}</option>)}
+                </select>
+              </label>
+              <span className="tl-resource-count" role="status">{filteredCount} dari {roleCount} role</span>
+              {(query || teamScope !== "all") && (
+                <button type="button" className="tl-resource-clear" onClick={() => { setQuery(""); setTeamScope("all"); }}>Hapus filter</button>
+              )}
+            </div>
+            {filteredCount === 0 && (
+              <div className="tl-resource-empty" role="status">
+                Tidak ada role yang cocok. Ubah kata kunci atau pilih semua tim untuk melihat katalog.
+              </div>
+            )}
+            <div className="tl-catalog-directory">
+          {filteredTeams.map((team) => (
+            <section key={team.key} className="tl-catalog-team" aria-labelledby={`tim-${team.key}`}>
+              <div className="tl-catalog-team-header"><h3 id={`tim-${team.key}`}>Tim {team.label}</h3><span>{team.roles.length} role</span></div>
+              <ul className="tl-catalog-role-list">
                 {team.roles.map((r) => (
                   <li key={r.code}>
                     <button
                       onClick={() => setOpenRole(r.code)}
-                      className="group grid w-full grid-cols-[auto_1fr_auto] items-start gap-x-3 gap-y-2 px-4 py-4 text-left hover:bg-canvas sm:gap-x-4 sm:px-5"
+                      className="tl-catalog-role group"
                     >
-                      <span className="pt-0.5 sm:w-12">
+                      <span className="tl-catalog-role-code">
                         <RoleBadge role={r.code} />
                       </span>
                       <span className="min-w-0">
-                        <span className="block font-medium text-ink">{r.name}</span>
-                        <span className="mt-0.5 block text-sm text-muted">{r.summary}</span>
-                        <span className="mt-2 flex flex-wrap gap-1.5">
+                        <span className="tl-catalog-role-name">{r.name}</span>
+                        <span className="tl-catalog-role-summary">{r.summary}</span>
+                        <span className="tl-catalog-role-tags">
                           {Object.keys(r.capability_areas ?? {}).map((area) => (
-                            <span key={area} className="rounded-md bg-canvas px-2 py-0.5 text-xs text-muted ring-1 ring-line group-hover:bg-surface">
+                            <span key={area}>
                               {area}
                             </span>
                           ))}
                         </span>
                       </span>
-                      <ChevronRight className="mt-1 h-4 w-4 text-muted group-hover:text-ink" aria-hidden />
+                      <ChevronRight className="tl-catalog-role-arrow h-4 w-4" aria-hidden />
                     </button>
                   </li>
                 ))}
@@ -158,21 +199,22 @@ export default function CatalogPage() {
             </section>
           ))}
 
+            </div>
+          </section>
+
           <section aria-labelledby="aturan">
-            <h2 id="aturan" className="text-base font-semibold text-ink">
-              Aturan keputusan
-            </h2>
-            <p className="mb-3 text-sm text-muted">Dipatuhi Estimator dan Reviewer saat menilai item.</p>
-            <ul className="grid gap-x-8 rounded-xl border border-line bg-surface px-5 sm:grid-cols-2">
+            <ResourceHeading index="02" label="GOVERNANCE" id="aturan" title="Aturan keputusan"
+              description="Aturan yang digunakan Estimator dan Reviewer dalam mengklasifikasi pekerjaan. Buka setiap aturan untuk detailnya." />
+            <ul className="tl-catalog-reference">
               {catalog.rules.map((rule) => (
-                <li key={rule.id} className="border-b border-line last:border-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-0">
-                  <details className="group py-3">
-                    <summary className="flex cursor-pointer list-none items-start gap-2 text-sm text-ink">
-                      <span className="tabular w-8 shrink-0 text-muted">{rule.id}</span>
-                      <span className="flex-1 font-medium">{rule.title}</span>
-                      <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180" aria-hidden />
+                <li key={rule.id}>
+                  <details className="tl-catalog-rule group">
+                    <summary>
+                      <span className="tl-rule-id">{rule.id}</span>
+                      <strong>{rule.title}</strong>
+                      <ChevronDown className="h-4 w-4" aria-hidden />
                     </summary>
-                    <p className="mt-1.5 pl-10 text-sm leading-relaxed text-muted">{rule.text}</p>
+                    <p>{rule.text}</p>
                   </details>
                 </li>
               ))}
@@ -181,16 +223,14 @@ export default function CatalogPage() {
 
           {Object.keys(catalog.competency_scale ?? {}).length > 0 && (
             <section aria-labelledby="skala">
-              <h2 id="skala" className="text-base font-semibold text-ink">
-                Skala kompetensi
-              </h2>
-              <p className="mb-3 text-sm text-muted">Acuan bila talent dinilai per skill.</p>
-              <ol className="rounded-xl border border-line bg-surface px-5 text-sm">
+              <ResourceHeading index="03" label="COMPETENCY SCALE" id="skala" title="Skala kompetensi"
+                description="Referensi tingkat kompetensi untuk penilaian talent per skill." />
+              <ol className="tl-catalog-scale">
                 {Object.entries(catalog.competency_scale).map(([level, text]) => {
                   const [name, ...rest] = text.split(":");
                   return (
-                    <li key={level} className="flex gap-4 border-b border-line py-2.5 last:border-0">
-                      <span className="tabular w-4 font-semibold text-accent-700">{level}</span>
+                    <li key={level}>
+                      <strong>{level}</strong>
                       <span>
                         <span className="font-medium text-ink">{name}</span>
                         {rest.length > 0 && <span className="text-muted">, {rest.join(":").trim()}</span>}
@@ -201,8 +241,9 @@ export default function CatalogPage() {
               </ol>
             </section>
           )}
-        </div>
+        </>
       )}
+      </div>
 
       <Drawer
         open={Boolean(selected)}
@@ -218,6 +259,6 @@ export default function CatalogPage() {
       >
         {selected && <RoleDetail role={selected} />}
       </Drawer>
-    </>
+    </div>
   );
 }

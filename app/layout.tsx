@@ -6,6 +6,7 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import "./editorial.css";
 import "./resource.css";
+import "./studio.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://talentlens.adryanrizkyalviano.me"),

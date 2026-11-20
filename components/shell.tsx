@@ -66,21 +66,23 @@ function NavLink({
 }
 
 function Sidebar() {
+  const pathname = usePathname();
   const { run, status } = useStore();
   const hasRun = Boolean(run);
   return (
     <aside className="tl-app-sidebar hidden w-64 shrink-0 border-r border-line bg-surface lg:block">
       <div className="sticky top-0 flex h-screen flex-col">
         <Link href="/" className="tl-app-brand flex items-center gap-3 border-b border-line px-5 py-5">
-          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-md bg-[#123b55] text-[#bce9f1]"><GitBranch size={18}/></span>
-          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[10px] font-semibold tracking-[.08em] text-muted">CAPABILITY INTELLIGENCE</small></span>
+          <span aria-hidden className="tl-brand-symbol"><span /></span>
+          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[10px] font-semibold tracking-[.08em] text-muted">WORKFORCE INTELLIGENCE</small></span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
+          <p className="tl-nav-kicker">WORKSPACE</p>
           <NavLink href="/" label="Beranda" icon={<Home className="h-4 w-4" aria-hidden />} />
-          <NavLink href="/validasi" label="Validasi Baru" icon={<FilePlus2 className="h-4 w-4" aria-hidden />} />
+          <NavLink href="/validasi" label="Analisis baru" icon={<FilePlus2 className="h-4 w-4" aria-hidden />} />
           <NavLink
             href="/proses"
-            label="Proses"
+            label="Aktivitas agent"
             disabled={status === "idle" && !hasRun}
             icon={
               status === "running" ? (
@@ -90,16 +92,23 @@ function Sidebar() {
               )
             }
           />
-          <div className="pt-2">
-            <p className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted">
-              <CircleCheck className="h-4 w-4" aria-hidden />
-              Hasil
-            </p>
-            {RESULT_LINKS.map((link) => (
-              <NavLink key={link.href} {...link} nested disabled={!hasRun} />
-            ))}
+          <div className="pt-3">
+            <p className="tl-nav-kicker">DECISION INTELLIGENCE</p>
+            <NavLink href="/hasil/ringkasan" label="Decision report" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
+            <NavLink href="/hasil/review" label={hasRun ? `Perlu review · ${run?.breakdown.filter((row) => row.needs_review).length ?? 0}` : "Perlu review"} icon={<GitBranch className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
+            {hasRun && (
+              <details className="tl-nav-details" open={pathname.startsWith("/hasil/") && pathname !== "/hasil/ringkasan" && pathname !== "/hasil/review" ? true : undefined}>
+                <summary>Jelajahi seluruh hasil</summary>
+                <div className="tl-nav-results">
+                  {RESULT_LINKS.filter((link) => link.href !== "/hasil/ringkasan" && link.href !== "/hasil/review").map((link) => (
+                    <NavLink key={link.href} {...link} nested />
+                  ))}
+                </div>
+              </details>
+            )}
           </div>
           <div className="space-y-1 border-t border-line pt-3">
+            <p className="tl-nav-kicker">REFERENSI & PENGATURAN</p>
             <NavLink href="/katalog" label="Katalog Capability" icon={<Layers className="h-4 w-4" aria-hidden />} />
             <NavLink href="/feedback" label="Feedback" icon={<MessageSquareText className="h-4 w-4" aria-hidden />} />
             <NavLink href="/pengaturan" label="Pengaturan" icon={<Settings className="h-4 w-4" aria-hidden />} />
@@ -122,7 +131,7 @@ function MobileNav() {
   const links = [
     { href: "/", label: "Beranda" },
     { href: "/validasi", label: "Validasi" },
-    ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }] : []),
+    ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }, { href: "/hasil/review", label: "Perlu review" }] : []),
     { href: "/katalog", label: "Katalog" },
     { href: "/feedback", label: "Feedback" },
     { href: "/pengaturan", label: "Pengaturan" },
@@ -233,8 +242,12 @@ function Footer() {
 }
 
 export function Shell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  if (pathname === "/") {
+    return <div className="tl-marketing">{children}<Notice /></div>;
+  }
   return (
-    <div className="flex min-h-screen">
+    <div className="tl-studio-app flex min-h-screen">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />

@@ -8,6 +8,7 @@ import type {
   Parameters,
   ProgressEvent,
   ProjectInfo,
+  AuthInfo,
   ProviderConfig,
   RateTable,
   RunResult,
@@ -75,6 +76,9 @@ interface Store {
   setRates: (r: RateTable) => void;
   costSettings: CostSettings;
   setCostSettings: (c: CostSettings) => void;
+  auth: AuthInfo | null;
+  signIn: (username: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
   project: ProjectInfo;
   setProject: (p: ProjectInfo) => void;
   parameters: Parameters;
@@ -160,6 +164,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [defaultRates, setDefaultRates] = useState<RateTable | null>(null);
   const [rates, setRates] = useState<RateTable | null>(null);
   const [costSettings, setCostSettings] = useState<CostSettings>(DEFAULT_COST_SETTINGS);
+  const [auth, setAuth] = useState<AuthInfo | null>(null);
   const [project, setProject] = useState<ProjectInfo>({
     name: "",
     start: null,
@@ -204,6 +209,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setRates(r);
       })
       .catch(() => setNotice("Rate talenta bawaan gagal dimuat. Periksa koneksi ke API."));
+    api.fetchAuth().then(setAuth).catch(() => setAuth({ user: null, admin_enabled: false, storage: "memory" }));
+  }, []);
+
+  const signIn = useCallback(async (username: string, password: string) => {
+    const user = await api.login(username, password);
+    setAuth((a) => ({ admin_enabled: a?.admin_enabled ?? false, storage: a?.storage ?? "memory", user }));
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await api.logout();
+    setAuth((a) => (a ? { ...a, user: null } : a));
   }, []);
 
   useEffect(() => {
@@ -360,13 +376,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Store>(
     () => ({
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
-      resetCatalog, rates, defaultRates, setRates, costSettings, setCostSettings, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
+      resetCatalog, rates, defaultRates, setRates, costSettings, setCostSettings, auth, signIn, signOut, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
       error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, canUndo: history.length > 0, undo, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
-      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, rates, defaultRates, costSettings, project,
+      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, rates, defaultRates, costSettings, auth, signIn, signOut, project,
       parameters, team, teamAuto, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
       modelCalls, demo,
       run, start, cancel, busy, update, history, undo, reclassify, exportExcel, notice, teamView,

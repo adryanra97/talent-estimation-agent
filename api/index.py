@@ -12,17 +12,28 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import uuid
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Cookie, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field, ValidationError
 
 from talent_estimation import __version__
 from talent_estimation.agents import RunInputs, reclassify_rows, run_pipeline
+from talent_estimation.auth import (
+    SESSION_SECONDS,
+    User,
+    admin_password,
+    authenticate,
+    issue_token,
+    on_vercel,
+    read_token,
+)
 from talent_estimation.calc import recalculate
 from talent_estimation.catalog import (
     Catalog,
@@ -38,6 +49,16 @@ from talent_estimation.domain.models import (
     RunResult,
 )
 from talent_estimation.excel import build_workbook
+from talent_estimation.feedback import (
+    TARGET_LABELS,
+    Feedback,
+    Guidance,
+    GuidedClient,
+    RunSnapshot,
+    active_guidance,
+    diagnose,
+    get_store,
+)
 from talent_estimation.io import WbsFormatError, WbsReadResult, extract_text, merge_wbs, read_wbs
 from talent_estimation.llm import (
     LangChainClient,
@@ -309,6 +330,9 @@ async def create_run(
     except (json.JSONDecodeError, ValidationError) as exc:
         raise HTTPException(status_code=422, detail=f"Pengaturan tidak valid: {exc}") from exc
     llm = _client(options.provider, x_llm_api_key, options.demo)
+    guidance = _guidance() if llm is not None else []
+    if llm is not None and guidance:
+        llm = GuidedClient(llm, guidance)
     catalog = options.catalog or load_default_catalog()
 
     wbs_files = await _read_all(wbs, "WBS")
@@ -398,6 +422,13 @@ async def create_run(
                     message = f"Run gagal: {type(item).__name__}: {item}"
                     yield json.dumps({"type": "error", "message": message}) + "\n"
                 else:
+                    if guidance and item.get("type") == "result":
+                        names = ", ".join(sorted({TARGET_LABELS[g.target] for g in guidance}))
+                        item["run"]["trace"].insert(0, {
+                            "agent": "Orchestrator",
+                            "action": f"Memakai {len(guidance)} panduan dari feedback yang disetujui",
+                            "detail": f"Ditambahkan ke prompt {names}.",
+                        })  # fmt: skip
                     yield json.dumps(item, default=str) + "\n"
         finally:
             task.cancel()
@@ -486,6 +517,156 @@ def excel(body: ExcelBody) -> Response:
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="Validasi_Talent_{name}.xlsx"'},
     )
+
+
+# ------------------------------------------------------------------ accounts
+SESSION_COOKIE = "tl_session"
+
+
+class LoginBody(BaseModel):
+    """Demo account credentials."""
+
+    username: str
+    password: str
+
+
+def _user(token: str | None) -> User | None:
+    return read_token(token)
+
+
+def _require(token: str | None, role: str | None = None) -> User:
+    user = _user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Masuk dulu untuk memakai fitur ini.")
+    if role and user.role != role:
+        raise HTTPException(status_code=403, detail="Hanya admin yang bisa melakukan ini.")
+    return user
+
+
+@app.get("/api/py/auth/me")
+def me(tl_session: Annotated[str | None, Cookie()] = None) -> dict[str, Any]:
+    """Return the signed-in account and which demo accounts are available."""
+    user = _user(tl_session)
+    return {
+        "user": user.model_dump() if user else None,
+        "admin_enabled": admin_password() is not None,
+        "storage": get_store().backend,
+    }
+
+
+@app.post("/api/py/auth/login")
+def login(body: LoginBody) -> JSONResponse:
+    """Sign in with a demo account and set the session cookie."""
+    user = authenticate(body.username, body.password)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nama pengguna atau kata sandi salah.")
+    res = JSONResponse({"user": user.model_dump()})
+    res.set_cookie(
+        SESSION_COOKIE, issue_token(user), max_age=SESSION_SECONDS, httponly=True,
+        samesite="lax", secure=on_vercel(), path="/",
+    )  # fmt: skip
+    return res
+
+
+@app.post("/api/py/auth/logout")
+def logout() -> JSONResponse:
+    """Clear the session cookie."""
+    res = JSONResponse({"user": None})
+    res.delete_cookie(SESSION_COOKIE, path="/")
+    return res
+
+
+# ------------------------------------------------------------------ feedback
+def _guidance() -> list[Guidance]:
+    try:
+        return active_guidance(get_store().list())
+    except Exception:  # storage down must not stop a run
+        return []
+
+
+class FeedbackBody(BaseModel):
+    """A new feedback item from the results pages."""
+
+    rating: Literal["accurate", "partly", "inaccurate"]
+    text: str = Field(min_length=20, max_length=2000)
+    page: str | None = None
+    role: str | None = None
+    snapshot: RunSnapshot = Field(default_factory=RunSnapshot)
+    provider: ProviderConfig = Field(default_factory=ProviderConfig)
+
+
+class DecisionBody(BaseModel):
+    """Admin decision on a feedback item."""
+
+    decision: Literal["approve", "reject", "deactivate", "activate"]
+    note: str = Field(default="", max_length=500)
+
+
+def _now() -> str:
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+@app.get("/api/py/feedback")
+def list_feedback(tl_session: Annotated[str | None, Cookie()] = None) -> dict[str, Any]:
+    """List feedback with diagnoses, newest first, plus the guidance in use."""
+    _require(tl_session)
+    items = get_store().list()
+    return {
+        "items": [f.model_dump(mode="json") for f in items],
+        "guidance": [g.model_dump(mode="json") for g in active_guidance(items)],
+        "storage": get_store().backend,
+    }
+
+
+@app.post("/api/py/feedback")
+async def create_feedback(
+    body: FeedbackBody,
+    tl_session: Annotated[str | None, Cookie()] = None,
+    x_llm_api_key: Annotated[str | None, Header()] = None,
+) -> dict[str, Any]:
+    """Save a feedback item and let the Feedback Agent diagnose it."""
+    user = _require(tl_session)
+    item = Feedback(
+        id=uuid.uuid4().hex[:12], created_at=_now(), author=user.name, rating=body.rating,
+        page=body.page, role=body.role, text=body.text.strip(), snapshot=body.snapshot,
+    )  # fmt: skip
+    llm = None
+    if x_llm_api_key:
+        try:
+            llm = LangChainClient(body.provider, x_llm_api_key)
+        except ValueError:
+            llm = None
+    item.diagnosis = await diagnose(item, llm)
+    get_store().save(item)
+    return item.model_dump(mode="json")
+
+
+@app.post("/api/py/feedback/{feedback_id}/decision")
+def decide_feedback(
+    feedback_id: str,
+    body: DecisionBody,
+    tl_session: Annotated[str | None, Cookie()] = None,
+) -> dict[str, Any]:
+    """Approve, reject, or switch an approved guidance on or off. Admin only."""
+    user = _require(tl_session, "admin")
+    store = get_store()
+    item = store.get(feedback_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Feedback tidak ditemukan.")
+    if body.decision in ("approve", "reject"):
+        item.status = "approved" if body.decision == "approve" else "rejected"
+        item.decided_by, item.decided_at, item.decision_note = user.name, _now(), body.note
+        item.active = body.decision == "approve" and bool(
+            item.diagnosis and item.diagnosis.kind == "prompt_guidance"
+        )
+    else:
+        if item.status != "approved":
+            raise HTTPException(
+                status_code=409, detail="Hanya feedback yang disetujui yang bisa diaktifkan."
+            )
+        item.active = body.decision == "activate"
+    store.save(item)
+    return item.model_dump(mode="json")
 
 
 @app.exception_handler(ValidationError)

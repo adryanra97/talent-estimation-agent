@@ -32,6 +32,11 @@ stored on the server.
   the baseline numbers.
 - Exports the full validation workbook with live formulas, so a reviewer can
   change one input and see every total update.
+- Prices requested and computed FTE with public salary benchmarks per role and
+  level (editable), as a page and a Biaya sheet in the workbook.
+- Collects reviewer feedback on a result. A Feedback Agent diagnoses which agent
+  or input to fix and proposes a change; an admin approves or rejects it, and
+  approved guidance is added to that agent's prompt on later runs.
 
 ## Architecture
 
@@ -131,8 +136,19 @@ before every commit.
 
 ## Deploy
 
-Import the repository in Vercel. No environment variables are needed. The UI
-is built by Next.js and `api/index.py` runs as a Python function. See
+Import the repository in Vercel. The analysis needs no environment variables.
+The UI is built by Next.js and `api/index.py` runs as a Python function.
+
+The feedback menu uses these optional variables:
+
+| Variable | Purpose |
+|---|---|
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Upstash Redis from the Vercel Marketplace. Without them feedback lives in memory and can disappear. |
+| `DEMO_ADMIN_PASSWORD` | Enables the `admin` account that approves feedback. Unset on Vercel means no admin. |
+| `DEMO_REVIEWER_PASSWORD` | Password of the public `reviewer` account; defaults to `reviewer-demo`. |
+| `AUTH_SECRET` | Signs session cookies. Defaults to a value derived from the admin password. |
+
+See
 [docs/04-implementation/deployment.md](docs/04-implementation/deployment.md).
 
 ## Repository layout

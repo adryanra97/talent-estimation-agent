@@ -95,7 +95,9 @@ export default function SummaryPage() {
                 <Link href={review ? "/hasil/breakdown?review=1" : "/hasil/breakdown"}>
                   {review ? "Tinjau baris yang ditandai" : "Periksa rincian pekerjaan"} <ArrowRight size={15} aria-hidden />
                 </Link>
-                <Link href="/hasil/biaya">Lihat estimasi biaya <ArrowRight size={15} aria-hidden /></Link>
+                <Link href="/hasil/peluang-ai">Tinjau peluang bantuan AI <ArrowRight size={15} aria-hidden /></Link>
+                <Link href="/hasil/biaya">Bandingkan biaya di tahap akhir <ArrowRight size={15} aria-hidden /></Link>
+                <Link href="/hasil/review">Buka pusat review <ArrowRight size={15} aria-hidden /></Link>
                 <Link href="/hasil/temuan">Lihat temuan dan asumsi <ArrowRight size={15} aria-hidden /></Link>
               </div>
             </section>

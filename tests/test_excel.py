@@ -8,6 +8,7 @@ from openpyxl import load_workbook
 from talent_estimation.agents import run_pipeline
 from talent_estimation.domain.models import RunResult
 from talent_estimation.excel import build_workbook
+from talent_estimation.rates import load_default_rates
 
 
 async def demo_run(inputs):
@@ -23,13 +24,15 @@ async def test_workbook_structure(demo_inputs, catalog):
         "Petunjuk",
         "Parameter",
         "Ringkasan",
+        "Biaya",
         "Breakdown_WBS",
-        "Capability",
     ]
     caps = [(r, c) for r in run.breakdown for c in r.capabilities]
     assert caps and wb["Capability"]["H5"].value == caps[0][1].skill
     assert {"UCP_DE", "UCP_AI", "Peluang_AI", "Asumsi_Log"} <= set(wb.sheetnames)
     assert wb["Breakdown_WBS"]["B7"].value == run.breakdown[0].item_id
+    assert wb["Biaya"]["C11"].value == "Middle"
+    assert wb["Biaya"]["D7"].value == "Karyawan"
 
 
 @pytest.mark.skipif(shutil.which("soffice") is None, reason="LibreOffice not installed")
@@ -51,3 +54,8 @@ async def test_excel_formulas_match_engine(demo_inputs, catalog, tmp_path):
         assert sheet[f"J{r}"].value == pytest.approx(e.bu_fte, abs=1e-6)
         assert sheet[f"H{r}"].value == pytest.approx(e.ucp_peak_fte, abs=1e-6)
         assert sheet[f"K{r}"].value == pytest.approx(e.bu_peak_fte, abs=1e-6)
+    biaya = load_workbook(out / "run.xlsx", data_only=True)["Biaya"]
+    rates = load_default_rates()
+    for i, e in enumerate(run.estimates):
+        expected = e.bu_fte * rates.roles[e.role].median("M") * rates.employer_multiplier * 1e6
+        assert biaya[f"J{11 + i}"].value == pytest.approx(expected, rel=1e-6)

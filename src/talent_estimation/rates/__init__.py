@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import resources
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -66,6 +67,27 @@ class RateTable(BaseModel):
         return value
 
 
+class CostSettings(BaseModel):
+    """How a run's FTE is priced: which rates, level per role, basis and method."""
+
+    rates: RateTable
+    levels: dict[str, str] = {}
+    basis: Literal["employee", "vendor"] = "employee"
+    method: Literal["ucp", "bu"] = "bu"
+
+    def level(self, role: str) -> str:
+        """Level code used for a role, Middle when none was chosen."""
+        value = self.levels.get(role, "M")
+        return value if value in LEVELS else "M"
+
+    @property
+    def multiplier(self) -> float:
+        """Multiplier that turns gross pay into cost for the chosen basis."""
+        if self.basis == "vendor":
+            return self.rates.vendor_multiplier
+        return self.rates.employer_multiplier
+
+
 def load_default_rates() -> RateTable:
     """Load the rate table that ships with the package.
 
@@ -82,4 +104,4 @@ def load_default_rates() -> RateTable:
     return RateTable.model_validate(yaml.safe_load(text))
 
 
-__all__ = ["LEVELS", "RateTable", "RoleRate", "Source", "load_default_rates"]
+__all__ = ["LEVELS", "CostSettings", "RateTable", "RoleRate", "Source", "load_default_rates"]

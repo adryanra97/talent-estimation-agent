@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import * as api from "./api";
+import { type CostSettings, DEFAULT_COST_SETTINGS } from "./cost";
 import type {
   Catalog,
   Parameters,
@@ -72,6 +73,8 @@ interface Store {
   rates: RateTable | null;
   defaultRates: RateTable | null;
   setRates: (r: RateTable) => void;
+  costSettings: CostSettings;
+  setCostSettings: (c: CostSettings) => void;
   project: ProjectInfo;
   setProject: (p: ProjectInfo) => void;
   parameters: Parameters;
@@ -156,6 +159,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [catalogSource, setCatalogSource] = useState("bawaan");
   const [defaultRates, setDefaultRates] = useState<RateTable | null>(null);
   const [rates, setRates] = useState<RateTable | null>(null);
+  const [costSettings, setCostSettings] = useState<CostSettings>(DEFAULT_COST_SETTINGS);
   const [project, setProject] = useState<ProjectInfo>({
     name: "",
     start: null,
@@ -345,24 +349,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!run) return;
     setBusy(true);
     try {
-      await api.downloadExcel(run, catalog);
+      await api.downloadExcel(run, catalog, rates ? { rates, ...costSettings } : null);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
     }
-  }, [catalog, run]);
+  }, [catalog, run, rates, costSettings]);
 
   const value = useMemo<Store>(
     () => ({
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
-      resetCatalog, rates, defaultRates, setRates, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
+      resetCatalog, rates, defaultRates, setRates, costSettings, setCostSettings, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
       error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, canUndo: history.length > 0, undo, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
-      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, rates, defaultRates, project,
+      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, rates, defaultRates, costSettings, project,
       parameters, team, teamAuto, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
       modelCalls, demo,
       run, start, cancel, busy, update, history, undo, reclassify, exportExcel, notice, teamView,

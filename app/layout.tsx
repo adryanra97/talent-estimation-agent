@@ -8,6 +8,8 @@ import "./editorial.css";
 import "./resource.css";
 import "./studio.css";
 import "./refinement.css";
+import "./tln.css";
+import "./operational-theme.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://talentlens.adryanrizkyalviano.me"),

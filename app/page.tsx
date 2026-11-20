@@ -218,7 +218,7 @@ export default function HomePage() {
           <section className="tlw-hero" aria-labelledby="tlw-title">
             <div className="tlw-hero-copy">
               <div className="tlw-kicker"><span /> WORKFORCE DECISION INTELLIGENCE</div>
-              <h1 id="tlw-title">The work is complex.<br /><em>The decision shouldn't be.</em></h1>
+              <h1 id="tlw-title">Complex work.<br /><em>Clear decisions.</em></h1>
               <p>From project scope to a workforce you can explain. TalentLens mengubah WBS menjadi estimasi FTE, capability, review, dan skenario bantuan AI—dengan alasan yang dapat ditelusuri.</p>
               <div className="tlw-hero-actions">
                 <Link href="/validasi" className="tlw-button-primary">Start an analysis <ArrowUpRight size={20} aria-hidden /></Link>

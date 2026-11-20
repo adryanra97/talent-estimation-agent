@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, EmptyState, InfoTip, PageHeader, RoleBadge, StatusBadge, inputBase, inputClass } from "@/components/ui";
@@ -94,6 +96,10 @@ export default function AiPage() {
             <p className="tl-report-footnote" style={{ marginBottom: 28 }}>
               Angka tersebut menggunakan kategori dan asumsi penghematan tugas yang dapat diedit pada tabel di bawah. Hasil aktual tetap memerlukan validasi.
             </p>
+            <Link href="/hasil/biaya" className="tl-ai-cost-next">
+              <span><small>LANGKAH TERAKHIR / COST INTELLIGENCE</small><strong>Bandingkan baseline biaya dengan skenario bantuan AI</strong><em>Rate yang sama diterapkan pada kedua skenario, agar perubahan effort dapat dihitung sebagai potensi biaya kapasitas.</em></span>
+              <ArrowRight size={21} aria-hidden />
+            </Link>
 
             <Card
               title="Detail tugas"

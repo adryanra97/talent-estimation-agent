@@ -24,6 +24,10 @@ export interface RoleCost {
   computedMonthly: number;
   gapMonthly: number | null; // requested minus computed
   gapPeriod: number | null;
+  assistedFte: number | null;
+  assistedMonthly: number | null;
+  potentialMonthly: number | null;
+  potentialPeriod: number | null;
 }
 
 export function multiplierFor(rates: RateTable, basis: CostBasis): number {
@@ -34,6 +38,7 @@ export function multiplierFor(rates: RateTable, basis: CostBasis): number {
 export function roleCosts(run: RunResult, rows: Comparison[], rates: RateTable, settings: CostSettings): RoleCost[] {
   const months = Math.max(1, run.monthly.length);
   const multiplier = multiplierFor(rates, settings.basis);
+  const aiByRole = new Map(run.ai_enabled ? run.ai_summary.map((item) => [item.role, item]) : []);
   return rows.map((c) => {
     const level = settings.levels[c.role] ?? "M";
     const range = rates.roles[c.role]?.[level] ?? [0, 0];
@@ -43,11 +48,20 @@ export function roleCosts(run: RunResult, rows: Comparison[], rates: RateTable, 
     const requestedMonthly = c.requested_fte === null ? null : c.requested_fte * perFte;
     const computedMonthly = computedFte * perFte;
     const gapMonthly = requestedMonthly === null ? null : requestedMonthly - computedMonthly;
+    const assessment = aiByRole.get(c.role);
+    const proposedFte = settings.method === "ucp" ? assessment?.ucp_fte_assisted : assessment?.bu_fte_assisted;
+    // AI estimates represent assisted effort, not an automatic headcount or budget cut.
+    const assistedFte = typeof proposedFte === "number" && Number.isFinite(proposedFte)
+      ? Math.max(0, Math.min(computedFte, proposedFte)) : null;
+    const assistedMonthly = assistedFte === null ? null : assistedFte * perFte;
+    const potentialMonthly = assistedMonthly === null ? null : computedMonthly - assistedMonthly;
     return {
       role: c.role, level, salary, multiplier, perFte,
       requestedFte: c.requested_fte, computedFte,
       requestedMonthly, computedMonthly, gapMonthly,
       gapPeriod: gapMonthly === null ? null : gapMonthly * months,
+      assistedFte, assistedMonthly, potentialMonthly,
+      potentialPeriod: potentialMonthly === null ? null : potentialMonthly * months,
     };
   });
 }

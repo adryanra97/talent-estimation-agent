@@ -86,6 +86,9 @@ jobs:
       - name: TypeScript type check
         run: .github/scripts/run-check.sh "TypeScript type check" npm run typecheck
 
+      - name: Cost scenario tests
+        run: .github/scripts/run-check.sh "Cost scenario tests" npm run test:cost
+
       - name: Next.js production build
         run: .github/scripts/run-check.sh "Next.js production build" npm run build
         env:

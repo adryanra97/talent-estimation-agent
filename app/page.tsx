@@ -199,7 +199,7 @@ export default function HomePage() {
             <a href="#how" onClick={() => setMenuOpen(false)}>Cara kerja</a>
             <Link href="/metodologi" onClick={() => setMenuOpen(false)}>Metodologi</Link>
           </nav>
-          <Link href="/validasi" className="tln-nav-cta">Buka aplikasi <ArrowUpRight size={17} aria-hidden /></Link>
+          <Link href="/validasi" className="tln-nav-cta" aria-label="Buka aplikasi">Buka aplikasi <ArrowUpRight size={17} aria-hidden /></Link>
           <button type="button" className="tln-menu-button" aria-label={menuOpen ? "Tutup navigasi" : "Buka navigasi"}
             aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={23} /> : <Menu size={23} />}</button>
         </header>

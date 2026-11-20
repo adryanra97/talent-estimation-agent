@@ -16,7 +16,7 @@
   font-family: var(--tl-body);
 }
 .tln-site *, .tln-site *::before, .tln-site *::after { box-sizing: border-box; }
-.tln-site h1,.tln-site h2,.tln-site h3,.tln-site p,.tln-site figure{margin:0}
+.tln-site :where(h1,h2,h3,p,figure){margin:0}
 .tln-site a { text-decoration: none; }
 .tln-site :is(a,button):focus-visible {outline:3px solid #1973c9;outline-offset:4px}
 .tln-container {width:min(100% - 88px,1340px);margin:0 auto}
@@ -237,6 +237,9 @@
  .tln-footer p{width:100%;order:3}
 }
 @media(max-width:400px){
+ .tln-nav-cta{font-size:0;padding:10px;gap:0;min-width:41px;justify-content:center}
+ .tln-nav-cta svg{width:20px;height:20px}
+
  .tln-header .tln-logo strong{font-size:19px}
  .tln-hero h1{font-size:clamp(41px,10vw,49px)}
  .tln-report-legend{gap:10px;font-size:11px}

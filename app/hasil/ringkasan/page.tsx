@@ -84,7 +84,7 @@ export default function SummaryPage() {
               <div>
                 <p className="tl-summary-eyebrow">EXECUTIVE TAKEAWAY / 01</p>
                 <h2 id="tl-summary-conclusion">{reportMessage}</h2>
-                <p>
+                <p className="tl-summary-context">
                   Total kebutuhan yang dihitung adalah <strong>{fte(total.ucp)} FTE (UCP)</strong> dan{" "}
                   <strong>{fte(total.bu)} FTE (bottom-up)</strong>. Kedua metode saling melengkapi:
                   lihat perbedaan per role, bukan mengambil satu angka tanpa melihat item WBS.
@@ -136,7 +136,7 @@ export default function SummaryPage() {
                   <span className="is-bu"><i aria-hidden /> Bottom-up</span>
                 </div>
               </div>
-              <p className="tl-report-footnote" style={{ marginTop: -10, marginBottom: 21 }}>
+              <p className="tl-report-footnote tl-summary-chart-guide">
                 Panjang batang menggunakan skala yang sama untuk semua role yang sedang ditampilkan. Angka di kanan adalah FTE rata-rata.
               </p>
               {shown.length === 0 ? (

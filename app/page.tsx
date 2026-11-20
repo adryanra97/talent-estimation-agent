@@ -1,291 +1,286 @@
 "use client";
 
 import {
-  ArrowDown, ArrowRight, ArrowUpRight, BarChart3, CheckCircle2,
-  ChevronRight, FileSpreadsheet, Layers3, Menu, Play, SearchCheck,
-  ShieldCheck, Sparkles, X,
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  FileText,
+  Menu,
+  Play,
+  ShieldCheck,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 
-type Perspective = "fte" | "capability" | "ai";
-
-const perspectives: Record<Perspective, {
-  kicker: string;
-  heading: string;
-  description: string;
-  columns: [string, string];
-  rows: { name: string; left: number; right: number; detail: string }[];
-  takeaway: string;
-}> = {
-  fte: {
-    kicker: "01 / WORKFORCE",
-    heading: "Two methods. One clearer picture.",
-    description: "UCP mengukur kompleksitas. Bottom-up mengukur effort pekerjaan. Bandingkan keduanya tanpa kehilangan alasan di balik angkanya.",
-    columns: ["UCP", "Bottom-up"],
+type LensId = "workforce" | "capability" | "ai";
+type Lens = {
+  index: string;
+  label: string;
+  headline: string;
+  explanation: string;
+  axes: [string, string];
+  rows: { name: string; a: number; b: number; detail: string }[];
+  annotation: string;
+};
+const lenses: Record<LensId, Lens> = {
+  workforce: {
+    index: "01", label: "Workforce", headline: "Two methods. One more confident decision.",
+    explanation: "Baca perbedaan estimasi UCP dan bottom-up, kemudian telusuri pekerjaan yang mendasarinya.",
+    axes: ["UCP", "Bottom-up"],
     rows: [
-      { name: "Data Engineer", left: 1.12, right: 1.07, detail: "Perlu ditinjau: 1 item" },
-      { name: "AI Engineer", left: 0.78, right: 0.74, detail: "Selisih kecil" },
-      { name: "Data Scientist", left: 0.92, right: 0.87, detail: "Selisih kecil" },
+      { name: "Data Engineer", a: 1.12, b: 1.07, detail: "Review 1 pekerjaan" },
+      { name: "AI Engineer", a: 0.78, b: 0.74, detail: "Selisih kecil" },
+      { name: "Data Scientist", a: 0.92, b: 0.87, detail: "Selisih kecil" },
     ],
-    takeaway: "Perbedaan yang terlihat menjadi titik awal review, bukan angka yang disembunyikan.",
+    annotation: "Kedua metode dihitung secara independen. Data di layar ini adalah ilustrasi, bukan hasil proyek pengguna.",
   },
   capability: {
-    kicker: "02 / CAPABILITIES",
-    heading: "Roles alone don't tell the full story.",
-    description: "Setiap work package dihubungkan ke skill dan area kompetensi. Buka detail untuk mengetahui mengapa capability diperlukan.",
-    columns: ["Tersedia", "Dibutuhkan"],
+    index: "02", label: "Capability", headline: "People have roles. Work needs skills.",
+    explanation: "Jelajahi capability yang relevan bagi setiap paket pekerjaan, berikut alasan di balik pemetaannya.",
+    axes: ["Ketersediaan", "Kebutuhan"],
     rows: [
-      { name: "Data integration", left: 0.63, right: 0.82, detail: "ETL · Data quality" },
-      { name: "Applied AI", left: 0.58, right: 0.77, detail: "Model evaluation" },
-      { name: "Analytics", left: 0.67, right: 0.75, detail: "Dashboard · KPI" },
+      { name: "Data Integration", a: 63, b: 82, detail: "Data pipeline" },
+      { name: "Applied AI", a: 58, b: 77, detail: "Model evaluation" },
+      { name: "Analytics", a: 67, b: 75, detail: "Reporting & insights" },
     ],
-    takeaway: "Capability menjadi dasar diskusi staffing, bukan sekadar nama jabatan.",
+    annotation: "Persentase ilustratif untuk mendemonstrasikan perspektif capability. Bukan pengukuran skill nyata.",
   },
   ai: {
-    kicker: "03 / AI ASSISTANCE",
-    heading: "Explore effort before pricing it.",
-    description: "Lihat bagaimana bantuan AI berpotensi mengubah effort tiap pekerjaan. Estimasi biaya berada di akhir keputusan.",
-    columns: ["Baseline", "Dengan AI"],
+    index: "03", label: "AI opportunity", headline: "Find the effort AI can actually assist.",
+    explanation: "Lihat tugas yang berpotensi dibantu AI dan bagaimana perubahan effort memengaruhi keputusan tenaga kerja.",
+    axes: ["Baseline", "Dengan AI"],
     rows: [
-      { name: "Engineering", left: 0.92, right: 0.72, detail: "Skenario pekerjaan rutin" },
-      { name: "Documentation", left: 0.84, right: 0.63, detail: "Skenario dokumentasi" },
-      { name: "Analytics", left: 0.73, right: 0.65, detail: "Skenario analitik" },
+      { name: "Engineering", a: 92, b: 72, detail: "Automation support" },
+      { name: "Documentation", a: 84, b: 63, detail: "Drafting support" },
+      { name: "Analytics", a: 73, b: 65, detail: "Analysis support" },
     ],
-    takeaway: "Efisiensi adalah potensi kapasitas, bukan otomatis penghematan anggaran.",
+    annotation: "Skenario AI mengukur potensi perubahan effort, bukan penghematan biaya yang sudah terealisasi.",
   },
 };
 
-const steps = [
-  { number: "01", label: "Understand", title: "Dokumen menjadi konteks", description: "Baca WBS, kebutuhan proyek, dan peran yang diajukan.", icon: FileSpreadsheet },
-  { number: "02", label: "Estimate", title: "Hitung dengan dua metode", description: "UCP dan bottom-up memberi perspektif berbeda atas pekerjaan.", icon: BarChart3 },
-  { number: "03", label: "Review", title: "Periksa setiap keputusan", description: "Telusuri alasan, asumsi, dan item yang perlu dikonfirmasi.", icon: SearchCheck },
-  { number: "04", label: "Optimize", title: "Nilai peluang bantuan AI", description: "Bandingkan effort sebelum menilai skenario biaya.", icon: Sparkles },
+function BrandMark() {
+  return <span aria-hidden="true" className="tlw-brand-glyph"><span /><span /><span /></span>;
+}
+
+function WorkSignal() {
+  return (
+    <div className="tlw-signal-art" aria-label="Visualisasi ilustratif aliran pekerjaan menuju capability, estimasi, dan review" role="img">
+      <div className="tlw-signal-grain" aria-hidden="true" />
+      <svg className="tlw-signal-network" viewBox="0 0 600 660" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="tlw-flow" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#5f94ff" /><stop offset=".5" stopColor="#6bcfe4" /><stop offset="1" stopColor="#b2d9ff" /></linearGradient>
+          <radialGradient id="tlw-halo"><stop stopColor="#3978e8" stopOpacity=".57" /><stop offset=".7" stopColor="#3978e8" stopOpacity=".12" /><stop offset="1" stopColor="#3978e8" stopOpacity="0" /></radialGradient>
+        </defs>
+        <ellipse cx="355" cy="319" rx="265" ry="265" fill="url(#tlw-halo)" />
+        <circle cx="355" cy="318" r="193" fill="none" stroke="#7cb9e8" strokeOpacity=".15" strokeWidth="1" />
+        <circle cx="355" cy="318" r="145" fill="none" stroke="#a9d7ff" strokeOpacity=".13" strokeWidth="1" strokeDasharray="2 9" />
+        <path className="tlw-flow-path" d="M48 151 C180 151 170 318 338 318 S499 492 577 492" fill="none" stroke="url(#tlw-flow)" strokeWidth="2.2" />
+        <path className="tlw-flow-path tlw-flow-delay" d="M36 363 C160 363 173 318 338 318 S488 174 566 174" fill="none" stroke="#a4baff" strokeOpacity=".73" strokeWidth="1.6" />
+        <path d="M54 542 C172 542 203 318 338 318 S502 356 583 355" fill="none" stroke="#6f9fb8" strokeOpacity=".38" strokeWidth="1" />
+        <path d="M338 318 C301 235 323 199 341 161" stroke="#9ac8f7" strokeOpacity=".24" fill="none" />
+        <g fill="#9ce8f3"><circle cx="48" cy="151" r="5"/><circle cx="36" cy="363" r="5"/><circle cx="54" cy="542" r="5"/><circle cx="577" cy="492" r="5"/></g>
+        <circle cx="338" cy="318" r="13" fill="#9be2ed" opacity=".1" /><circle cx="338" cy="318" r="5" fill="#bef5ff" />
+        <circle cx="338" cy="318" r="31" fill="none" stroke="#e2f4ff" strokeOpacity=".52" strokeWidth="1.2" />
+      </svg>
+      <div className="tlw-signal-note tlw-signal-note-a"><span>PROJECT INPUT</span><strong>28 work packages</strong><small>WBS · scope · assumptions</small></div>
+      <div className="tlw-signal-note tlw-signal-note-b"><span>CAPABILITY MAPPING</span><strong>12 skills identified</strong><small>Roles · expertise · allocation</small></div>
+      <div className="tlw-signal-number"><span>ESTIMATED WORKFORCE</span><strong>2.82<em> FTE</em></strong><div><b /> UCP baseline <span>·</span> illustrative</div></div>
+      <div className="tlw-signal-note tlw-signal-note-c"><span>HUMAN REVIEW</span><strong>1 item flagged</strong><small>Evidence ready to inspect</small></div>
+      <div className="tlw-signal-corner tlw-corner-a" aria-hidden="true">+</div>
+      <div className="tlw-signal-corner tlw-corner-b" aria-hidden="true">+</div>
+      <div className="tlw-signal-index">TALENTLENS / DECISION SYSTEM <span>—</span> 01</div>
+    </div>
+  );
+}
+
+function CompareRows({ lens, id }: { lens: Lens; id: LensId }) {
+  const cap = id === "workforce" ? 1.35 : 100;
+  const value = (n: number) => id === "workforce" ? n.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " FTE" : n + "%";
+  return (
+    <div className="tlw-compare">
+      <div className="tlw-compare-heading"><strong>Role-level evidence</strong><div><span className="tlw-legend-first" />{lens.axes[0]}<span className="tlw-legend-second" />{lens.axes[1]}</div></div>
+      {lens.rows.map(row => (
+        <div key={row.name} className="tlw-compare-row">
+          <div className="tlw-compare-name"><strong>{row.name}</strong><span>{row.detail}</span></div>
+          <div className="tlw-compare-bars">
+            <span role="img" aria-label={lens.axes[0] + " " + value(row.a)}><i style={{ width: (row.a / cap * 100) + "%" }} /></span>
+            <span role="img" aria-label={lens.axes[1] + " " + value(row.b)}><i style={{ width: (row.b / cap * 100) + "%" }} /></span>
+          </div>
+          <div className="tlw-compare-values"><strong>{value(row.a)}</strong><span>{value(row.b)}</span></div>
+        </div>
+      ))}
+      <p className="tlw-compare-footnote">{lens.annotation}</p>
+    </div>
+  );
+}
+
+function ReportStage() {
+  const [selected, setSelected] = useState<LensId>("workforce");
+  const tabs: LensId[] = ["workforce", "capability", "ai"];
+  const content = lenses[selected];
+  return (
+    <div className="tlw-report-stage">
+      <div className="tlw-report-stage-top">
+        <div><BrandMark /><span>TALENTLENS <b>/</b> INSIGHT STUDIO</span></div>
+        <span>PRODUCT PREVIEW <i>•</i> SAMPLE DATA</span>
+      </div>
+      <div className="tlw-report-stage-body">
+        <div className="tlw-report-toolbar">
+          <div><span>PROJECT 001 / EXAMPLE</span><strong>Public service analytics platform</strong></div>
+          <span className="tlw-status">EXAMPLE RUN</span>
+        </div>
+        <div className="tlw-report-tabs" role="tablist" aria-label="Jelajahi contoh analisis">
+          {tabs.map((id, index) => (
+            <button key={id} id={"tlw-tab-" + id} type="button" role="tab" aria-selected={selected === id}
+              aria-controls="tlw-tab-panel" tabIndex={selected === id ? 0 : -1}
+              onClick={() => setSelected(id)}
+              onKeyDown={e => {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+                e.preventDefault();
+                const next = tabs[(index + (e.key === "ArrowRight" ? 1 : 2)) % 3];
+                setSelected(next); document.getElementById("tlw-tab-" + next)?.focus();
+              }}>{content.index === lenses[id].index && <span className="tlw-active-dot" />}{lenses[id].label}</button>
+          ))}
+        </div>
+        <div id="tlw-tab-panel" role="tabpanel" aria-labelledby={"tlw-tab-" + selected} className="tlw-report-panel" key={selected}>
+          <div className="tlw-report-story">
+            <span>0{tabs.indexOf(selected) + 1} / A BETTER QUESTION</span>
+            <h3>{content.headline}</h3>
+            <p>{content.explanation}</p>
+            <div className="tlw-report-proof"><Check size={18} aria-hidden /><span>Inspectable assumptions, transparent outcomes.</span></div>
+          </div>
+          <CompareRows lens={content} id={selected} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const phases = [
+  { index: "01", name: "Decode the scope.", description: "Dari WBS dan dokumen pendukung menjadi struktur pekerjaan serta capability yang bisa ditinjau.", detail: "INPUT → CAPABILITY" },
+  { index: "02", name: "Challenge the estimate.", description: "UCP dan bottom-up dihitung terpisah. Reviewer menyoroti pekerjaan dan asumsi yang membutuhkan perhatian.", detail: "ESTIMATE → HUMAN REVIEW" },
+  { index: "03", name: "Design a better scenario.", description: "Pertimbangkan bantuan AI per tugas. Baru setelah itu lihat implikasi FTE dan estimasi biaya.", detail: "AI OPPORTUNITY → COST" },
 ];
 
-function Mark() {
-  return <span className="tln-mark" aria-hidden="true"><span /><span /><span /><span /></span>;
-}
-
-function ScenarioBars({ left, right, type }: { left: number; right: number; type: Perspective }) {
-  const scale = type === "fte" ? 1.3 : 1;
+function ReviewDetail() {
   return (
-    <div className="tln-scenario-bars" aria-label={"Perbandingan " + left.toLocaleString("id-ID") + " dan " + right.toLocaleString("id-ID")} role="img">
-      <span style={{ width: String(Math.min(100, left / scale * 100)) + "%" }} />
-      <span style={{ width: String(Math.min(100, right / scale * 100)) + "%" }} />
-    </div>
-  );
-}
-
-function ProductStory() {
-  const [active, setActive] = useState<Perspective>("fte");
-  const view = perspectives[active];
-  const options: { value: Perspective; label: string }[] = [
-    { value: "fte", label: "FTE & estimasi" },
-    { value: "capability", label: "Capability" },
-    { value: "ai", label: "AI opportunity" },
-  ];
-
-  return (
-    <div className="tln-product-story">
-      <div className="tln-product-top">
-        <div><Mark /><strong>TalentLens</strong><span>DECISION INTELLIGENCE</span></div>
-        <span className="tln-sample-pill">DATA ILUSTRATIF</span>
+    <div className="tlw-review-mock">
+      <div className="tlw-review-head"><span>REVIEW QUEUE <b>/</b> EXAMPLE DATA</span><span>01 FLAGGED</span></div>
+      <div className="tlw-review-item-top">
+        <span>WBS 2.1.2</span><span className="tlw-review-flag">Needs attention</span>
       </div>
-      <div className="tln-product-tabs" role="tablist" aria-label="Perspektif contoh analisis">
-        {options.map((tab, index) => (
-          <button key={tab.value} id={"tln-tab-" + tab.value} type="button" role="tab"
-            aria-selected={active === tab.value} aria-controls="tln-panel"
-            tabIndex={active === tab.value ? 0 : -1}
-            onClick={() => setActive(tab.value)}
-            onKeyDown={(event) => {
-              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-              event.preventDefault();
-              const next = options[(index + (event.key === "ArrowRight" ? 1 : options.length - 1)) % options.length].value;
-              setActive(next);
-              document.getElementById("tln-tab-" + next)?.focus();
-            }}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div id="tln-panel" role="tabpanel" aria-labelledby={"tln-tab-" + active} key={active} className="tln-product-panel">
-        <div className="tln-product-narrative">
-          <span className="tln-eyebrow">{view.kicker}</span>
-          <h3>{view.heading}</h3>
-          <p>{view.description}</p>
-          <div className="tln-product-insight"><CheckCircle2 size={21} aria-hidden="true" /><span>{view.takeaway}</span></div>
-        </div>
-        <div className="tln-product-plot">
-          <div className="tln-plot-heading">
-            <strong>Workforce evidence</strong>
-            <span>{view.columns[0]} <i /> {view.columns[1]}</span>
-          </div>
-          <div className="tln-plot-list">
-            {view.rows.map((row) => (
-              <div key={row.name} className="tln-plot-row">
-                <div className="tln-plot-label"><strong>{row.name}</strong><span>{row.detail}</span></div>
-                <ScenarioBars left={row.left} right={row.right} type={active} />
-                <span className="tln-plot-numbers">
-                  {active === "fte"
-                    ? row.left.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + " / " + row.right.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + " FTE"
-                    : Math.round(row.left * 100) + "% / " + Math.round(row.right * 100) + "%"}
-                </span>
-              </div>
-            ))}
-          </div>
-          <small>Contoh fiktif untuk memperlihatkan tampilan. Hasil aktual dihitung dari dokumen dan parameter pengguna.</small>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DecisionPreview() {
-  return (
-    <div className="tln-report" aria-label="Pratinjau ilustratif alur laporan TalentLens">
-      <div className="tln-report-top">
-        <div className="tln-report-icon"><Layers3 size={21} aria-hidden /></div>
-        <div><span>PROJECT INTELLIGENCE / CONTOH</span><strong>Analitik layanan publik</strong></div>
-        <span className="tln-live-pill">ILUSTRASI</span>
-      </div>
-      <div className="tln-report-feature">
-        <div className="tln-report-intro">
-          <div><span className="tln-report-caption">WORKFORCE ESTIMATE</span><h2>A clearer view of your team's needs.</h2></div>
-          <span className="tln-report-index">01 — 04</span>
-        </div>
-        <div className="tln-report-legend"><span><i /> Use Case Points</span><span><i /> Bottom-up</span></div>
-        {[
-          { name: "Data Engineer", ucp: "1,12", bu: "1,07", u: 91, b: 86 },
-          { name: "AI Engineer", ucp: "0,78", bu: "0,74", u: 63, b: 60 },
-          { name: "Data Scientist", ucp: "0,92", bu: "0,87", u: 75, b: 70 },
-        ].map((row) => (
-          <div className="tln-report-row" key={row.name}>
-            <div><strong>{row.name}</strong><span>Estimasi FTE rata-rata</span></div>
-            <div className="tln-report-bars"><span style={{ width: row.u + "%" }} /><span style={{ width: row.b + "%" }} /></div>
-            <div className="tln-report-values"><strong>{row.ucp}</strong><span>{row.bu}</span></div>
-          </div>
-        ))}
-      </div>
-      <div className="tln-report-bottom">
-        <div><span className="tln-report-dot" /><p><strong>Review the evidence.</strong><span>Selisih estimasi dapat ditelusuri ke pekerjaan.</span></p></div>
-        <div>WBS <ArrowRight size={15} aria-hidden /> REVIEW <ArrowRight size={15} aria-hidden /> AI <ArrowRight size={15} aria-hidden /> COST</div>
-      </div>
+      <h3>Integrasi data pengaduan</h3>
+      <p>Data Engineer <span>—</span> Average complexity</p>
+      <div className="tlw-review-rule" />
+      <div className="tlw-review-field"><span>Classification rationale</span><strong>Integrasi beberapa sumber data memerlukan validasi kompleksitas dan dependensi.</strong></div>
+      <details className="tlw-review-details">
+        <summary>Inspect review evidence <ChevronDown size={19} aria-hidden /></summary>
+        <div><strong>Review note</strong><p>Konfirmasi jumlah endpoint, kualitas data, dan penanganan error sebelum memutuskan alokasi effort final.</p><strong>Next action</strong><p>Buka breakdown WBS, periksa klasifikasi, dan jalankan review ulang jika ada perubahan.</p></div>
+      </details>
     </div>
   );
 }
 
 export default function HomePage() {
   const router = useRouter();
-  const { run, start, status } = useStore();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const reviews = run?.breakdown.filter((item) => item.needs_review).length ?? 0;
+  const { run, status, start } = useStore();
+  const [navOpen, setNavOpen] = useState(false);
+  const flagged = run?.breakdown.filter(item => item.needs_review).length ?? 0;
 
-  async function startSample() {
+  async function runSample() {
     if (status === "running") return;
     router.push("/proses");
     await start(true);
   }
 
-  return (
-    <div className="tln-site">
-      <div className="tln-container">
-        <header className="tln-header">
-          <Link href="/" className="tln-logo" aria-label="TalentLens beranda"><Mark /><strong>TalentLens</strong><span>.</span></Link>
-          <nav className={menuOpen ? "tln-main-nav is-open" : "tln-main-nav"} aria-label="Navigasi utama">
-            <a href="#platform" onClick={() => setMenuOpen(false)}>Platform</a>
-            <a href="#how" onClick={() => setMenuOpen(false)}>Cara kerja</a>
-            <Link href="/metodologi" onClick={() => setMenuOpen(false)}>Metodologi</Link>
+  return <div className="tlw-site">
+    <section className="tlw-night">
+      <div className="tlw-night-light" aria-hidden="true" />
+      <div className="tlw-wide">
+        <header className="tlw-header">
+          <Link href="/" className="tlw-logo" aria-label="TalentLens homepage"><BrandMark /><strong>talentlens</strong><span>.</span></Link>
+          <nav className={navOpen ? "tlw-nav is-open" : "tlw-nav"} aria-label="Navigasi utama">
+            <a href="#platform" onClick={() => setNavOpen(false)}>Platform</a>
+            <a href="#how" onClick={() => setNavOpen(false)}>Approach</a>
+            <Link href="/metodologi" onClick={() => setNavOpen(false)}>Methodology</Link>
           </nav>
-          <Link href="/validasi" className="tln-nav-cta" aria-label="Buka aplikasi">Buka aplikasi <ArrowUpRight size={17} aria-hidden /></Link>
-          <button type="button" className="tln-menu-button" aria-label={menuOpen ? "Tutup navigasi" : "Buka navigasi"}
-            aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={23} /> : <Menu size={23} />}</button>
+          <Link href="/validasi" className="tlw-header-link">Open studio <ArrowUpRight size={18} aria-hidden /></Link>
+          <button type="button" className="tlw-nav-toggle" onClick={() => setNavOpen(!navOpen)} aria-expanded={navOpen} aria-label={navOpen ? "Tutup menu" : "Buka menu"}>
+            {navOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </header>
         <main>
-          <section className="tln-hero" aria-labelledby="tln-hero-heading">
-            <div className="tln-hero-copy">
-              <span className="tln-eyebrow"><span className="tln-eyebrow-line" /> WORKFORCE DECISION INTELLIGENCE</span>
-              <h1 id="tln-hero-heading">The right team starts with <em>the right evidence.</em></h1>
-              <p className="tln-hero-lead">Dari WBS hingga keputusan talent. Temukan kebutuhan FTE, capability, dan peluang bantuan AI melalui analisis yang dapat dijelaskan.</p>
-              <div className="tln-hero-actions">
-                <Link href="/validasi" className="tln-primary-cta">Mulai analisis <ArrowUpRight size={20} aria-hidden /></Link>
-                <button type="button" className="tln-secondary-cta" onClick={startSample} disabled={status === "running"}>
-                  <Play size={17} aria-hidden /> {status === "running" ? "Memproses contoh…" : "Coba data contoh"}
-                </button>
+          <section className="tlw-hero" aria-labelledby="tlw-title">
+            <div className="tlw-hero-copy">
+              <div className="tlw-kicker"><span /> WORKFORCE DECISION INTELLIGENCE</div>
+              <h1 id="tlw-title">The work is complex.<br /><em>The decision shouldn't be.</em></h1>
+              <p>From project scope to a workforce you can explain. TalentLens mengubah WBS menjadi estimasi FTE, capability, review, dan skenario bantuan AI—dengan alasan yang dapat ditelusuri.</p>
+              <div className="tlw-hero-actions">
+                <Link href="/validasi" className="tlw-button-primary">Start an analysis <ArrowUpRight size={20} aria-hidden /></Link>
+                <button type="button" onClick={runSample} disabled={status === "running"} className="tlw-button-ghost"><Play size={16} aria-hidden />{status === "running" ? "Processing…" : "Explore the demo"}</button>
               </div>
-              <div className="tln-hero-meta">
-                <span><ShieldCheck size={17} aria-hidden /> Built for traceability</span>
-                <span><CheckCircle2 size={17} aria-hidden /> Human-in-the-loop review</span>
-              </div>
-              {run && <Link href="/hasil/ringkasan" className="tln-resume">
-                Lanjutkan hasil terakhir{reviews > 0 ? " · " + reviews + " item perlu review" : ""}
-                <ArrowRight size={17} aria-hidden />
-              </Link>}
+              {run && <Link className="tlw-resume" href="/hasil/ringkasan">Continue your last report {flagged > 0 ? " · " + flagged + " to review" : ""}<ArrowRight size={16} aria-hidden /></Link>}
+              <div className="tlw-hero-bottom"><span>01 / INTELLIGENCE IN MOTION</span><a href="#platform">Discover the platform <ArrowDownRight size={17} aria-hidden /></a></div>
             </div>
-            <DecisionPreview />
-          </section>
-          <div className="tln-signal"><span>01 / INPUT</span><ArrowRight size={16} aria-hidden /><span>02 / ESTIMATE</span><ArrowRight size={16} aria-hidden /><span>03 / REVIEW</span><ArrowRight size={16} aria-hidden /><span>04 / AI SCENARIO</span><ArrowRight size={16} aria-hidden /><span>05 / COST</span></div>
-
-          <section className="tln-platform" id="platform" aria-labelledby="tln-platform-heading">
-            <div className="tln-section-heading">
-              <div><span className="tln-eyebrow">THE PLATFORM / 01</span><h2 id="tln-platform-heading">From project scope to <em>workforce clarity.</em></h2></div>
-              <p>Angka yang berdiri sendiri tidak cukup. Lihat cara TalentLens menghubungkan pekerjaan, estimasi, review, dan alternatif keputusan dalam satu alur.</p>
-            </div>
-            <ProductStory />
-          </section>
-
-          <section className="tln-how" id="how" aria-labelledby="tln-how-heading">
-            <div className="tln-section-heading">
-              <div><span className="tln-eyebrow">HOW IT WORKS / 02</span><h2 id="tln-how-heading">Everything has a reason.</h2></div>
-              <p>Agent membantu menafsirkan konteks. Engine menghitung. Manusia meninjau dan menentukan keputusan final.</p>
-            </div>
-            <div className="tln-steps">
-              {steps.map((step) => (
-                <article key={step.number}>
-                  <div className="tln-step-top"><span>{step.number}</span><step.icon size={25} strokeWidth={1.7} aria-hidden /></div>
-                  <span className="tln-step-label">{step.label}</span>
-                  <h3>{step.title}</h3>
-                  <p>{step.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="tln-evidence" aria-labelledby="tln-evidence-heading">
-            <div className="tln-evidence-copy">
-              <span className="tln-eyebrow">TRACEABILITY / 03</span>
-              <h2 id="tln-evidence-heading">Beyond the number. <em>See the reasoning.</em></h2>
-              <p>Ketika hasil perlu diperiksa, kamu dapat menelusuri item WBS, alasan klasifikasi, alokasi FTE, capability, dan temuan reviewer—tanpa kehilangan konteks proyek.</p>
-              <Link href="/metodologi">Pelajari metodologinya <ArrowUpRight size={18} aria-hidden /></Link>
-            </div>
-            <div className="tln-evidence-detail">
-              <div className="tln-evidence-head"><span>SAMPLE REVIEW / 2.1.2</span><span>CONTOH ILUSTRATIF</span></div>
-              <h3>Integrasi data pengaduan</h3>
-              <div className="tln-evidence-items">
-                <div><span>Role terkait</span><strong>Data Engineer</strong></div>
-                <div><span>Klasifikasi</span><strong>Average complexity</strong></div>
-                <div><span>Alasan review</span><strong>Validasi effort integrasi dan asumsi sumber data.</strong></div>
-              </div>
-              <div className="tln-evidence-foot"><SearchCheck size={19} aria-hidden /><span>Review berfokus pada bukti, bukan sekadar persetujuan angka.</span></div>
-            </div>
+            <WorkSignal />
           </section>
         </main>
       </div>
-      <section className="tln-cta">
-        <div className="tln-container tln-cta-layout">
-          <div><span className="tln-eyebrow">THE NEXT DECISION</span><h2>Build a plan your team can <em>stand behind.</em></h2></div>
-          <div><p>Mulai dari WBS proyek, telaah rekomendasi, lalu bandingkan kebutuhan dan potensi biaya dengan bantuan AI sebagai langkah terakhir.</p>
-            <Link href="/validasi">Mulai dengan dokumen <ArrowUpRight size={20} aria-hidden /></Link>
-          </div>
+    </section>
+    <div className="tlw-transition-bar" aria-label="Decision process"><span>UNDERSTAND THE WORK</span><i /> <span>ESTIMATE THE EFFORT</span><i /><span>REVIEW THE EVIDENCE</span><i /><span>OPTIMIZE THE SCENARIO</span></div>
+
+    <section className="tlw-platform" id="platform">
+      <div className="tlw-wide">
+        <div className="tlw-section-head">
+          <span>01 / THE PLATFORM</span>
+          <div><h2>See beyond<br /><em>the headcount.</em></h2><p>Keputusan talent yang baik dimulai dari pemahaman pekerjaan. Jelajahi contoh cara TalentLens menghubungkan estimasi, capability, dan peluang AI.</p></div>
         </div>
-      </section>
-      <footer className="tln-container tln-footer">
-        <Link href="/" className="tln-logo"><Mark /><strong>TalentLens</strong><span>.</span></Link>
-        <p>Workforce intelligence, built by Adryan Rizky Alviano</p>
-        <div><Link href="/tentang">Tentang</Link><a href="https://github.com/adryanra97/talent-estimation-agent">GitHub</a></div>
-      </footer>
-    </div>
-  );
+        <ReportStage />
+      </div>
+    </section>
+
+    <section className="tlw-philosophy" id="how">
+      <div className="tlw-wide">
+        <div className="tlw-philosophy-hero"><span>02 / HOW IT WORKS</span><h2>An estimate is <em>not</em> a decision.</h2><p>A decision needs context, evidence, and a way to challenge the assumptions behind it.</p></div>
+        <div className="tlw-phases">
+          {phases.map(phase => (
+            <article className="tlw-phase" key={phase.index}>
+              <div className="tlw-phase-index">{phase.index}<span> / 03</span></div>
+              <div><h3>{phase.name}</h3><p>{phase.description}</p></div>
+              <span className="tlw-phase-detail">{phase.detail}</span>
+              <ArrowUpRight size={24} strokeWidth={1.5} aria-hidden />
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section className="tlw-review-section">
+      <div className="tlw-wide tlw-review-layout">
+        <div className="tlw-review-story">
+          <span>03 / BUILT FOR ACCOUNTABILITY</span>
+          <h2>Every number<br />has a <em>why.</em></h2>
+          <p>Jika satu hasil perlu diperiksa, jangan cari alasan di puluhan tabel. TalentLens membawa item WBS, klasifikasi, capability, asumsi, dan catatan reviewer ke dalam alur review yang jelas.</p>
+          <Link href="/metodologi">Explore our methodology <ArrowUpRight size={19} aria-hidden /></Link>
+          <div className="tlw-review-quote">"Intelligence you can question, not just consume."</div>
+        </div>
+        <ReviewDetail />
+      </div>
+    </section>
+
+    <section className="tlw-final">
+      <div className="tlw-wide tlw-final-layout">
+        <div><span>04 / YOUR NEXT PROJECT</span><h2>Build your next team<br /><em>on better evidence.</em></h2></div>
+        <div><p>Ubah WBS menjadi keputusan talent yang bisa dijelaskan. Tinjau effort, lihat peluang AI, lalu bandingkan biaya sebagai langkah terakhir.</p><Link href="/validasi">Begin with your WBS <ArrowUpRight size={20} aria-hidden /></Link></div>
+      </div>
+    </section>
+    <footer className="tlw-footer">
+      <div className="tlw-wide"><Link href="/" className="tlw-logo"><BrandMark /><strong>talentlens</strong><span>.</span></Link><span>Workforce decision intelligence · by Adryan Rizky Alviano</span><div><Link href="/tentang">About</Link><a href="https://github.com/adryanra97/talent-estimation-agent">GitHub</a></div></div>
+    </footer>
+  </div>;
 }

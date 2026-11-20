@@ -7,6 +7,7 @@ import "./globals.css";
 import "./editorial.css";
 import "./resource.css";
 import "./studio.css";
+import "./refinement.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://talentlens.adryanrizkyalviano.me"),

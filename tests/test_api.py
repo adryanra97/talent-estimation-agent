@@ -109,3 +109,12 @@ def test_extract_requested_and_existing_without_key():
     assert body["method"] == "aturan"
     assert body["requested"]["DE"]["fte"] == 1.0 and body["requested"]["DA"]["fte"] == 0.5
     assert body["existing"]["DS"]["fte"] == 1.0 and "DS" not in body["requested"]
+
+
+def test_demo_uses_declared_ucp_effort_preset():
+    """The built-in sample can use a different, documented UCP assumption."""
+    from talent_estimation.demo import DEMO_PHM
+    from talent_estimation.domain.models import Parameters
+
+    assert DEMO_PHM == 8.0
+    assert 0 < DEMO_PHM < Parameters().phm

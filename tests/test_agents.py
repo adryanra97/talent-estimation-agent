@@ -32,6 +32,24 @@ async def test_demo_pipeline(demo_inputs):
     assert order.index("Reviewer Agent") < order.index("Augmentation Agent") < order.index("Report")
 
 
+async def test_calibrated_demo_methods_remain_comparable(demo_inputs):
+    """The sample should illustrate a useful comparison, not a huge artificial gap."""
+    from talent_estimation.demo import DEMO_PHM
+
+    demo = demo_inputs.model_copy(
+        update={"parameters": demo_inputs.parameters.model_copy(update={"phm": DEMO_PHM})}
+    )
+    _, result = await collect(demo, None)
+    total_ucp = sum(role.ucp_fte for role in result.comparisons)
+    total_bu = sum(role.bu_fte for role in result.comparisons)
+    assert total_bu > 0
+    # Both estimates remain independent; this bounds only the published
+    # example's overall gap, never the output of a user-uploaded project.
+    assert 0.5 <= total_ucp / total_bu <= 1.8, (
+        f"Sample UCP={total_ucp:.2f} and bottom-up={total_bu:.2f} FTE"
+    )
+
+
 async def test_llm_pipeline_with_review_loop(demo_inputs, scripted_llm):
     _, run = await collect(demo_inputs, scripted_llm)
     assert all(r.role in run.roles for r in run.breakdown), "roles outside the catalog are dropped"

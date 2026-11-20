@@ -161,7 +161,7 @@ export function RoleBadge({ role, name }: { role: string; name?: string }) {
   const full = catalog?.roles[role]?.name ?? role;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap ring-1 ring-inset ${ROLE_STYLE[role] ?? "bg-slate-50 text-slate-700 ring-slate-200"}`}
+      className={`tl-role-badge inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap ring-1 ring-inset ${ROLE_STYLE[role] ?? "bg-slate-50 text-slate-700 ring-slate-200"}`}
       title={full}
       aria-label={name ? undefined : full}
     >
@@ -180,7 +180,7 @@ export function StatusBadge({ tone, children }: { tone: "good" | "warn" | "bad" 
     accent: "bg-accent-50 text-accent-700 ring-accent-200",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tones[tone]}`}>
+    <span className={`tl-status-badge inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tones[tone]}`}>
       {children}
     </span>
   );

@@ -16,13 +16,13 @@ const lenses: Record<Lens, {
   workforce: {
     eyebrow: "01 / WORKFORCE ESTIMATION",
     title: "Know what the work really needs.",
-    value: "2.1", unit: "FTE gap",
-    description: "Bandingkan permintaan dan estimasi berbasis pekerjaan. Perbedaan bisa ditelusuri hingga item WBS.",
-    first: "Diminta", second: "Hasil estimasi",
+    value: "0.14", unit: "FTE delta",
+    description: "Bandingkan dua metode independen pada data ilustratif. Selisih pada proyek sebenarnya tetap ditampilkan apa adanya dan dapat ditelusuri hingga item WBS.",
+    first: "UCP", second: "Bottom-up",
     roles: [
-      { name: "Data Engineer", before: 68, after: 85, value: "2,6 FTE" },
-      { name: "AI Engineer", before: 41, after: 64, value: "1,8 FTE" },
-      { name: "Data Scientist", before: 72, after: 56, value: "1,4 FTE" },
+      { name: "Data Engineer", before: 88, after: 84, value: "1,12 / 1,07 FTE" },
+      { name: "AI Engineer", before: 61, after: 58, value: "0,78 / 0,74 FTE" },
+      { name: "Data Scientist", before: 72, after: 68, value: "0,92 / 0,87 FTE" },
     ],
   },
   capability: {
@@ -108,7 +108,7 @@ function InteractiveEvidence() {
           <h3>{item.title}</h3>
           <p>{item.description}</p>
           <div className="tlx-evidence-metric"><strong>{item.value}</strong><span>{item.unit}</span></div>
-          <small>Data ilustratif, bukan hasil analisis pengguna</small>
+          <small>Angka fiktif untuk contoh visual, bukan hasil analisis pengguna.</small>
         </div>
         <div className="tlx-evidence-plot">
           <div className="tlx-plot-head"><strong>Role-level comparison</strong><span>ILLUSTRATIVE DATASET / 2026</span></div>
@@ -121,7 +121,7 @@ function InteractiveEvidence() {
               </div>
             </div>
           ))}
-          <p className="tlx-plot-note">Dalam laporan sebenarnya, angka, sumber, dan asumsi dapat diperiksa per item WBS.</p>
+          <p className="tlx-plot-note">Skala yang sama dipakai dalam tiap perspektif. Pada laporan sebenarnya, UCP dan bottom-up dihitung terpisah dan tidak disamakan otomatis.</p>
         </div>
       </div>
     </div>

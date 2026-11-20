@@ -272,3 +272,60 @@ export interface RateTable {
   roles: Record<string, RoleRate>;
   sources: { name: string; url: string; date: string }[];
 }
+
+export interface User {
+  username: string;
+  role: "reviewer" | "admin";
+  name: string;
+}
+
+export interface AuthInfo {
+  user: User | null;
+  admin_enabled: boolean;
+  storage: "redis" | "memory";
+}
+
+export type FeedbackTarget = "intake" | "estimator" | "reviewer" | "augmentation" | "report" | "catalog" | "parameter" | "data";
+export type FeedbackRating = "accurate" | "partly" | "inaccurate";
+
+export interface RunSnapshot {
+  project_name: string;
+  period: string;
+  roles: { role: string; requested_fte: number | null; ucp_fte: number; bu_fte: number; conclusion: string }[];
+  review_rows: number;
+  guidance_used: string[];
+}
+
+export interface Diagnosis {
+  target: FeedbackTarget;
+  kind: "prompt_guidance" | "catalog_change" | "parameter_change" | "no_change";
+  summary: string;
+  proposal: string;
+  confidence: "rendah" | "sedang" | "tinggi";
+  by: "model" | "aturan";
+}
+
+export interface FeedbackItem {
+  id: string;
+  created_at: string;
+  author: string;
+  rating: FeedbackRating;
+  page: string | null;
+  role: string | null;
+  text: string;
+  snapshot: RunSnapshot;
+  diagnosis: Diagnosis | null;
+  status: "pending" | "approved" | "rejected";
+  decided_by: string | null;
+  decided_at: string | null;
+  decision_note: string;
+  active: boolean;
+}
+
+export interface Guidance {
+  id: string;
+  target: FeedbackTarget;
+  text: string;
+  approved_by: string | null;
+  approved_at: string | null;
+}

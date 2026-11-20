@@ -1,5 +1,19 @@
 import type { CostSettings } from "./cost";
-import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RateTable, RunResult, WbsPreview } from "./types";
+import type {
+  AuthInfo,
+  Catalog,
+  ConnectionResult,
+  ExtractResult,
+  FeedbackItem,
+  FeedbackRating,
+  Guidance,
+  ProviderConfig,
+  RateTable,
+  RunResult,
+  RunSnapshot,
+  User,
+  WbsPreview,
+} from "./types";
 
 const BASE = "/api/py";
 
@@ -176,4 +190,57 @@ export async function downloadExcel(
   link.download = match?.[1] ?? "Validasi_Talent.xlsx";
   link.click();
   URL.revokeObjectURL(url);
+}
+
+export async function fetchAuth(): Promise<AuthInfo> {
+  const res = await fetch(`${BASE}/auth/me`, { cache: "no-store" });
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function login(username: string, password: string): Promise<User> {
+  const res = await fetch(`${BASE}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) throw await failure(res);
+  return (await res.json()).user;
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${BASE}/auth/logout`, { method: "POST" });
+}
+
+export async function listFeedback(): Promise<{ items: FeedbackItem[]; guidance: Guidance[]; storage: string }> {
+  const res = await fetch(`${BASE}/feedback`, { cache: "no-store" });
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function sendFeedback(
+  body: { rating: FeedbackRating; text: string; page: string | null; role: string | null; snapshot: RunSnapshot; provider: ProviderConfig },
+  apiKey: string,
+): Promise<FeedbackItem> {
+  const res = await fetch(`${BASE}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...keyHeader(apiKey) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function decideFeedback(
+  id: string,
+  decision: "approve" | "reject" | "activate" | "deactivate",
+  note = "",
+): Promise<FeedbackItem> {
+  const res = await fetch(`${BASE}/feedback/${id}/decision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ decision, note }),
+  });
+  if (!res.ok) throw await failure(res);
+  return res.json();
 }

@@ -11,7 +11,9 @@ import {
   Layers,
   GitBranch,
   Loader2,
+  MessageSquareText,
   Settings,
+  UserRound,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +21,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { RESULT_LINKS } from "@/lib/nav";
 import { useStore } from "@/lib/store";
+import { FeedbackButton } from "./feedback-drawer";
 import { Button } from "./ui";
 
 
@@ -98,6 +101,7 @@ function Sidebar() {
           </div>
           <div className="space-y-1 border-t border-line pt-3">
             <NavLink href="/katalog" label="Katalog Capability" icon={<Layers className="h-4 w-4" aria-hidden />} />
+            <NavLink href="/feedback" label="Feedback" icon={<MessageSquareText className="h-4 w-4" aria-hidden />} />
             <NavLink href="/pengaturan" label="Pengaturan" icon={<Settings className="h-4 w-4" aria-hidden />} />
             <NavLink href="/metodologi" label="Metodologi" icon={<BookOpen className="h-4 w-4" aria-hidden />} />
             <NavLink href="/tentang" label="Tentang Aplikasi" icon={<Info className="h-4 w-4" aria-hidden />} />
@@ -120,6 +124,7 @@ function MobileNav() {
     { href: "/validasi", label: "Validasi" },
     ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }] : []),
     { href: "/katalog", label: "Katalog" },
+    { href: "/feedback", label: "Feedback" },
     { href: "/pengaturan", label: "Pengaturan" },
     { href: "/metodologi", label: "Metodologi" },
     { href: "/tentang", label: "Tentang" },
@@ -141,7 +146,7 @@ function MobileNav() {
 
 function Header() {
   const pathname = usePathname();
-  const { provider, apiKey, demo, run, exportExcel, busy } = useStore();
+  const { provider, apiKey, demo, run, exportExcel, busy, auth } = useStore();
   const connected = Boolean(apiKey);
   const providerName: Record<string, string> = {
     google: "Gemini",
@@ -168,13 +173,22 @@ function Header() {
             : "Model belum diatur"}
         </Link>
       </div>
-      {run && !pathname.startsWith("/hasil") && (
-        <Button size="sm" onClick={exportExcel} disabled={busy}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
-          <span className="sm:hidden">Excel</span>
-          <span className="hidden sm:inline">Unduh hasil Excel</span>
-        </Button>
-      )}
+      <div className="flex shrink-0 items-center gap-2">
+        {run && pathname.startsWith("/hasil") && <FeedbackButton />}
+        {run && !pathname.startsWith("/hasil") && (
+          <Button size="sm" onClick={exportExcel} disabled={busy}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Download className="h-4 w-4" aria-hidden />}
+            <span className="sm:hidden">Excel</span>
+            <span className="hidden sm:inline">Unduh hasil Excel</span>
+          </Button>
+        )}
+        <Link href={auth?.user ? "/feedback" : `/masuk?next=${encodeURIComponent(pathname)}`}
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-muted hover:bg-canvas hover:text-ink">
+          <UserRound className="h-4 w-4" aria-hidden />
+          <span className="hidden sm:inline">{auth?.user ? auth.user.name : "Masuk"}</span>
+          <span className="sr-only sm:hidden">{auth?.user ? auth.user.name : "Masuk"}</span>
+        </Link>
+      </div>
     </header>
   );
 }

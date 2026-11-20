@@ -36,8 +36,8 @@
 .tlw-hero h1 em{display:inline;font-family:var(--tlw-display);font-size:1.06em;font-weight:450;font-style:italic;letter-spacing:-.048em;color:#c2ddff;line-height:1.035}
 .tlw-hero-copy>p{font-size:17px;line-height:1.85;max-width:580px;margin-top:29px;color:#c3cedb}
 .tlw-hero-actions{display:flex;flex-wrap:wrap;gap:20px;align-items:center;margin-top:32px}
-.tlw-button-primary{display:inline-flex;align-items:center;justify-content:space-between;min-height:57px;padding:16px 20px;gap:27px;background:#4479f7;color:#fff!important;font-size:15px;font-weight:760;line-height:1.4;border:1px solid #6494ff;border-radius:2px;box-shadow:0 12px 36px #335fe82c;transition:transform .2s,background .2s}
-.tlw-button-primary:hover{transform:translateY(-2px);background:#618bfa}
+.tlw-button-primary{display:inline-flex;align-items:center;justify-content:space-between;min-height:57px;padding:16px 20px;gap:27px;background:#2b63cc;color:#fff!important;font-size:15px;font-weight:760;line-height:1.4;border:1px solid #6494ff;border-radius:2px;box-shadow:0 12px 36px #335fe82c;transition:transform .2s,background .2s}
+.tlw-button-primary:hover{transform:translateY(-2px);background:#366bcf}
 .tlw-button-primary svg,.tlw-header-link svg,.tlw-final a svg{transition:transform .2s}
 .tlw-button-primary:hover svg,.tlw-header-link:hover svg,.tlw-final a:hover svg{transform:translate(3px,-3px)}
 .tlw-button-ghost{display:inline-flex;align-items:center;gap:12px;background:transparent;border:0;border-bottom:1px solid #a9bfd1;padding:13px 3px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;min-height:50px}
@@ -95,7 +95,7 @@
 .tlw-report-stage-body{background:#fff}
 .tlw-report-toolbar{display:flex;justify-content:space-between;gap:24px;align-items:center;padding:28px 42px 22px}
 .tlw-report-toolbar>div{display:grid;gap:8px}
-.tlw-report-toolbar>div>span{color:#6a7b8d;font-size:12px;letter-spacing:.075em;font-weight:740}
+.tlw-report-toolbar>div>span{color:#53687c;font-size:12px;letter-spacing:.075em;font-weight:740}
 .tlw-report-toolbar>div>strong{color:#142e49;font-size:20px;letter-spacing:-.02em;line-height:1.35}
 .tlw-status{font-size:12px;white-space:nowrap;color:#0b6a7b;border:1px solid #a8d4dc;background:#eaf7f7;border-radius:100px;padding:8px 12px;font-weight:760}
 .tlw-report-tabs{display:flex;gap:34px;border-bottom:1px solid #dbe5ec;padding:0 42px;overflow-x:auto;scrollbar-width:thin}
@@ -120,15 +120,15 @@
 .tlw-compare-row{border-top:1px solid #e1e8ee;padding:22px 0;display:grid;grid-template-columns:minmax(115px,.9fr) minmax(135px,1.4fr) 104px;align-items:center;gap:17px}
 .tlw-compare-name{min-width:0;display:flex;flex-direction:column;gap:6px}
 .tlw-compare-name strong{font-size:14px;font-weight:740;color:#1b344b;line-height:1.5}
-.tlw-compare-name span{font-size:12px;color:#6a7a8a;line-height:1.5}
+.tlw-compare-name span{font-size:12px;color:#546a7c;line-height:1.5}
 .tlw-compare-bars{display:grid;gap:8px;min-width:0}
 .tlw-compare-bars>span{display:block;height:9px;border-radius:100px;background:#e8eef6;overflow:hidden}
 .tlw-compare-bars i{display:block;height:100%;border-radius:100px;background:#3467c4}
 .tlw-compare-bars>span:last-child i{background:#36a0b2}
 .tlw-compare-values{display:grid;text-align:right;gap:6px;line-height:1.4;font-variant-numeric:tabular-nums}
 .tlw-compare-values strong{font-size:13px;color:#245bb0;font-weight:780}
-.tlw-compare-values span{font-size:13px;color:#208598;font-weight:730}
-.tlw-compare-footnote{color:#738292;font-size:12px;line-height:1.75;padding-top:15px;border-top:1px solid #e1e8ee;margin-top:0!important}
+.tlw-compare-values span{font-size:13px;color:#176c82;font-weight:730}
+.tlw-compare-footnote{color:#53687c;font-size:12px;line-height:1.75;padding-top:15px;border-top:1px solid #e1e8ee;margin-top:0!important}
 .tlw-philosophy{padding:135px 0 145px;background:#0b1421;color:#fff;position:relative;overflow:hidden}
 .tlw-philosophy:before{content:"";position:absolute;right:-230px;top:-420px;width:800px;height:900px;border-radius:50%;background:radial-gradient(ellipse,#17325a5d,transparent 65%);pointer-events:none}
 .tlw-philosophy-hero{position:relative;max-width:1190px}
@@ -168,7 +168,7 @@
 .tlw-review-mock>p span{padding:0 8px}
 .tlw-review-rule{height:1px;background:#dfe7ec;margin:27px 0}
 .tlw-review-field{display:grid;gap:13px}
-.tlw-review-field>span{font-size:12px;color:#6a8293;font-weight:750;letter-spacing:.045em}
+.tlw-review-field>span{font-size:12px;color:#506879;font-weight:750;letter-spacing:.045em}
 .tlw-review-field strong{font-size:16px;line-height:1.7;font-weight:660;color:#29455d}
 .tlw-review-details{border-top:1px solid #dee7ec;margin-top:30px}
 .tlw-review-details summary{display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:14px;font-weight:770;color:#2e65a3;padding:19px 0;cursor:pointer;list-style:none;min-height:57px}

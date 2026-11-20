@@ -146,3 +146,29 @@
 .tl-studio-app .tl-app-sidebar .text-muted{color:#b5afc2}
 .tl-studio-app .tl-mobile-navlink.is-active{background:#ebe6f7;color:#543596;box-shadow:inset 0 -2px #825bce}
 .tl-studio-app input:focus-visible,.tl-studio-app textarea:focus-visible,.tl-studio-app select:focus-visible,.tl-studio-app button:focus-visible,.tl-studio-app a:focus-visible{outline:2px solid #825bce;outline-offset:2px}
+
+/* The analysis form follows the same narrative hierarchy as the public homepage. */
+.tl-validation-intro{border-bottom:1px solid #d7d5df;padding:13px 0 27px;margin-bottom:31px}
+.tl-validation-intro .tl-summary-eyebrow{font-size:10px;font-weight:750;letter-spacing:.13em;color:#7953c6}
+.tl-validation-intro .tl-ui-pageheader{margin:12px 0 22px}
+.tl-validation-intro .tl-ui-pageheader-title{font-size:clamp(33px,3.8vw,50px);font-weight:640;letter-spacing:-.07em}
+.tl-validation-intro .tl-ui-pageheader p{max-width:650px;font-size:13px;line-height:1.8}
+.tl-validation-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #cdc9d6;padding-top:18px}
+.tl-validation-steps li{display:grid;grid-template-columns:26px 1fr;gap:4px 8px;align-content:start;padding:0 15px;border-right:1px solid #dfdde5}
+.tl-validation-steps li:first-child{padding-left:0}
+.tl-validation-steps li:last-child{border-right:0}
+.tl-validation-steps span{grid-row:1/3;font-size:11px;color:#7a55ce;font-weight:760}
+.tl-validation-steps strong{font-size:12px;font-weight:740;color:#252432}
+.tl-validation-steps small{font-size:11px;color:#797987}
+.tl-validation-layout>.space-y-6>.tl-ui-card{border-radius:3px}
+.tl-validation-layout .tl-ui-card-heading{padding:21px 23px;background:#fff}
+.tl-validation-layout .tl-ui-card-heading h2{font-weight:730;letter-spacing:-.032em}
+.tl-validation-layout .tl-ui-card-body{padding:23px}
+.tl-validation-layout :is(input,textarea,select){border-radius:3px}
+.tl-studio-process-head{padding:22px 0 30px!important;border-bottom:1px solid #d6d3dd;margin-bottom:27px}
+.tl-studio-process-head h1{max-width:760px;font-size:clamp(33px,3.8vw,49px);letter-spacing:-.06em;font-weight:660}
+.tl-studio-process-head .tl-serif{color:#7956c9}
+.tl-studio-app .tl-journey{border:1px solid #dad6e2;border-radius:3px;box-shadow:none}
+.tl-studio-app .tl-journey-toolbar{background:#f3f0f7;border-bottom-color:#dfd9e8}
+.tl-studio-app .tl-stage-segment.is-done{background:#7d5bc5}
+@media(max-width:760px){.tl-validation-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 0}.tl-validation-steps li:nth-child(2){border-right:0}.tl-validation-steps li:nth-child(3){padding-left:0}.tl-validation-layout .tl-ui-card-heading,.tl-validation-layout .tl-ui-card-body{padding:18px}}

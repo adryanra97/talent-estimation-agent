@@ -323,14 +323,23 @@ export default function NewValidationPage() {
 
   return (
     <>
-      <PageHeader
-        title="Validasi Baru"
-        description="Hanya WBS yang wajib. File diproses di memori dan tidak disimpan."
-      />
+      <div className="tl-validation-intro">
+        <p className="tl-summary-eyebrow">NEW ANALYSIS / FROM DOCUMENTS TO DECISIONS</p>
+        <PageHeader
+          title="Mulai dari pekerjaan."
+          description="Unggah WBS, lengkapi konteks, lalu biarkan agent memetakan kebutuhan talent. Hanya WBS yang wajib; file diproses di memori dan tidak disimpan."
+        />
+        <ol className="tl-validation-steps" aria-label="Tahapan analisis">
+          <li><span>01</span><strong>Dokumen</strong><small>WBS & referensi</small></li>
+          <li><span>02</span><strong>Konteks proyek</strong><small>Scope & permintaan</small></li>
+          <li><span>03</span><strong>Jalankan agent</strong><small>Estimasi & review</small></li>
+          <li><span>04</span><strong>Keputusan</strong><small>AI scenario → biaya</small></li>
+        </ol>
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="tl-validation-layout grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card title="Dokumen">
+          <Card title="01 / Dokumen proyek">
             <div className="space-y-4">
               <FilePicker
                 label="WBS"
@@ -395,7 +404,7 @@ export default function NewValidationPage() {
             </div>
           </Card>
 
-          <Card title="Proyek">
+          <Card title="02 / Konteks proyek">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Field label="Nama proyek" hint="Dibaca dari dokumen bila dikosongkan">
@@ -458,7 +467,7 @@ export default function NewValidationPage() {
           </Card>
 
           <Card
-            title="Permintaan dan talent"
+            title="03 / Permintaan dan talent"
             description="Terisi otomatis dari dokumen permintaan dan pendukung. Semua angka bisa diubah."
             actions={
               (files.request.length > 0 || files.supporting.length > 0) && (

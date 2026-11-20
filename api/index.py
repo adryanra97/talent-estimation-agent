@@ -46,6 +46,7 @@ from talent_estimation.llm import (
     ProviderConfig,
     test_connection,
 )
+from talent_estimation.rates import CostSettings, load_default_rates
 from talent_estimation.skills import AGENT_CARDS
 from talent_estimation.skills.judgement import parse_request
 from talent_estimation.skills.schemas import ReclassifyRequest
@@ -85,6 +86,12 @@ class RunEnvelope(BaseModel):
 
     run: RunResult
     catalog: Catalog | None = None
+
+
+class ExcelBody(RunEnvelope):
+    """A run plus the cost settings chosen in the browser."""
+
+    costs: CostSettings | None = None
 
 
 class ReclassifyBody(RunEnvelope):
@@ -185,6 +192,12 @@ def health() -> dict[str, str]:
 def default_catalog() -> dict[str, Any]:
     """Return the default capability catalog."""
     return load_default_catalog().model_dump(mode="json")
+
+
+@app.get("/api/py/rates")
+def default_rates() -> dict[str, Any]:
+    """Return the default monthly pay benchmarks per role and level."""
+    return load_default_rates().model_dump(mode="json")
 
 
 @app.post("/api/py/catalog/parse")
@@ -462,10 +475,11 @@ async def reclassify(
 
 
 @app.post("/api/py/excel")
-def excel(body: RunEnvelope) -> Response:
+def excel(body: ExcelBody) -> Response:
     """Build the validation workbook from the run held by the browser."""
     run = recalculate(body.run)
-    content = build_workbook(run, body.catalog or load_default_catalog())
+    costs = body.costs or CostSettings(rates=load_default_rates())
+    content = build_workbook(run, body.catalog or load_default_catalog(), costs)
     name = "".join(c if c.isalnum() else "_" for c in (run.project.name or "proyek"))[:50]
     return Response(
         content,

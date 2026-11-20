@@ -1,6 +1,7 @@
 /** Result pages in reading order. Used by the sidebar and the pager. */
 export const RESULT_LINKS = [
   { href: "/hasil/ringkasan", label: "Ringkasan FTE" },
+  { href: "/hasil/biaya", label: "Estimasi Biaya" },
   { href: "/hasil/breakdown", label: "Breakdown WBS" },
   { href: "/hasil/capability", label: "Capability per WBS" },
   { href: "/hasil/bulanan", label: "Per Bulan" },

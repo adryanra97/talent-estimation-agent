@@ -1,4 +1,5 @@
-import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RunResult, WbsPreview } from "./types";
+import type { CostSettings } from "./cost";
+import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RateTable, RunResult, WbsPreview } from "./types";
 
 const BASE = "/api/py";
 
@@ -17,6 +18,12 @@ function keyHeader(apiKey: string): Record<string, string> {
 
 export async function fetchCatalog(): Promise<Catalog> {
   const res = await fetch(`${BASE}/catalog`);
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function fetchRates(): Promise<RateTable> {
+  const res = await fetch(`${BASE}/rates`);
   if (!res.ok) throw await failure(res);
   return res.json();
 }
@@ -149,11 +156,15 @@ export async function reclassify(
   return res.json();
 }
 
-export async function downloadExcel(run: RunResult, catalog: Catalog | null): Promise<void> {
+export async function downloadExcel(
+  run: RunResult,
+  catalog: Catalog | null,
+  costs: (CostSettings & { rates: RateTable }) | null,
+): Promise<void> {
   const res = await fetch(`${BASE}/excel`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ run, catalog }),
+    body: JSON.stringify({ run, catalog, costs }),
   });
   if (!res.ok) throw await failure(res);
   const blob = await res.blob();

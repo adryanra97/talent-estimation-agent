@@ -46,6 +46,7 @@ from talent_estimation.excel.styles import (
     title,
     widths,
 )
+from talent_estimation.rates import LEVELS, CostSettings, load_default_rates
 
 N1 = 7
 """First data row of the Breakdown_WBS sheet."""
@@ -72,9 +73,10 @@ class WorkbookBuilder:
         Capability catalog used in the run.
     """
 
-    def __init__(self, run: RunResult, catalog: Catalog) -> None:
+    def __init__(self, run: RunResult, catalog: Catalog, costs: CostSettings | None = None) -> None:
         self.run = run
         self.catalog = catalog
+        self.costs = costs or CostSettings(rates=load_default_rates())
         self.roles = run.roles
         self.n_rows = max(150, len(run.breakdown) + 30)
         self.last_row = N1 + self.n_rows - 1
@@ -1206,6 +1208,147 @@ class WorkbookBuilder:
         ws.freeze_panes = "A5"
         page(ws)
 
+    # ------------------------------------------------------------------- costs
+    def _biaya(self) -> None:
+        ws = self.wb.create_sheet("Biaya")
+        rates = self.costs.rates
+        level_names = [rates.levels[code] for code in LEVELS]
+        title(
+            ws,
+            "ESTIMASI BIAYA TALENT",
+            "Estimasi dari benchmark gaji publik, bukan tarif internal. Ubah sel kuning: level per "
+            "role, pengali, dasar biaya, metode, atau tabel gaji di bagian bawah.",
+            12,
+        )
+        widths(
+            ws,
+            {
+                "A": 8, "B": 20, "C": 11, "D": 13, "E": 11, "F": 15, "G": 11, "H": 11,
+                "I": 17, "J": 17, "K": 17, "L": 19,
+            },
+        )  # fmt: skip
+        section(ws, 4, "1. Pengaturan", 12)
+        settings = [
+            (5, "Pengali biaya perusahaan (x gaji)", rates.employer_multiplier, "0.00"),
+            (6, "Pengali vendor (x gaji)", rates.vendor_multiplier, "0.00"),
+            (7, "Dasar biaya", "Vendor" if self.costs.basis == "vendor" else "Karyawan", None),
+            (8, "Metode FTE", "UCP" if self.costs.method == "ucp" else "Bottom-up", None),
+        ]
+        for row, label, value, fmt in settings:
+            put(ws, f"A{row}", label, F_BOLD)
+            ws.merge_cells(f"A{row}:C{row}")
+            as_input(put(ws, f"D{row}", value), fmt)
+        basis_dv = DataValidation(type="list", formula1='"Karyawan,Vendor"', allow_blank=False)
+        method_dv = DataValidation(type="list", formula1='"UCP,Bottom-up"', allow_blank=False)
+        level_dv = DataValidation(
+            type="list", formula1='"' + ",".join(level_names) + '"', allow_blank=False
+        )
+        for dv in (basis_dv, method_dv, level_dv):
+            ws.add_data_validation(dv)
+        basis_dv.add("D7")
+        method_dv.add("D8")
+        put(ws, "E5", "BPJS, tunjangan, THR. Asumsi.", F_NOTE)
+        put(ws, "E6", "Markup vendor terhadap gaji. Asumsi.", F_NOTE)
+        put(ws, "E7", '="Pengali dipakai: "&TEXT(IF(D7="Vendor",D6,D5),"0.00")', F_NOTE)
+
+        roles = self.roles
+        first = 11
+        last = first + len(roles) - 1
+        table_head = last + 4
+        table_first = table_head + 1
+        table_last = table_first + len(rates.roles) - 1
+        rate_range = f"$C${table_first}:$J${table_last}"
+        code_range = f"$A${table_first}:$A${table_last}"
+        levels_list = "{" + ",".join(f'"{n}"' for n in level_names) + "}"
+
+        section(ws, 9, "2. Biaya per role (rupiah per bulan, kecuali kolom terakhir)", 12)
+        header(
+            ws,
+            10,
+            [
+                "Kode", "Role", "Level", "Gaji median (juta)", "Pengali", "Biaya per FTE",
+                "FTE diminta", "FTE hasil hitung", "Biaya sesuai permintaan",
+                "Biaya sesuai hasil hitung", "Selisih per bulan", "Selisih selama periode",
+            ],
+        )  # fmt: skip
+        ws.row_dimensions[10].height = 44
+        for i, code in enumerate(roles):
+            row = first + i
+            ring = 7 + i
+            put(ws, f"A{row}", f"=Ringkasan!A{ring}", F_BOLD, border=BORDER)
+            put(ws, f"B{row}", f"=Ringkasan!B{ring}", border=BORDER)
+            as_input(put(ws, f"C{row}", rates.levels[self.costs.level(code)]))
+            level_dv.add(f"C{row}")
+            k = f"MATCH(C{row},{levels_list},0)"
+            m = f"MATCH(A{row},{code_range},0)"
+            as_calc(
+                put(
+                    ws,
+                    f"D{row}",
+                    f"=IFERROR((INDEX({rate_range},{m},2*{k}-1)+INDEX({rate_range},{m},2*{k}))/2,0)",
+                ),
+                "0.0",
+            )
+            as_calc(put(ws, f"E{row}", '=IF($D$7="Vendor",$D$6,$D$5)'), "0.00")
+            as_calc(put(ws, f"F{row}", f"=D{row}*E{row}*1000000"), "#,##0")
+            as_calc(put(ws, f"G{row}", f'=IF(Ringkasan!C{ring}="",0,Ringkasan!C{ring})'), "0.00")
+            as_calc(
+                put(ws, f"H{row}", f'=IF($D$8="UCP",Ringkasan!G{ring},Ringkasan!J{ring})'), "0.00"
+            )
+            as_calc(put(ws, f"I{row}", f"=G{row}*F{row}"), "#,##0")
+            as_calc(put(ws, f"J{row}", f"=H{row}*F{row}"), "#,##0", RES_FILL, True)
+            as_calc(put(ws, f"K{row}", f"=I{row}-J{row}"), "#,##0;[Red]-#,##0")
+            as_calc(
+                put(ws, f"L{row}", f"=K{row}*Durasi_Bulan"), "#,##0;[Red]-#,##0", RES_FILL, True
+            )
+        total = last + 1
+        put(ws, f"A{total}", "Total", F_BOLD, border=BORDER)
+        ws.merge_cells(f"A{total}:F{total}")
+        for col in "GHIJKL":
+            fmt = "0.00" if col in "GH" else "#,##0;[Red]-#,##0"
+            as_calc(
+                put(ws, f"{col}{total}", f"=SUM({col}{first}:{col}{last})"), fmt, RES_FILL, True
+            )
+        put(
+            ws,
+            f"A{total + 1}",
+            "Selisih positif: permintaan lebih mahal dari kebutuhan hasil hitung. Negatif: "
+            "permintaan di bawah kebutuhan.",
+            F_NOTE,
+        )
+
+        section(
+            ws,
+            table_head - 1,
+            f"3. Gaji bruto per bulan per FTE, juta rupiah ({rates.version})",
+            12,
+        )
+        labels = ["Kode", "Role"]
+        for name in level_names:
+            labels += [f"{name} min", f"{name} maks"]
+        header(ws, table_head, [*labels, "Dasar angka", ""])
+        for i, (code, rate) in enumerate(rates.roles.items()):
+            row = table_first + i
+            put(ws, f"A{row}", code, F_BOLD, border=BORDER)
+            put(ws, f"B{row}", self._name(code), border=BORDER)
+            for j, level in enumerate(LEVELS):
+                low, high = getattr(rate, level)
+                as_input(put(ws, f"{col_letter(3 + 2 * j)}{row}", low), "0.0")
+                as_input(put(ws, f"{col_letter(4 + 2 * j)}{row}", high), "0.0")
+            put(ws, f"K{row}", rate.basis, F_NOTE, align=WRAP)
+            ws.merge_cells(f"K{row}:L{row}")
+        notes = table_last + 2
+        put(ws, f"A{notes}", "Metode", F_BOLD)
+        ws.merge_cells(f"B{notes}:L{notes + 2}")
+        put(ws, f"B{notes}", rates.method, F_NOTE, align=WRAP)
+        src = notes + 4
+        put(ws, f"A{src}", "Sumber", F_BOLD)
+        for i, source in enumerate(rates.sources):
+            cell = put(ws, f"B{src + i}", f"{source.name} ({source.date})", F_NOTE)
+            cell.hyperlink = source.url  # type: ignore[attr-defined]
+        ws.freeze_panes = "C11"
+        page(ws)
+
     # --------------------------------------------------------------- findings
     def _asumsi(self) -> None:
         ws = self.wb.create_sheet("Asumsi_Log")
@@ -1277,13 +1420,14 @@ class WorkbookBuilder:
         section(ws, 4, "Cara membaca", 8)
         steps = [
             "1. Ringkasan: kebutuhan per role dari dua metode, dibandingkan dengan permintaan.",
-            "2. Breakdown_WBS: asal setiap angka. Koreksi baris yang ditandai Perlu review; "
+            "2. Biaya: estimasi rupiah dari benchmark gaji publik; level dan pengali bisa diubah.",
+            "3. Breakdown_WBS: asal setiap angka. Koreksi baris yang ditandai Perlu review; "
             "semua total ikut berubah.",
-            "3. Capability: skill yang dibutuhkan tiap item WBS per role, siap difilter.",
-            "4. UCP per role: aktor dan rating faktor. Rating selain 3 wajib punya bukti.",
-            "5. Fase_Bulanan: sebaran kebutuhan per bulan dan puncaknya.",
-            "6. Peluang_AI: skenario bantuan AI per tugas dan capability.",
-            "7. Asumsi_Log: temuan agent dan asumsi hitung.",
+            "4. Capability: skill yang dibutuhkan tiap item WBS per role, siap difilter.",
+            "5. UCP per role: aktor dan rating faktor. Rating selain 3 wajib punya bukti.",
+            "6. Fase_Bulanan: sebaran kebutuhan per bulan dan puncaknya.",
+            "7. Peluang_AI: skenario bantuan AI per tugas dan capability.",
+            "8. Asumsi_Log: temuan agent dan asumsi hitung.",
         ]
         for i, text in enumerate(steps):
             ws.merge_cells(f"A{5 + i}:H{5 + i}")
@@ -1325,19 +1469,20 @@ class WorkbookBuilder:
         self._bottom_up()
         self._fase()
         self._ringkasan()
+        self._biaya()
         if self.run.ai_enabled:
             self._peluang_ai()
         self._rubrik()
         self._asumsi()
         self._petunjuk()
         order = [
-            "Petunjuk", "Parameter", "Ringkasan", "Breakdown_WBS", "Capability",
+            "Petunjuk", "Parameter", "Ringkasan", "Biaya", "Breakdown_WBS", "Capability",
             *[f"UCP_{c}" for c in self.roles], "BottomUp", "Fase_Bulanan",
             *(["Peluang_AI"] if self.run.ai_enabled else []), "Rubrik", "Asumsi_Log",
         ]  # fmt: skip
         self.wb._sheets = [self.wb[name] for name in order]
         colors = {
-            "Petunjuk": "7F7F7F", "Parameter": "FFC000", "Ringkasan": "70AD47",
+            "Petunjuk": "7F7F7F", "Parameter": "FFC000", "Ringkasan": "70AD47", "Biaya": "70AD47",
             "Breakdown_WBS": "FFC000", "Capability": "FFC000", "Peluang_AI": "7C3AED", "Rubrik": "7F7F7F",
             "Asumsi_Log": "FFC000",
         }  # fmt: skip
@@ -1350,7 +1495,7 @@ class WorkbookBuilder:
         return buffer.getvalue()
 
 
-def build_workbook(run: RunResult, catalog: Catalog) -> bytes:
+def build_workbook(run: RunResult, catalog: Catalog, costs: CostSettings | None = None) -> bytes:
     """Build the validation workbook for a run.
 
     Parameters
@@ -1359,6 +1504,9 @@ def build_workbook(run: RunResult, catalog: Catalog) -> bytes:
         A recalculated run.
     catalog : Catalog
         Capability catalog used in the run.
+    costs : CostSettings, optional
+        Rates, levels, basis and method for the Biaya sheet. Defaults to the
+        packaged rates at Middle level, employee basis, bottom-up FTE.
 
     Returns
     -------
@@ -1370,4 +1518,4 @@ def build_workbook(run: RunResult, catalog: Catalog) -> bytes:
     The workbook stores formulas, not values. Excel computes them when the
     file is opened.
     """
-    return WorkbookBuilder(run, catalog).build()
+    return WorkbookBuilder(run, catalog, costs).build()

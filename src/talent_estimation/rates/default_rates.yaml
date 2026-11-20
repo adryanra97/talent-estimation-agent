@@ -1,0 +1,95 @@
+# Default monthly pay benchmarks per role and level.
+#
+# Figures are gross monthly pay for one person (1 FTE), in million rupiah,
+# taken from public salary pages in 2026. They are rough market references for
+# a demo, not internal tariffs. Users can edit every number from the settings
+# page; a change lives only in the browser tab.
+
+version: "2026-11-20"
+currency: IDR
+unit_label: juta Rp per bulan per FTE
+levels:
+  J: Junior
+  M: Middle
+  S: Senior
+  L: Lead
+
+employer_multiplier: 1.3
+employer_note: >-
+  Asumsi biaya perusahaan di atas gaji (BPJS, tunjangan, THR). Bukan data,
+  sesuaikan dengan kebijakan organisasi.
+vendor_multiplier: 1.6
+vendor_note: >-
+  Asumsi tarif vendor atau outsourcing terhadap gaji. Rate card vendor yang
+  publik umumnya berisi gaji, sehingga angka ini tidak punya sumber langsung.
+
+method: >-
+  Data Analyst dan UI/UX memakai rentang per level dari KantorKu (Mei 2026).
+  Data Engineer dan Data Scientist adalah tabel Data Analyst dikali rasio
+  rata-rata gaji di Jobstreet (November 2026): 1,72 untuk Data Engineer dan
+  1,48 untuk Data Scientist. AI Engineer adalah Data Scientist dikali 1,3, dari
+  rasio AI/ML Engineer terhadap Data Scientist level senior dan lead di Nucamp
+  (data ERI SalaryExpert, April 2026). UX Researcher mengikuti UX Designer
+  karena tidak ada sumber yang layak. Lead UI/UX diturunkan dari rasio Senior ke
+  Lead pada Data Analyst. Median adalah titik tengah rentang.
+
+roles:
+  DA:
+    basis: Sumber langsung
+    J: [5.5, 8]
+    M: [8, 15]
+    S: [15, 30]
+    L: [25, 40]
+  DE:
+    basis: Turunan (Data Analyst x 1,72)
+    J: [9.5, 13.5]
+    M: [13.5, 26]
+    S: [26, 51.5]
+    L: [43, 68.5]
+  DS:
+    basis: Turunan (Data Analyst x 1,48)
+    J: [8, 12]
+    M: [12, 22]
+    S: [22, 44.5]
+    L: [37, 59]
+  AI:
+    basis: Turunan (Data Scientist x 1,3)
+    J: [10.5, 15.5]
+    M: [15.5, 28.5]
+    S: [28.5, 58]
+    L: [48, 76.5]
+  UI:
+    basis: Sumber langsung, Lead turunan
+    J: [5, 8]
+    M: [9, 15]
+    S: [16, 30]
+    L: [25, 45]
+  UX:
+    basis: Sumber langsung, Lead turunan
+    J: [5, 8]
+    M: [9, 15]
+    S: [16, 30]
+    L: [25, 45]
+  UXR:
+    basis: Turunan (sama dengan UX Designer)
+    J: [5, 8]
+    M: [9, 15]
+    S: [16, 30]
+    L: [25, 45]
+
+sources:
+  - name: KantorKu, Gaji Data Analyst
+    url: https://kantorku.id/blog/gaji-data-analyst/
+    date: "2026-05-11"
+  - name: KantorKu, Gaji UI UX Designer 2026
+    url: https://kantorku.id/blog/gaji-ui-ux-designer
+    date: "2026-05-22"
+  - name: Jobstreet, Gaji Data Engineer
+    url: https://id.jobstreet.com/id/career-advice/role/data-engineer/salary
+    date: "2026-11"
+  - name: Jobstreet, Gaji Data Analyst
+    url: https://id.jobstreet.com/id/career-advice/role/data-analyst/salary
+    date: "2026-11"
+  - name: Nucamp, AI Salaries in Indonesia in 2026
+    url: https://www.nucamp.co/blog/coding-bootcamp-indonesia-idn-top-10-best-paid-tech-job-in-indonesia-in-2025
+    date: "2026-04-15"

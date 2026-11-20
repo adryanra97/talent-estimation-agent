@@ -253,3 +253,22 @@ export interface WbsPreview {
   legend_size: number;
   files: { name: string; sheet: string; items: number; start: string | null; end: string | null }[];
 }
+
+export type RateLevel = "J" | "M" | "S" | "L";
+
+/** Monthly pay range per level for one role, in million rupiah. */
+export type RoleRate = { basis: string } & Record<RateLevel, [number, number]>;
+
+export interface RateTable {
+  version: string;
+  currency: string;
+  unit_label: string;
+  levels: Record<RateLevel, string>;
+  employer_multiplier: number;
+  employer_note: string;
+  vendor_multiplier: number;
+  vendor_note: string;
+  method: string;
+  roles: Record<string, RoleRate>;
+  sources: { name: string; url: string; date: string }[];
+}

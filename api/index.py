@@ -41,7 +41,7 @@ from talent_estimation.catalog import (
     load_catalog_file,
     load_default_catalog,
 )
-from talent_estimation.demo import NOTES_TEXT, PROJECT_NAME, REQUEST_TEXT, build_demo_wbs
+from talent_estimation.demo import DEMO_PHM, NOTES_TEXT, PROJECT_NAME, REQUEST_TEXT, build_demo_wbs
 from talent_estimation.domain.models import (
     Parameters,
     ProjectInfo,
@@ -341,6 +341,10 @@ async def create_run(
     _check_total(wbs_files, request_files, supporting_files)
 
     if options.demo and not wbs_files:
+        # This published sample has a separate effort assumption; never
+        # apply it to uploaded WBS files or the user's custom parameters.
+        if options.parameters == Parameters():
+            options.parameters = options.parameters.model_copy(update={"phm": DEMO_PHM})
         wbs_files = [("WBS_contoh.xlsx", build_demo_wbs())]
         request_text, supporting_text = REQUEST_TEXT, NOTES_TEXT
         options.role_inputs = []

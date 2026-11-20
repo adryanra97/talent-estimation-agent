@@ -13,6 +13,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 PROJECT_NAME = "Platform Analitik Layanan Publik (contoh)"
+DEMO_PHM = 8.0
+# The sample WBS contains short work packages. Its smaller UCP effort
+# multiplier helps explain independent methods without changing real projects.
 
 WBS_ROWS: list[tuple[str, str, str, str, date | None, date | None]] = [
     ("1.0", "Manajemen Proyek", "Pengelolaan proyek", "Project Manager", date(2027, 2, 1), date(2027, 4, 30)),

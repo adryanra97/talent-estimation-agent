@@ -8,6 +8,7 @@ import type {
   ProgressEvent,
   ProjectInfo,
   ProviderConfig,
+  RateTable,
   RunResult,
   WbsPreview,
 } from "./types";
@@ -68,6 +69,9 @@ interface Store {
   catalogSource: string;
   setCatalog: (c: Catalog, source: string) => void;
   resetCatalog: () => void;
+  rates: RateTable | null;
+  defaultRates: RateTable | null;
+  setRates: (r: RateTable) => void;
   project: ProjectInfo;
   setProject: (p: ProjectInfo) => void;
   parameters: Parameters;
@@ -150,6 +154,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [defaultCatalog, setDefaultCatalog] = useState<Catalog | null>(null);
   const [catalog, setCatalogState] = useState<Catalog | null>(null);
   const [catalogSource, setCatalogSource] = useState("bawaan");
+  const [defaultRates, setDefaultRates] = useState<RateTable | null>(null);
+  const [rates, setRates] = useState<RateTable | null>(null);
   const [project, setProject] = useState<ProjectInfo>({
     name: "",
     start: null,
@@ -187,6 +193,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setCatalogState(c);
       })
       .catch(() => setNotice("Katalog bawaan gagal dimuat. Periksa koneksi ke API."));
+    api
+      .fetchRates()
+      .then((r) => {
+        setDefaultRates(r);
+        setRates(r);
+      })
+      .catch(() => setNotice("Rate talenta bawaan gagal dimuat. Periksa koneksi ke API."));
   }, []);
 
   useEffect(() => {
@@ -343,13 +356,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Store>(
     () => ({
       provider, setProvider, apiKey, setApiKey, catalog, defaultCatalog, catalogSource, setCatalog,
-      resetCatalog, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
+      resetCatalog, rates, defaultRates, setRates, project, setProject, parameters, setParameters, team, setTeam, teamAuto, setTeamAuto, aiEnabled,
       setAiEnabled, aiTools, setAiTools, files, setFiles, preview, setPreview, status, events,
       error, startedAt, endedAt, modelCalls, demo, run, setRun, start, cancel, busy, update, canUndo: history.length > 0, undo, reclassify, exportExcel,
       notice, setNotice, teamView, setTeamView,
     }),
     [
-      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, project,
+      provider, apiKey, catalog, defaultCatalog, catalogSource, setCatalog, resetCatalog, rates, defaultRates, project,
       parameters, team, teamAuto, aiEnabled, aiTools, files, preview, status, events, error, startedAt, endedAt,
       modelCalls, demo,
       run, start, cancel, busy, update, history, undo, reclassify, exportExcel, notice, teamView,

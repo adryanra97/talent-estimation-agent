@@ -87,9 +87,9 @@
 .tl-settings-aside{border-top:2px solid #7daabf;padding-top:15px}
 .tl-settings-aside h3{font-size:17px;font-weight:740;letter-spacing:-.024em;color:#1a4661}
 .tl-settings-aside ol{counter-reset:set;display:grid;gap:20px;margin-top:20px}
-.tl-settings-aside li{display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:12px;line-height:1.7;color:#617e8f}
-.tl-settings-aside li:before{counter-increment:set;content:"0" counter(set);font:italic 21px Georgia,serif;color:#2e81a0}
-.tl-settings-aside li strong{display:block;color:#1b465f;font-weight:760}
+.tl-settings-aside ol li{display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:12px;line-height:1.7;color:#617e8f}
+.tl-settings-aside ol li:before{counter-increment:set;content:"0" counter(set);font:italic 21px Georgia,serif;color:#2e81a0}
+.tl-settings-aside ol li strong{display:block;color:#1b465f;font-weight:760}
 .tl-method-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:25px;margin:28px 0}
 .tl-method-panel{background:#fff;border:1px solid #d3e2e9;padding:26px;min-width:0}
 .tl-method-panel-index{font-size:10px;color:#347999;font-weight:800;letter-spacing:.13em}

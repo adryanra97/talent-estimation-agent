@@ -1,4 +1,4 @@
-import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RunResult, WbsPreview } from "./types";
+import type { Catalog, ConnectionResult, ExtractResult, ProviderConfig, RateTable, RunResult, WbsPreview } from "./types";
 
 const BASE = "/api/py";
 
@@ -17,6 +17,12 @@ function keyHeader(apiKey: string): Record<string, string> {
 
 export async function fetchCatalog(): Promise<Catalog> {
   const res = await fetch(`${BASE}/catalog`);
+  if (!res.ok) throw await failure(res);
+  return res.json();
+}
+
+export async function fetchRates(): Promise<RateTable> {
+  const res = await fetch(`${BASE}/rates`);
   if (!res.ok) throw await failure(res);
   return res.json();
 }

@@ -3,6 +3,7 @@
 import { CheckCircle2, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { Button, Card, Field, Toggle, inputClass } from "@/components/ui";
+import { RatesEditor } from "@/components/rates-editor";
 import { ResourceHero, ResourceHeading } from "@/components/resource-page";
 import { testConnection } from "@/lib/api";
 import { useStore } from "@/lib/store";
@@ -81,7 +82,7 @@ export default function SettingsPage() {
   return (
     <div className="tl-resource-page tl-settings-page">
       <ResourceHero eyebrow="CONFIGURATION / MODEL ACCESS" title="Pengaturan" accent="model AI."
-        description="Tentukan penyedia model, masukkan kredensial secara aman, lalu uji koneksi sebelum menganalisis dokumen proyek."
+        description="Tentukan penyedia model, masukkan kredensial secara aman, lalu uji koneksi sebelum menganalisis dokumen proyek. Rate talenta untuk estimasi biaya ada di bagian kedua."
         chapter="CONFIGURATION / 02"
         footnote="API key tetap berada di memori tab browser; aplikasi tidak menyimpannya di database." />
       <div className="tl-resource-body">
@@ -243,6 +244,9 @@ export default function SettingsPage() {
           </div>
         </aside>
         </div>
+        <ResourceHeading index="02" label="TALENT RATES" title="Rate talenta untuk estimasi biaya" id="rate"
+          description="Dipakai untuk menerjemahkan FTE menjadi rupiah. Validasi kebutuhan tetap dihitung dari beban kerja, bukan dari biaya." />
+        <RatesEditor />
       </div>
     </div>
   );

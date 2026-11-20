@@ -46,6 +46,7 @@ from talent_estimation.llm import (
     ProviderConfig,
     test_connection,
 )
+from talent_estimation.rates import load_default_rates
 from talent_estimation.skills import AGENT_CARDS
 from talent_estimation.skills.judgement import parse_request
 from talent_estimation.skills.schemas import ReclassifyRequest
@@ -185,6 +186,12 @@ def health() -> dict[str, str]:
 def default_catalog() -> dict[str, Any]:
     """Return the default capability catalog."""
     return load_default_catalog().model_dump(mode="json")
+
+
+@app.get("/api/py/rates")
+def default_rates() -> dict[str, Any]:
+    """Return the default monthly pay benchmarks per role and level."""
+    return load_default_rates().model_dump(mode="json")
 
 
 @app.post("/api/py/catalog/parse")

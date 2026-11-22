@@ -126,3 +126,5 @@
 /* Exhibit 1: the two totals being compared stay navy, intermediate steps are muted, the gap carries the accent. */
 .tl-wf-col.is-total:first-child .tl-wf-bar{background:#8ea4ba}
 .tl-wf-col.is-total:nth-child(3) .tl-wf-bar{background:#2f659b}
+.tl-studio-app .tl-summary-method-note{margin:0 0 40px;padding:14px 18px;border-left:3px solid #2f659b;background:#eef3f8;font-size:14px;line-height:1.65;color:#16324c}
+.tl-studio-app .tl-summary-method-note a{color:#1d568e;font-weight:650;text-decoration:underline;text-underline-offset:3px}

@@ -324,7 +324,7 @@ export default function NewValidationPage() {
   return (
     <>
       <div className="tl-validation-intro">
-        <p className="tl-summary-eyebrow">NEW ANALYSIS / FROM DOCUMENTS TO DECISIONS</p>
+        <p className="tl-summary-eyebrow">ANALISIS BARU / DARI DOKUMEN KE KEPUTUSAN</p>
         <PageHeader
           title="Mulai dari pekerjaan."
           description="Unggah WBS, lengkapi konteks, lalu biarkan agent memetakan kebutuhan talent. Hanya WBS yang wajib; file diproses di memori dan tidak disimpan."

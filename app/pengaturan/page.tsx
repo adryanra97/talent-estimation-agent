@@ -81,9 +81,9 @@ export default function SettingsPage() {
 
   return (
     <div className="tl-resource-page tl-settings-page">
-      <ResourceHero eyebrow="CONFIGURATION / MODEL ACCESS" title="Pengaturan" accent="model AI."
+      <ResourceHero eyebrow="PENGATURAN / AKSES MODEL" title="Pengaturan" accent="model AI."
         description="Tentukan penyedia model, masukkan kredensial secara aman, lalu uji koneksi sebelum menganalisis dokumen proyek. Rate talenta untuk estimasi biaya ada di bagian kedua."
-        chapter="CONFIGURATION / 02"
+        chapter="PENGATURAN / 02"
         footnote="API key tetap berada di memori tab browser; aplikasi tidak menyimpannya di database." />
       <div className="tl-resource-body">
         <div className="tl-settings-status" role="status">
@@ -93,7 +93,7 @@ export default function SettingsPage() {
           <span className="tl-settings-status-tag"><i aria-hidden className={"tl-settings-status-dot" + (shownState === "ok" ? " is-ok" : "")} />
             {shownState === "ok" ? "Terverifikasi lewat tes" : "Belum diverifikasi"}</span>
         </div>
-        <ResourceHeading index="01" label="PROVIDER & CREDENTIALS" title="Hubungkan model bahasa"
+        <ResourceHeading index="01" label="PENYEDIA & KREDENSIAL" title="Hubungkan model bahasa"
           description="Pilih penyedia dan model yang akan digunakan agent. Mulai dari pengaturan inti, lalu tes sebelum menjalankan validasi." />
         <div className="tl-settings-main">
         <Card title="Konfigurasi koneksi" description="Kredensial tidak tersimpan setelah halaman ditutup.">
@@ -244,7 +244,7 @@ export default function SettingsPage() {
           </div>
         </aside>
         </div>
-        <ResourceHeading index="02" label="TALENT RATES" title="Rate talenta untuk estimasi biaya" id="rate"
+        <ResourceHeading index="02" label="RATE TALENT" title="Rate talenta untuk estimasi biaya" id="rate"
           description="Dipakai untuk menerjemahkan FTE menjadi rupiah. Validasi kebutuhan tetap dihitung dari beban kerja, bukan dari biaya." />
         <RatesEditor />
       </div>

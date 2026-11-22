@@ -65,7 +65,7 @@ export default function AiPage() {
 
             <div className="tl-summary-section-head">
               <div>
-                <p className="tl-summary-eyebrow">AI AUGMENTATION / SCENARIO</p>
+                <p className="tl-summary-eyebrow">BANTUAN AI / SKENARIO</p>
                 <h2>Dampak bantuan AI per role</h2>
               </div>
               <p>Skenario menunjukkan potensi efisiensi, bukan keputusan otomatis untuk mengurangi talent. Baseline di Ringkasan tetap sama.</p>
@@ -97,7 +97,7 @@ export default function AiPage() {
               Angka tersebut menggunakan kategori dan asumsi penghematan tugas yang dapat diedit pada tabel di bawah. Hasil aktual tetap memerlukan validasi.
             </p>
             <Link href="/hasil/biaya" className="tl-ai-cost-next">
-              <span><small>LANGKAH TERAKHIR / COST INTELLIGENCE</small><strong>Bandingkan baseline biaya dengan skenario bantuan AI</strong><em>Rate yang sama diterapkan pada kedua skenario, agar perubahan effort dapat dihitung sebagai potensi biaya kapasitas.</em></span>
+              <span><small>LANGKAH TERAKHIR / ANALISIS BIAYA</small><strong>Bandingkan baseline biaya dengan skenario bantuan AI</strong><em>Rate yang sama diterapkan pada kedua skenario, agar perubahan effort dapat dihitung sebagai potensi biaya kapasitas.</em></span>
               <ArrowRight size={21} aria-hidden />
             </Link>
 

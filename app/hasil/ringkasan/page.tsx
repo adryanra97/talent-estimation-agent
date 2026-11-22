@@ -156,7 +156,7 @@ export default function SummaryPage() {
             <section aria-labelledby="tl-role-comparison">
               <div className="tl-summary-section-head">
                 <div>
-                  <p className="tl-summary-eyebrow">EXHIBIT 3</p>
+                  <p className="tl-summary-eyebrow">GAMBAR 3</p>
                   <h2 id="tl-role-comparison">{roleTitle}</h2>
                 </div>
               </div>
@@ -195,23 +195,11 @@ export default function SummaryPage() {
               })}
             </section>
 
-            <section className="tl-summary-takeaways" aria-label="Konteks untuk keputusan">
-              <div className="tl-summary-takeaway">
-                <h3>Selisih metode</h3>
-                <p>{fte(delta)} FTE selisih antara total UCP dan bottom-up pada role yang terlihat.</p>
-                <Link href="/metodologi">Cara membaca dua metode</Link>
-              </div>
-              <div className="tl-summary-takeaway">
-                <h3>Perlu dicermati</h3>
-                <p>{maxDifference ? `${roleName(maxDifference.role, catalog?.roles)} memiliki selisih dua metode terbesar: ${fte(Math.abs(maxDifference.ucp_fte - maxDifference.bu_fte))} FTE.` : "Belum ada peran yang dapat dibandingkan."}</p>
-                <Link href="/hasil/breakdown">Buka rincian WBS</Link>
-              </div>
-              <div className="tl-summary-takeaway">
-                <h3>Kebutuhan tambahan</h3>
-                <p>{fte(Math.min(total.extraUcp, total.extraBu))}–{fte(Math.max(total.extraUcp, total.extraBu))} FTE tambahan setelah memperhitungkan talent tersedia.</p>
-                <Link href="/hasil/bulanan">Lihat distribusi per bulan</Link>
-              </div>
-            </section>
+            <p className="tl-summary-method-note">
+              <strong>Catatan metode.</strong> Total UCP dan bottom-up berbeda {fte(delta)} FTE pada role yang terlihat
+              {maxDifference ? `; selisih terbesar ada di ${roleName(maxDifference.role, catalog?.roles)} (${fte(Math.abs(maxDifference.ucp_fte - maxDifference.bu_fte))} FTE)` : ""}.{" "}
+              <Link href="/metodologi">Cara membaca dua metode</Link>
+            </p>
 
             <details className="tl-report-detail">
               <summary>Lihat tabel teknis lengkap dan asumsi perhitungan</summary>

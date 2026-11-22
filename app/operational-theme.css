@@ -244,3 +244,9 @@
 .tl-studio-app button.bg-accent-600:disabled{background:#8aa7c3}
 .tl-studio-app small{font-size:max(12px,.8em)}
 .tl-studio-app .tl-catalog-rule .tl-rule-id{color:#2f6390}
+
+/* Compact report cover: the decision card on each page carries the message, the cover only identifies the project. */
+.tl-studio-app .tl-results-page .tl-report-cover{padding:22px 32px 24px}
+.tl-studio-app .tl-results-page .tl-report-cover-main{padding-top:14px;align-items:center}
+.tl-studio-app .tl-results-page .tl-report-project{font:500 clamp(20px,2vw,26px)/1.25 "Newsreader Variable","Newsreader",Georgia,serif;letter-spacing:-.01em;color:#fff}
+@media (max-width:760px){.tl-studio-app .tl-results-page .tl-report-cover{padding:18px 20px 20px}.tl-studio-app .tl-results-page .tl-report-cover-main{align-items:flex-start}}

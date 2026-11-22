@@ -58,7 +58,7 @@ export default function ProcessPage() {
     <div className="tl-page">
       <header className="tl-process-head tl-studio-process-head flex flex-wrap items-center justify-between gap-5">
         <div>
-          <p className="tl-eyebrow">AGENT OPERATIONS / LIVE MONITOR</p>
+          <p className="tl-eyebrow">OPERASI AGENT / PEMANTAUAN LANGSUNG</p>
           <h1 className="mt-3">Di balik setiap keputusan, <span className="tl-serif">ada proses yang bisa ditelusuri.</span></h1>
           <p>
             {demo

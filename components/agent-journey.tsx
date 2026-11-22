@@ -177,7 +177,7 @@ export default function AgentJourney({
         </div>
 
         <div className={"tl-journey-output" + (complete ? " is-ready" : "")} aria-label="Output yang disiapkan TalentLens">
-          <span className="tl-output-label">OUTPUT</span>
+          <span className="tl-output-label">HASIL</span>
           <div>{complete ? <Check size={14} aria-hidden/> : <Circle size={12} aria-hidden/>}<span>Capability</span></div>
           <div>{complete ? <Check size={14} aria-hidden/> : <Circle size={12} aria-hidden/>}<span>UCP / Bottom-up</span></div>
           <div>{complete ? <Check size={14} aria-hidden/> : <Circle size={12} aria-hidden/>}<span>FTE & review</span></div>

@@ -166,8 +166,8 @@ export default function FeedbackPage() {
   return (
     <div className="tl-resource-page">
       <ResourceHero
-        eyebrow="TALENTLENS / FEEDBACK LOOP"
-        chapter="LEARNING / 01"
+        eyebrow="TALENTLENS / SIKLUS FEEDBACK"
+        chapter="PEMBELAJARAN / 01"
         title="Feedback dan"
         accent="perbaikan agent."
         description="Reviewer menulis apa yang kurang tepat. Feedback Agent mendiagnosis bagian yang perlu diperbaiki dan menyusun usulan. Admin memutuskan; hanya usulan yang disetujui yang dipakai agent pada run berikutnya."
@@ -208,7 +208,7 @@ export default function FeedbackPage() {
               </div>
             </div>
 
-            <ResourceHeading index="01" label="ACTIVE GUIDANCE" title="Panduan yang sedang dipakai agent"
+            <ResourceHeading index="01" label="PANDUAN AKTIF" title="Panduan yang sedang dipakai agent"
               description="Ditambahkan ke prompt agent terkait saat analisis memakai model. Mode data contoh tidak memakai model, jadi tidak terpengaruh." />
             {guidance.length === 0 ? (
               <p className="mb-10 text-sm text-muted">Belum ada panduan aktif.</p>

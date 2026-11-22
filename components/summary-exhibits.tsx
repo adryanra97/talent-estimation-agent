@@ -145,7 +145,7 @@ export function Exhibit({ n, title, children, source, id }: {
   return (
     <figure ref={ref} className="tl-exhibit" data-in={seen ? "" : undefined} aria-labelledby={id}>
       <figcaption>
-        <span className="tl-exhibit-no">Exhibit {n}</span>
+        <span className="tl-exhibit-no">Gambar {n}</span>
         <h2 id={id}>{title}</h2>
       </figcaption>
       {children}

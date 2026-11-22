@@ -274,3 +274,9 @@
 .tl-studio-app .tl-resource-kpi,.tl-studio-app .tl-results-scope-stat{background:#f5f3f7}
 .tl-studio-app .tl-resource-kpi dd,.tl-studio-app .tl-results-scope-stat strong,.tl-studio-app .tl-summary-metric dd{color:#17141d}
 .tl-studio-app .tl-summary-metric dd.tl-cost-saving{color:#1f7a55}
+.tl-studio-app .tl-cost-metrics .tl-summary-metric dd,.tl-studio-app .tl-results-scope-stat strong{color:#17141d}
+.tl-studio-app .tl-cost-metrics .tl-summary-metric dd.tl-cost-over{color:#94520a}
+.tl-studio-app .tl-cost-metrics .tl-summary-metric dd.tl-cost-under{color:#b42318}
+.tl-studio-app .tl-cost-metrics .tl-summary-metric dd.tl-cost-even{color:#1f7a55}
+.tl-studio-app .tl-cost-breakdown .tl-summary-section-head h2{max-width:22ch}
+.tl-studio-app .tl-cost-breakdown .tl-summary-section-head p a{color:#6a22c4;font-weight:650}

@@ -1,15 +1,45 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
-import { Card, PageHeader, RoleBadge } from "@/components/ui";
+import { Exhibit } from "@/components/summary-exhibits";
+import { PageHeader, RoleBadge } from "@/components/ui";
 import { date, fte, month } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
 
-const REPORT_COLORS = ["#7e24e5", "#9e61e3", "#9364c9", "#a69bb3", "#8651c2", "#9e95a9", "#8e4fd7", "#b6adbf"];
+/** One small line per role on a shared scale; only the role that drives the peak month is coloured. */
+function RolePanels({ months, series, focus }: {
+  months: string[];
+  series: { role: string; name: string; values: number[] }[];
+  focus: string | null;
+}) {
+  const max = Math.max(0.1, ...series.flatMap((s) => s.values));
+  const W = 220, H = 84, pad = 6;
+  const x = (i: number) => (months.length < 2 ? W / 2 : pad + (i * (W - pad * 2)) / (months.length - 1));
+  const y = (v: number) => H - pad - (v / max) * (H - pad * 2);
+  return (
+    <ul className="tl-role-panels" aria-label="FTE bulanan per role, skala sama">
+      {series.map((s) => {
+        const peak = Math.max(...s.values);
+        const at = s.values.indexOf(peak);
+        const on = s.role === focus;
+        return (
+          <li key={s.role} className={on ? "is-focus" : undefined}>
+            <div className="tl-role-panel-head"><strong>{s.name}</strong><span>puncak {fte(peak)} · {months[at]}</span></div>
+            <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${s.name}: ${s.values.map((v, i) => `${months[i]} ${fte(v)} FTE`).join(", ")}`}>
+              <line x1={pad} x2={W - pad} y1={H - pad} y2={H - pad} className="tl-role-panel-base" />
+              <polyline points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} className="tl-role-panel-line" />
+              {s.values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r={i === at ? 4 : 2.5} className={i === at ? "tl-role-panel-peak" : "tl-role-panel-dot"} />)}
+            </svg>
+            <div className="tl-role-panel-axis" aria-hidden="true"><span>{months[0]}</span><span>{months[months.length - 1]}</span></div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function MonthlyPage() {
   const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");
@@ -71,36 +101,20 @@ export default function MonthlyPage() {
                 </p>
               </div>
             )}
-            <Card title={`Distribusi kapasitas · ${method === "ucp" ? "UCP" : "bottom-up"}`}
-              description="Area bertumpuk menunjukkan komposisi kebutuhan tiap role selama periode proyek. Pilih metode untuk membandingkan.">
-              <div className="tl-monthly-chart" aria-label="Visualisasi kebutuhan FTE bulanan menurut role">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data} margin={{ top: 15, right: 15, left: 0, bottom: 8 }}>
-                    <defs>
-                      {roles.map((role, index) => {
-                        const color = REPORT_COLORS[index % REPORT_COLORS.length];
-                        return <linearGradient key={role} id={`monthly-fill-${index}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={color} stopOpacity={0.88} />
-                          <stop offset="100%" stopColor={color} stopOpacity={0.47} />
-                        </linearGradient>;
-                      })}
-                    </defs>
-                    <CartesianGrid stroke="#e5e0ec" strokeDasharray="2 6" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#645d76" }} tickLine={false} axisLine={false} dy={12} />
-                    <YAxis tick={{ fontSize: 12, fill: "#645d76" }} tickLine={false} axisLine={false} width={36} tickFormatter={(value: number) => fte(value)} />
-                    <Tooltip formatter={(value: number, name: string) => [`${fte(value)} FTE`, name]}
-                      contentStyle={{ border: "1px solid #e0d8eb", borderRadius: 12, boxShadow: "0 12px 30px #2a214012", fontSize: 12 }}
-                      labelStyle={{ fontWeight: 700, color: "#29233f" }} />
-                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 24, lineHeight: "24px" }} />
-                    {roles.map((role, index) => (
-                      <Area key={role} type="monotone" dataKey={role} name={roleName(role, catalog?.roles)} stackId="total"
-                        stroke={REPORT_COLORS[index % REPORT_COLORS.length]} strokeWidth={1.5}
-                        fill={`url(#monthly-fill-${index})`} isAnimationActive={false} />
-                    ))}
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <p className="tl-report-footnote">Grafik menunjukkan FTE bulanan hasil pembagian effort pada periode proyek. Angka puncak menunjukkan bulan dengan kebutuhan paling tinggi, bukan kebutuhan rata-rata.</p>
+            {(() => {
+              const months = run.monthly.map((m) => month(m.month));
+              const totals = run.monthly.map((m) => monthTotal(m, roles));
+              const peakAt = totals.indexOf(Math.max(0, ...totals));
+              const series = roles.map((role) => ({ role, name: roleName(role, catalog?.roles), values: run.monthly.map((m) => m[method][role] ?? 0) }));
+              const driver = peakAt >= 0 ? [...series].sort((p, q) => q.values[peakAt] - p.values[peakAt])[0] : undefined;
+              return (
+                <Exhibit n={1} id="tl-monthly-exhibit"
+                  title={driver && peakAt >= 0 ? `${driver.name} menyumbang kebutuhan terbesar saat puncak ${months[peakAt]}` : "Kebutuhan bulanan per role"}
+                  source={`Sumber: jadwal item WBS, metode ${method === "ucp" ? "UCP" : "bottom-up"}. Semua panel memakai skala yang sama; ungu menandai role dengan kontribusi terbesar di bulan puncak. Angka lengkap ada di tabel.`}>
+                  <RolePanels months={months} series={series} focus={driver?.role ?? null} />
+                </Exhibit>
+              );
+            })()}
               <div className="tl-evidence-table-wrap mt-8 overflow-x-auto" role="region" aria-label="Data FTE bulanan per role" tabIndex={0}>
                 <table className="w-full text-sm">
                   <thead>
@@ -166,7 +180,6 @@ export default function MonthlyPage() {
                   </tbody>
                 </table>
               </div>
-            </Card>
           </>
         );
       }}

@@ -9,7 +9,7 @@ import { date, fte, month } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
 
-const REPORT_COLORS = ["#205fa9", "#278b9e", "#477fae", "#62aaba", "#39728c", "#7a9db6", "#267b82", "#91b6c9"];
+const REPORT_COLORS = ["#7e24e5", "#9e61e3", "#9364c9", "#a69bb3", "#8651c2", "#9e95a9", "#8e4fd7", "#b6adbf"];
 
 export default function MonthlyPage() {
   const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");

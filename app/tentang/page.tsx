@@ -104,7 +104,7 @@ export default function AboutPage() {
   return (
     <div className="tl-resource-page tl-about-page">
       <ResourceHero eyebrow="TENTANG / PRODUK & REKAYASA"
-        title="TalentLens." accent="Di balik setiap keputusan."
+        title="TalentLens." accent="Dari WBS ke keputusan."
         description="Platform untuk menerjemahkan WBS menjadi estimasi kebutuhan talent dan capability yang dapat dijelaskan, ditinjau, dan ditindaklanjuti."
         chapter="TENTANG / 04"
         actions={<Link href="/validasi">Mulai analisis <ArrowRight size={16} aria-hidden /></Link>}

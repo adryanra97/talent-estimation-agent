@@ -238,7 +238,7 @@ export default function HomePage() {
       <div className="tlw-wide">
         <div className="tlw-section-head">
           <span>01 / PLATFORM</span>
-          <div><h2>Melihat lebih dari<br /><em>jumlah orang.</em></h2><p>Keputusan talent yang baik dimulai dari pemahaman pekerjaan. Jelajahi contoh cara TalentLens menghubungkan estimasi, capability, dan peluang AI.</p></div>
+          <div><h2>Lebih dari<br /><em>jumlah orang.</em></h2><p>Keputusan talent yang baik dimulai dari pemahaman pekerjaan. Jelajahi contoh cara TalentLens menghubungkan estimasi, capability, dan peluang AI.</p></div>
         </div>
         <ReportStage />
       </div>
@@ -275,7 +275,7 @@ export default function HomePage() {
 
     <section className="tlw-final">
       <div className="tlw-wide tlw-final-layout">
-        <div><span>04 / PROYEK BERIKUTNYA</span><h2>Bentuk tim berikutnya<br /><em>dengan bukti yang lebih kuat.</em></h2></div>
+        <div><span>04 / PROYEK BERIKUTNYA</span><h2>Tim berikutnya,<br /><em>bukti lebih kuat.</em></h2></div>
         <div><p>Ubah WBS menjadi keputusan talent yang bisa dijelaskan. Tinjau effort, lihat peluang AI, lalu bandingkan biaya sebagai langkah terakhir.</p><Link href="/validasi">Mulai dari WBS <ArrowUpRight size={20} aria-hidden /></Link></div>
       </div>
     </section>

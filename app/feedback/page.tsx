@@ -189,8 +189,7 @@ export default function FeedbackPage() {
 
         {auth?.storage === "memory" && (
           <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-            <strong>Penyimpanan belum terhubung.</strong> Feedback disimpan sementara di memori server dan bisa hilang. Hubungkan
-            Upstash Redis di Vercel agar tersimpan permanen.
+            <strong>Mode demo.</strong> Feedback disimpan sementara dan bisa hilang saat server dimulai ulang.
           </p>
         )}
 

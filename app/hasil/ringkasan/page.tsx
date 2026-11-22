@@ -6,7 +6,9 @@ import { Fragment } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
 import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, InfoTip, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
-import { date, fte, num, pct } from "@/lib/format";
+import { ExecutiveHero, Exhibit, MonthlyLine, Waterfall, totals } from "@/components/summary-exhibits";
+import type { CostMethod } from "@/lib/cost";
+import { date, fte, month, num, pct } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
 import type { Comparison } from "@/lib/types";
@@ -28,6 +30,27 @@ function tone(text: string | null): "good" | "warn" | "bad" | "neutral" {
   return text === "Lebih tinggi" ? "bad" : "warn";
 }
 
+/** Short chip label; the request is the subject, as on the cost page. */
+function conclusionLabel(c: Comparison): string {
+  const t = c.conclusion.toLowerCase();
+  if (t.startsWith("selaras")) return "Selaras";
+  if (t.includes("lebih rendah")) return "Di atas kebutuhan";
+  if (t.includes("lebih tinggi")) return "Di bawah kebutuhan";
+  if (t.startsWith("isi fte")) return "Belum ada permintaan";
+  return "Perlu review";
+}
+
+/** Size of the gap between request and additional need, averaged over both methods. */
+function gapOf(c: Comparison): number {
+  if (c.requested_fte === null) return -1;
+  return Math.abs(c.requested_fte - (c.ucp_additional_fte + c.bu_additional_fte) / 2);
+}
+
+function offNeed(c: Comparison): boolean {
+  const label = conclusionLabel(c);
+  return label === "Di atas kebutuhan" || label === "Di bawah kebutuhan";
+}
+
 function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
   if (c.conclusion.startsWith("Selaras")) return "good";
   if (c.conclusion.toLowerCase().includes("lebih tinggi")) return "bad";
@@ -36,7 +59,7 @@ function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
 }
 
 export default function SummaryPage() {
-  const { catalog, update, run: current, teamView } = useStore();
+  const { catalog, update, run: current, teamView, costSettings, setCostSettings } = useStore();
 
   return (
     <WithRun>
@@ -55,11 +78,24 @@ export default function SummaryPage() {
         const maxFte = Math.max(.1, ...shown.flatMap((c) => [c.ucp_fte, c.bu_fte]));
         const maxDifference = [...shown].sort((a, b) => Math.abs(b.ucp_fte - b.bu_fte) - Math.abs(a.ucp_fte - a.bu_fte))[0];
         const delta = Math.abs(total.ucp - total.bu);
-        const reportMessage = review > 0
-          ? `${review} baris pekerjaan masih perlu ditinjau sebelum hasil dipakai sebagai dasar keputusan.`
-          : hasRequested
-            ? "Gunakan estimasi dua metode sebagai pembanding permintaan, lalu tinjau peran dengan selisih terbesar."
-            : "Estimasi sudah tersedia. Isi permintaan FTE pada input proyek agar kesenjangan terhadap kebutuhan bisa dibandingkan.";
+        const method = costSettings.method;
+        const methodName = method === "ucp" ? "UCP" : "bottom-up";
+        const setMethod = (m: CostMethod) => setCostSettings({ ...costSettings, method: m });
+        const headline = totals(shown, method);
+        const bridgeGap = headline.requested - headline.additional;
+        const offRoles = shown.filter(offNeed);
+        const over = offRoles.filter((c) => conclusionLabel(c) === "Di atas kebutuhan").length;
+        const under = offRoles.filter((c) => conclusionLabel(c) === "Di bawah kebutuhan").length;
+        const roleTitle = !hasRequested
+          ? "Kebutuhan per role dari dua metode"
+          : offRoles.length === 0
+            ? "Semua role selaras dengan permintaan"
+            : over >= under
+              ? `${over} dari ${shown.length} role diminta di atas kebutuhan`
+              : `${under} dari ${shown.length} role diminta di bawah kebutuhan`;
+        const roleNote = [over ? `${over} di atas kebutuhan` : "", under ? `${under} di bawah kebutuhan` : "", shown.length - offRoles.length ? `${shown.length - offRoles.length} selaras atau perlu review` : ""].filter(Boolean).join(", ");
+        const monthlyTotals = run.monthly.map((m) => ({ month: m.month, value: [...displayedRoles].reduce((a, r) => a + ((method === "ucp" ? m.ucp : m.bottom_up)[r] ?? 0), 0) }));
+        const peak = monthlyTotals.reduce<{ month: string; value: number } | null>((b, p) => (!b || p.value > b.value ? p : b), null);
 
         return (
           <>
@@ -70,9 +106,16 @@ export default function SummaryPage() {
                 <>
                   <TeamFilter run={run} />
                   {run.approved ? (
-                    <StatusBadge tone="good"><CheckCircle2 size={14} aria-hidden /> Disetujui</StatusBadge>
+                    <span className="inline-flex items-center gap-2">
+                      <StatusBadge tone="good"><CheckCircle2 size={14} aria-hidden /> Disetujui</StatusBadge>
+                      <Button variant="ghost" size="sm" onClick={() => current && void update({ ...current, approved: false })}>Batalkan</Button>
+                    </span>
                   ) : (
-                    <Button variant="secondary" onClick={() => current && void update({ ...current, approved: true })}>
+                    <Button variant="secondary" onClick={() => {
+                      if (!current) return;
+                      if (review > 0 && !window.confirm(`${review} baris masih ditandai perlu review. Tetap setujui hasil ini?`)) return;
+                      void update({ ...current, approved: true });
+                    }}>
                       Setujui hasil
                     </Button>
                   )}
@@ -80,64 +123,45 @@ export default function SummaryPage() {
               }
             />
 
-            <section className="tl-summary-intro" aria-labelledby="tl-summary-conclusion">
-              <div>
-                <p className="tl-summary-eyebrow">EXECUTIVE TAKEAWAY / 01</p>
-                <h2 id="tl-summary-conclusion">{reportMessage}</h2>
-                <p className="tl-summary-context">
-                  Total kebutuhan yang dihitung adalah <strong>{fte(total.ucp)} FTE (UCP)</strong> dan{" "}
-                  <strong>{fte(total.bu)} FTE (bottom-up)</strong>. Kedua metode saling melengkapi:
-                  lihat perbedaan per role, bukan mengambil satu angka tanpa melihat item WBS.
-                </p>
-              </div>
-              <div className="tl-summary-next">
-                <span className="tl-summary-eyebrow">TINDAKAN BERIKUTNYA</span>
-                <Link href={review ? "/hasil/breakdown?review=1" : "/hasil/breakdown"}>
-                  {review ? "Tinjau baris yang ditandai" : "Periksa rincian pekerjaan"} <ArrowRight size={15} aria-hidden />
-                </Link>
-                <Link href="/hasil/peluang-ai">Tinjau peluang bantuan AI <ArrowRight size={15} aria-hidden /></Link>
-                <Link href="/hasil/biaya">Bandingkan biaya di tahap akhir <ArrowRight size={15} aria-hidden /></Link>
-                <Link href="/hasil/review">Buka pusat review <ArrowRight size={15} aria-hidden /></Link>
-                <Link href="/hasil/temuan">Lihat temuan dan asumsi <ArrowRight size={15} aria-hidden /></Link>
-              </div>
-            </section>
+            <ExecutiveHero t={headline} method={method} onMethod={setMethod} review={review} roles={shown.length} />
 
-            <dl className="tl-summary-metrics" aria-label="Empat angka kunci">
-              <div className="tl-summary-metric">
-                <dt>Estimasi UCP</dt>
-                <dd>{fte(total.ucp)}</dd>
-                <small>FTE · berdasarkan Use Case Points</small>
-              </div>
-              <div className="tl-summary-metric">
-                <dt>Estimasi bottom-up</dt>
-                <dd>{fte(total.bu)}</dd>
-                <small>FTE · dari pekerjaan terurai</small>
-              </div>
-              <div className="tl-summary-metric">
-                <dt>FTE diminta</dt>
-                <dd>{hasRequested ? fte(total.req) : "—"}</dd>
-                <small>{hasRequested ? "Total permintaan tercatat" : "Belum ada permintaan FTE"}</small>
-              </div>
-              <div className="tl-summary-metric">
-                <dt>Talent tersedia</dt>
-                <dd>{fte(total.existing)}</dd>
-                <small>Existing FTE · data input proyek</small>
-              </div>
-            </dl>
+            <nav className="tl-exec-next" aria-label="Tindakan berikutnya">
+              <span>Langkah berikutnya</span>
+              <Link href={review ? "/hasil/breakdown?review=1" : "/hasil/breakdown"}>
+                {review ? "Tinjau baris yang ditandai" : "Periksa rincian pekerjaan"} <ArrowRight size={15} aria-hidden />
+              </Link>
+              <Link href="/hasil/biaya">Lihat dampak biaya <ArrowRight size={15} aria-hidden /></Link>
+              <Link href="/hasil/temuan">Temuan dan asumsi <ArrowRight size={15} aria-hidden /></Link>
+            </nav>
+
+            <Exhibit n={1} id="tl-exhibit-bridge"
+              title={!headline.hasRequested
+                ? `Pekerjaan di WBS membutuhkan ${fte(headline.additional)} FTE tambahan`
+                : bridgeGap > 0.05
+                  ? `Permintaan ${fte(bridgeGap)} FTE lebih besar dari kebutuhan tambahan`
+                  : bridgeGap < -0.05
+                    ? `Permintaan ${fte(-bridgeGap)} FTE lebih kecil dari kebutuhan tambahan`
+                    : "Permintaan sejalan dengan kebutuhan tambahan"}
+              source={`Sumber: WBS proyek dan dokumen permintaan. Kebutuhan dihitung dengan metode ${methodName}, dirata-rata selama periode analisis; talent tersedia dari input proyek. Role tanpa angka permintaan tidak masuk jembatan ini.`}>
+              <Waterfall t={headline} method={method} />
+            </Exhibit>
+
+            <Exhibit n={2} id="tl-exhibit-monthly"
+              title={peak ? `Kebutuhan memuncak di ${month(peak.month)} sebesar ${fte(peak.value)} FTE` : "Kebutuhan per bulan"}
+              source={`Sumber: jadwal item WBS dan alokasi FTE per item, metode ${methodName}. Garis putus-putus adalah permintaan ditambah talent tersedia.`}>
+              <MonthlyLine monthly={run.monthly} roles={[...displayedRoles]} method={method}
+                reference={headline.hasRequested ? headline.requested + headline.existing : null} referenceLabel="Diminta + tersedia" />
+            </Exhibit>
 
             <section aria-labelledby="tl-role-comparison">
               <div className="tl-summary-section-head">
                 <div>
-                  <p className="tl-summary-eyebrow">ROLE COMPARISON / 02</p>
-                  <h2 id="tl-role-comparison">Di role mana angkanya berbeda?</h2>
-                </div>
-                <div className="tl-summary-legend" aria-label="Legenda metode">
-                  <span><i aria-hidden /> UCP</span>
-                  <span className="is-bu"><i aria-hidden /> Bottom-up</span>
+                  <p className="tl-summary-eyebrow">GAMBAR 3</p>
+                  <h2 id="tl-role-comparison">{roleTitle}</h2>
                 </div>
               </div>
               <p className="tl-report-footnote tl-summary-chart-guide">
-                Panjang batang menggunakan skala yang sama untuk semua role yang sedang ditampilkan. Angka di kanan adalah FTE rata-rata.
+                {hasRequested && roleNote ? `${roleNote}. ` : ""}Role diurutkan dari selisih terbesar terhadap permintaan. Warna penuh menandai role yang permintaannya tidak sesuai kebutuhan; abu-abu berarti selaras atau belum ada permintaan.
               </p>
               {shown.length === 0 ? (
                 <p className="tl-results-empty-filter">Tidak ada role untuk tim ini. Pilih tim lainnya.</p>
@@ -149,8 +173,8 @@ export default function SummaryPage() {
                       <h3>{grouped || teamView !== "all" ? `Tim ${group.label}` : "Semua role"}</h3>
                       <p>{group.rows.length} role <span aria-hidden="true">·</span> UCP {fte(subtotal.ucp)} <span aria-hidden="true">/</span> Bottom-up {fte(subtotal.bu)} FTE</p>
                     </div>
-                    {group.rows.map((c) => (
-                      <div key={c.role} className="tl-summary-role">
+                    {[...group.rows].sort((a, b) => gapOf(b) - gapOf(a)).map((c) => (
+                      <div key={c.role} className={`tl-summary-role ${offNeed(c) ? "is-off" : "is-muted"}`}>
                         <div className="tl-summary-role-title">
                           <strong>{roleName(c.role, catalog?.roles)}</strong>
                           <small>{c.role} · Diminta {fte(c.requested_fte)} FTE</small>
@@ -160,7 +184,8 @@ export default function SummaryPage() {
                           <div className="tl-summary-barline"><span>BU</span><div className="tl-summary-bartrack"><div className="tl-summary-barfill is-bu" style={{ width: `${Math.max(0, c.bu_fte) / maxFte * 100}%` }} /></div><strong>{fte(c.bu_fte)}</strong></div>
                         </div>
                         <div className="tl-summary-role-status">
-                          <StatusBadge tone={conclusionTone(c)}>{c.conclusion}</StatusBadge>
+                          <span title={c.conclusion}><StatusBadge tone={conclusionTone(c)}>{conclusionLabel(c)}</StatusBadge></span>
+                          <span className="sr-only">{c.conclusion}.</span>
                           <small>Tambahan: {fte(Math.min(c.ucp_additional_fte, c.bu_additional_fte))}–{fte(Math.max(c.ucp_additional_fte, c.bu_additional_fte))} FTE</small>
                         </div>
                       </div>
@@ -170,23 +195,11 @@ export default function SummaryPage() {
               })}
             </section>
 
-            <section className="tl-summary-takeaways" aria-label="Konteks untuk keputusan">
-              <div className="tl-summary-takeaway">
-                <h3>Selisih metode</h3>
-                <p>{fte(delta)} FTE selisih antara total UCP dan bottom-up pada role yang terlihat.</p>
-                <Link href="/metodologi">Cara membaca dua metode</Link>
-              </div>
-              <div className="tl-summary-takeaway">
-                <h3>Perlu dicermati</h3>
-                <p>{maxDifference ? `${roleName(maxDifference.role, catalog?.roles)} memiliki selisih dua metode terbesar: ${fte(Math.abs(maxDifference.ucp_fte - maxDifference.bu_fte))} FTE.` : "Belum ada peran yang dapat dibandingkan."}</p>
-                <Link href="/hasil/breakdown">Buka rincian WBS</Link>
-              </div>
-              <div className="tl-summary-takeaway">
-                <h3>Kebutuhan tambahan</h3>
-                <p>{fte(Math.min(total.extraUcp, total.extraBu))}–{fte(Math.max(total.extraUcp, total.extraBu))} FTE tambahan setelah memperhitungkan talent tersedia.</p>
-                <Link href="/hasil/bulanan">Lihat distribusi per bulan</Link>
-              </div>
-            </section>
+            <p className="tl-summary-method-note">
+              <strong>Catatan metode.</strong> Total UCP dan bottom-up berbeda {fte(delta)} FTE pada role yang terlihat
+              {maxDifference ? `; selisih terbesar ada di ${roleName(maxDifference.role, catalog?.roles)} (${fte(Math.abs(maxDifference.ucp_fte - maxDifference.bu_fte))} FTE)` : ""}.{" "}
+              <Link href="/metodologi">Cara membaca dua metode</Link>
+            </p>
 
             <details className="tl-report-detail">
               <summary>Lihat tabel teknis lengkap dan asumsi perhitungan</summary>

@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Shell } from "@/components/shell";
 import { StoreProvider } from "@/lib/store";
 import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
 import "./globals.css";
 import "./editorial.css";
 import "./resource.css";

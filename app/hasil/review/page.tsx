@@ -38,7 +38,7 @@ export default function ReviewPage() {
               <>
                 <div className="tl-review-intro">
                   <div>
-                    <p className="tl-summary-eyebrow">REVIEW CENTER / EVIDENCE FIRST</p>
+                    <p className="tl-summary-eyebrow">PUSAT REVIEW / BUKTI DULU</p>
                     <h2>Mulai dari item yang membutuhkan perhatian.</h2>
                     <p>Status berasal dari hasil analisis, bukan prioritas yang dibuat-buat.</p>
                   </div>

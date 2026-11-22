@@ -74,10 +74,10 @@ function Sidebar() {
       <div className="sticky top-0 flex h-screen flex-col">
         <Link href="/" className="tl-app-brand flex items-center gap-3 border-b border-line px-5 py-5">
           <span aria-hidden className="tl-brand-symbol"><span /></span>
-          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[10px] font-semibold tracking-[.08em] text-muted">WORKFORCE INTELLIGENCE</small></span>
+          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[12px] font-medium text-muted">Analisis kebutuhan talent</small></span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
-          <p className="tl-nav-kicker">WORKSPACE</p>
+          <p className="tl-nav-kicker">RUANG KERJA</p>
           <NavLink href="/" label="Beranda" icon={<Home className="h-4 w-4" aria-hidden />} />
           <NavLink href="/validasi" label="Analisis baru" icon={<FilePlus2 className="h-4 w-4" aria-hidden />} />
           <NavLink
@@ -93,8 +93,8 @@ function Sidebar() {
             }
           />
           <div className="pt-3">
-            <p className="tl-nav-kicker">DECISION INTELLIGENCE</p>
-            <NavLink href="/hasil/ringkasan" label="Decision report" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
+            <p className="tl-nav-kicker">HASIL KEPUTUSAN</p>
+            <NavLink href="/hasil/ringkasan" label="Ringkasan keputusan" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
             <NavLink href="/hasil/review" label={hasRun ? `Perlu review · ${run?.breakdown.filter((row) => row.needs_review).length ?? 0}` : "Perlu review"} icon={<GitBranch className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
             {hasRun && (
               <details className="tl-nav-details" open={pathname.startsWith("/hasil/") && pathname !== "/hasil/ringkasan" && pathname !== "/hasil/review" ? true : undefined}>
@@ -172,7 +172,7 @@ function Header() {
             Data contoh
           </span>
         ) : null}
-        <Link href="/pengaturan" className="flex items-center gap-2 truncate text-muted hover:text-ink">
+        <Link href="/pengaturan" className="flex min-h-11 items-center gap-2 truncate text-muted hover:text-ink">
           <span
             aria-hidden
             className={`h-2 w-2 shrink-0 rounded-full ${connected ? "bg-emerald-500" : "bg-slate-300"}`}

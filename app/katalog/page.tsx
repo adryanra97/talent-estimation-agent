@@ -101,11 +101,11 @@ export default function CatalogPage() {
   return (
     <div className="tl-resource-page">
       <ResourceHero
-        eyebrow="ROLE & SKILL REFERENCE"
+        eyebrow="REFERENSI ROLE & SKILL"
         title="Katalog"
         accent="capability."
         description="Eksplorasi role, pilar skill, lingkup pekerjaan, dan aturan keputusan yang menjadi acuan agent saat menganalisis WBS."
-        chapter="REFERENCE / 01"
+        chapter="REFERENSI / 01"
         actions={
           <>
             {custom && (
@@ -140,7 +140,7 @@ export default function CatalogPage() {
             <div className="tl-resource-kpi"><dt>Aturan keputusan</dt><dd>{catalog.rules.length}</dd><small>Acuan klasifikasi dan review</small></div>
           </dl>
           <section aria-labelledby="catalog-roles">
-            <ResourceHeading index="01" label="ROLE DIRECTORY" title="Cari role dan capability"
+            <ResourceHeading index="01" label="DAFTAR ROLE" title="Cari role dan capability"
               id="catalog-roles" description="Telusuri role berdasarkan nama, skill, atau cakupan kerja. Pilih role untuk membaca penjelasan lengkap." />
             <div className="tl-resource-toolbar">
               <label className="tl-search">
@@ -203,7 +203,7 @@ export default function CatalogPage() {
           </section>
 
           <section aria-labelledby="aturan">
-            <ResourceHeading index="02" label="GOVERNANCE" id="aturan" title="Aturan keputusan"
+            <ResourceHeading index="02" label="TATA KELOLA" id="aturan" title="Aturan keputusan"
               description="Aturan yang digunakan Estimator dan Reviewer dalam mengklasifikasi pekerjaan. Buka setiap aturan untuk detailnya." />
             <ul className="tl-catalog-reference">
               {catalog.rules.map((rule) => (
@@ -223,7 +223,7 @@ export default function CatalogPage() {
 
           {Object.keys(catalog.competency_scale ?? {}).length > 0 && (
             <section aria-labelledby="skala">
-              <ResourceHeading index="03" label="COMPETENCY SCALE" id="skala" title="Skala kompetensi"
+              <ResourceHeading index="03" label="SKALA KOMPETENSI" id="skala" title="Skala kompetensi"
                 description="Referensi tingkat kompetensi untuk penilaian talent per skill." />
               <ol className="tl-catalog-scale">
                 {Object.entries(catalog.competency_scale).map(([level, text]) => {

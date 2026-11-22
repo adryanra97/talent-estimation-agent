@@ -103,16 +103,16 @@ const BEFORE_PRODUCTION = [
 export default function AboutPage() {
   return (
     <div className="tl-resource-page tl-about-page">
-      <ResourceHero eyebrow="ABOUT / PRODUCT & ENGINEERING"
-        title="TalentLens." accent="Behind the decisions."
+      <ResourceHero eyebrow="TENTANG / PRODUK & REKAYASA"
+        title="TalentLens." accent="Dari WBS ke keputusan."
         description="Platform untuk menerjemahkan WBS menjadi estimasi kebutuhan talent dan capability yang dapat dijelaskan, ditinjau, dan ditindaklanjuti."
-        chapter="ABOUT / 04"
+        chapter="TENTANG / 04"
         actions={<Link href="/validasi">Mulai analisis <ArrowRight size={16} aria-hidden /></Link>}
       />
       <div className="tl-resource-body">
         <section className="tl-about-intro" aria-labelledby="about-mission">
           <div>
-            <p className="tl-resource-eyebrow">OUR PURPOSE</p>
+            <p className="tl-resource-eyebrow">TUJUAN KAMI</p>
             <h2 id="about-mission">Dari kebutuhan proyek menjadi keputusan workforce yang bisa dipertanggungjawabkan.</h2>
             <p>TalentLens menggabungkan pembacaan dokumen proyek, penilaian capability, dua pendekatan estimasi, dan review manusia dalam satu alur. Tujuannya bukan menggantikan pengambil keputusan, melainkan memperjelas bukti di balik alokasi talent.</p>
           </div>
@@ -124,7 +124,7 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="about-strengths">
-          <ResourceHeading index="01" label="PRODUCT PRINCIPLES" title="Apa yang membedakan TalentLens"
+          <ResourceHeading index="01" label="PRINSIP PRODUK" title="Apa yang membedakan TalentLens"
             id="about-strengths" description="Keputusan staffing lebih mudah direview ketika setiap angka mempunyai sumber, metode, dan konteks yang jelas." />
           <div className="tl-about-strengths">
             {STRENGTHS.map(({ icon: Icon, title, text }) => (
@@ -137,7 +137,7 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="about-flow">
-          <ResourceHeading index="02" label="AGENT JOURNEY" id="about-flow" title="Bagaimana keputusan disusun"
+          <ResourceHeading index="02" label="ALUR AGENT" id="about-flow" title="Bagaimana keputusan disusun"
             description="Setiap tahap punya tanggung jawab yang berbeda, dengan jalur pemeriksaan ulang ketika Reviewer menemukan hal yang perlu dievaluasi." />
           <ol className="tl-about-journey">
             {[
@@ -158,7 +158,7 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="about-pilot">
-          <ResourceHeading index="03" label="READINESS & GOVERNANCE" title="Siap untuk pilot terkontrol"
+          <ResourceHeading index="03" label="KESIAPAN & TATA KELOLA" title="Siap untuk pilot terkontrol"
             id="about-pilot" description="Komponen dasar aplikasi tersedia untuk eksplorasi dan validasi. Kesiapan operasional organisasi memerlukan pengujian dan kontrol tambahan." />
           <div className="grid gap-5 lg:grid-cols-2">
             <Card title="Fondasi yang tersedia" description="Fitur dan kontrol yang sudah dirancang dalam aplikasi.">

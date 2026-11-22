@@ -34,7 +34,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: {
 function gapTone(gap: number | null): "good" | "warn" | "bad" | "neutral" {
   if (gap === null) return "neutral";
   if (Math.abs(gap) < 1) return "good";
-  return gap > 0 ? "bad" : "warn";
+  return gap > 0 ? "warn" : "bad";
 }
 
 function gapLabel(gap: number | null): string {
@@ -100,7 +100,7 @@ export default function CostPage() {
 
             <section className="tl-summary-intro" aria-labelledby="tl-cost-conclusion">
               <div>
-                <p className="tl-summary-eyebrow">FINAL DECISION / COST INTELLIGENCE</p>
+                <p className="tl-summary-eyebrow">KEPUTUSAN AKHIR / ANALISIS BIAYA</p>
                 <h2 id="tl-cost-conclusion">{headline}</h2>
                 <p>Angka per bulan memakai FTE rata-rata {methodName} selama periode analisis.</p>
               </div>
@@ -148,7 +148,7 @@ export default function CostPage() {
             <section className="tl-cost-breakdown" aria-labelledby="tl-cost-breakdown-title">
               <div className="tl-summary-section-head">
                 <div>
-                  <p className="tl-summary-eyebrow">COST SCENARIO / BY ROLE</p>
+                  <p className="tl-summary-eyebrow">SKENARIO BIAYA / PER ROLE</p>
                   <h2 id="tl-cost-breakdown-title">Dari baseline ke skenario bantuan AI.</h2>
                 </div>
                 <p>Setiap perbandingan memakai rate level yang sama. Perubahan mencerminkan effort yang berpotensi dibantu AI.</p>

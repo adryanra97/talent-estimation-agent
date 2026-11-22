@@ -2,8 +2,7 @@
  * TalentLens — Consulting premium experience
  * Editorial scale meets a restrained, high-energy technology visual system.
  */
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap");
-.tlw-site{--tlw-ink:#0d1725;--tlw-muted:#526173;--tlw-blue:#4876f8;--tlw-marine:#101d30;--tlw-cyan:#74d9e3;--tlw-display:"Newsreader",Georgia,serif;--tlw-ui:"Plus Jakarta Sans Variable",system-ui,sans-serif;background:#f8faf9;color:var(--tlw-ink);font-family:var(--tlw-ui);font-size:16px;min-height:100vh;overflow-x:clip}
+.tlw-site{--tlw-ink:#0d1725;--tlw-muted:#526173;--tlw-blue:#4876f8;--tlw-marine:#101d30;--tlw-cyan:#74d9e3;--tlw-display:"Newsreader Variable","Newsreader",Georgia,serif;--tlw-ui:"Plus Jakarta Sans Variable",system-ui,sans-serif;background:#f8faf9;color:var(--tlw-ink);font-family:var(--tlw-ui);font-size:16px;min-height:100vh;overflow-x:clip}
 .tlw-site *,.tlw-site *::before,.tlw-site *::after{box-sizing:border-box}
 .tlw-site :where(h1,h2,h3,p,figure){margin:0}
 .tlw-site a{text-decoration:none}
@@ -158,7 +157,7 @@
 .tlw-review-mock:before{content:"";position:absolute;height:11px;width:44%;background:#386cc5;top:-11px;right:-1px}
 .tlw-review-head{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #dbe3e9;padding-bottom:21px;align-items:center}
 .tlw-review-head span{font-size:12px;color:#517287;font-weight:750;letter-spacing:.065em;line-height:1.5}
-.tlw-review-head b{margin:0 5px;color:#a3b1bd}
+.tlw-review-head b{margin:0 5px;color:#627789}
 .tlw-review-head span:last-child{color:#956c25}
 .tlw-review-item-top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-top:36px}
 .tlw-review-item-top>span:first-child{color:#527189;font-size:12px;font-weight:760;letter-spacing:.05em}
@@ -248,18 +247,18 @@
  .tlw-button-primary{font-size:14px;padding:14px 17px;min-height:51px;gap:12px}
  .tlw-button-ghost{font-size:14px}
  .tlw-hero-bottom{margin-top:43px}
- .tlw-hero-bottom span{font-size:11px}
+ .tlw-hero-bottom span{font-size:12px}
  .tlw-hero-bottom a{font-size:12px}
  .tlw-signal-art{height:450px;min-height:450px;max-width:540px}
  .tlw-signal-number{left:24%;top:46%}
  .tlw-signal-number strong{font-size:clamp(65px,14vw,86px)}
  .tlw-signal-note strong{font-size:14px}
- .tlw-signal-note>span,.tlw-signal-note small{font-size:11px}
+ .tlw-signal-note>span,.tlw-signal-note small{font-size:12px}
  .tlw-signal-note-b{right:0;top:14%}
  .tlw-signal-note-a{top:5%;left:0}
  .tlw-signal-note-c{left:0;bottom:7%}
  .tlw-transition-bar{padding:22px 20px;justify-content:flex-start;gap:12px 15px}
- .tlw-transition-bar span{font-size:11px}
+ .tlw-transition-bar span{font-size:12px}
  .tlw-transition-bar i{height:6px;width:6px}
  .tlw-platform{padding:84px 0 90px}
  .tlw-section-head>div{display:block}
@@ -270,7 +269,7 @@
  .tlw-report-stage-top>span{display:none}
  .tlw-report-toolbar{padding:23px 22px 18px}
  .tlw-report-toolbar>div>strong{font-size:17px}
- .tlw-report-toolbar>div>span{font-size:11px}
+ .tlw-report-toolbar>div>span{font-size:12px}
  .tlw-report-tabs{padding:0 18px;gap:25px}
  .tlw-report-tabs button{font-size:14px;min-height:53px}
  .tlw-report-panel{padding:35px 22px 36px}
@@ -289,7 +288,7 @@
  .tlw-phase-index span{display:none}
  .tlw-phase h3{font-size:clamp(29px,5.6vw,42px)}
  .tlw-phase p{font-size:14px}
- .tlw-phase-detail{font-size:11px}
+ .tlw-phase-detail{font-size:12px}
  .tlw-review-section{padding:100px 0}
  .tlw-review-story h2{font-size:clamp(66px,11vw,91px)}
  .tlw-review-story>p{font-size:16px}
@@ -317,14 +316,14 @@
  .tlw-signal-note-b{top:18%;max-width:172px}
  .tlw-signal-note-a{top:4%}
  .tlw-signal-note-c{bottom:8%}
- .tlw-signal-index{font-size:10px}
- .tlw-report-stage-top>div>span:last-child{font-size:11px}
- .tlw-status{font-size:10px}
+ .tlw-signal-index{font-size:12px}
+ .tlw-report-stage-top>div>span:last-child{font-size:12px}
+ .tlw-status{font-size:12px}
  .tlw-report-panel{padding:28px 17px}
  .tlw-report-story h3{font-size:41px}
  .tlw-compare-heading{gap:10px}
  .tlw-compare-heading strong{font-size:15px}
- .tlw-compare-heading>div{font-size:11px}
+ .tlw-compare-heading>div{font-size:12px}
  .tlw-review-story h2{font-size:66px}
  .tlw-review-mock h3{font-size:33px}
  .tlw-final h2{font-size:57px}
@@ -338,7 +337,7 @@
  .tlw-signal-note-b{max-width:141px}
  .tlw-signal-number{left:11%}
  .tlw-signal-number strong{font-size:57px}
- .tlw-signal-number>span{font-size:10px}
+ .tlw-signal-number>span{font-size:12px}
  .tlw-signal-note strong{font-size:12px}
  .tlw-philosophy-hero h2{font-size:54px}
  .tlw-review-story h2{font-size:59px}

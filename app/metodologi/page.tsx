@@ -19,9 +19,9 @@ const BU_STEPS = [
 export default function MethodPage() {
   return (
     <div className="tl-resource-page tl-method-page">
-      <ResourceHero eyebrow="METHODOLOGY / TRANSPARENT ESTIMATION"
+      <ResourceHero eyebrow="METODOLOGI / ESTIMASI TRANSPARAN"
         title="Cara angka dihitung." accent="Tanpa black box."
-        chapter="METHOD / 03"
+        chapter="METODE / 03"
         description="TalentLens menggunakan dua pendekatan estimasi yang dihitung terpisah. Agent membantu menilai konteks pekerjaan; mesin hitung menghasilkan angka yang bisa diaudit."
         actions={<Link href="/hasil/ringkasan">Buka hasil analisis <ArrowRight size={16} aria-hidden /></Link>}
       />
@@ -31,12 +31,12 @@ export default function MethodPage() {
           <div><strong>Prinsip dasar:</strong> model bahasa memilih klasifikasi dan memberikan alasan yang dapat ditinjau; rumus UCP, bottom-up, dan FTE dijalankan oleh kode. Parameter dapat dikaji di halaman Validasi Baru.</div>
         </div>
 
-        <ResourceHeading index="01" label="TWO INDEPENDENT ESTIMATES"
+        <ResourceHeading index="01" label="DUA ESTIMASI INDEPENDEN"
           title="Satu WBS, dua sudut pandang."
           description="UCP memberi ukuran kompleksitas. Bottom-up menghitung langsung effort berdasarkan jadwal dan alokasi. Perbedaan hasil adalah sinyal untuk membaca evidence lebih lanjut." />
         <div className="tl-method-grid">
           <section className="tl-method-panel" aria-labelledby="ucp-heading">
-            <p className="tl-method-panel-index">METHOD 01 / COMPLEXITY BASED</p>
+            <p className="tl-method-panel-index">METODE 01 / BERBASIS KOMPLEKSITAS</p>
             <h3 id="ucp-heading">Use Case Points</h3>
             <p>Estimasi beban kerja berdasarkan kelas pekerjaan, interaksi aktor, dan faktor teknis serta lingkungan.</p>
             <div className="tl-method-equation" role="group" aria-label="Rumus UCP">
@@ -55,7 +55,7 @@ export default function MethodPage() {
           </section>
 
           <section className="tl-method-panel" aria-labelledby="bu-heading">
-            <p className="tl-method-panel-index">METHOD 02 / ACTIVITY BASED</p>
+            <p className="tl-method-panel-index">METODE 02 / BERBASIS AKTIVITAS</p>
             <h3 id="bu-heading">Bottom-up</h3>
             <p>Estimasi effort setiap aktivitas WBS melalui durasi pekerjaan, alokasi tenaga, dan kuantitasnya.</p>
             <div className="tl-method-equation" role="group" aria-label="Rumus bottom-up">
@@ -74,7 +74,7 @@ export default function MethodPage() {
           </section>
         </div>
 
-        <ResourceHeading index="02" label="INTERPRETING THE RESULTS"
+        <ResourceHeading index="02" label="MEMBACA HASIL"
           title="Cara membaca rekomendasi."
           description="Tiga angka ini menjawab pertanyaan yang berbeda. Dengan membedakannya, keputusan staffing lebih mudah dijelaskan." />
         <div className="tl-method-concepts">
@@ -94,7 +94,7 @@ export default function MethodPage() {
 
         <div className="tl-method-checklist" aria-label="Checklist review hasil">
           <div>
-            <p className="tl-resource-eyebrow">HUMAN IN THE LOOP / 03</p>
+            <p className="tl-resource-eyebrow">MANUSIA TETAP MEMUTUSKAN / 03</p>
             <h2>Ketika dua metode berbeda, apa berikutnya?</h2>
             <p>Reviewer Agent memeriksa selisih, kualitas data, dan kemungkinan ketidaksesuaian klasifikasi. Hasilnya dapat ditinjau serta dikoreksi manusia sebelum keputusan final.</p>
             <Link className="tl-resource-action-link" href="/hasil/temuan">Lihat temuan dan asumsi <ArrowRight size={15} aria-hidden /></Link>
@@ -107,7 +107,7 @@ export default function MethodPage() {
           </ol>
         </div>
 
-        <ResourceHeading index="04" label="AI AUGMENTATION"
+        <ResourceHeading index="04" label="BANTUAN AI"
           title="Efisiensi AI dihitung sebagai skenario."
           description="Augmentation Agent memetakan tugas yang berpotensi terbantu oleh AI ke kategori skill, lalu menggunakan asumsi persentase penghematan per kategori." />
         <div className="tl-method-augmentation">

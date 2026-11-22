@@ -134,7 +134,7 @@ function Table({ run }: { run: RunResult }) {
               </option>
             ))}
           </select>
-          <label className="flex items-center gap-2 text-sm text-ink">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-ink">
             <input type="checkbox" className="h-4 w-4 accent-accent-600" checked={reviewOnly} onChange={(e) => setReviewOnly(e.target.checked)} />
             Hanya perlu review
           </label>
@@ -181,7 +181,9 @@ function Table({ run }: { run: RunResult }) {
                   <Fragment key={k}>
                     <tr className={`border-b border-line align-top ${r.needs_review ? "bg-amber-50/50" : ""}`}>
                       <td className="py-2.5 pr-2">
-                        <input type="checkbox" aria-label={`Pilih ${r.item_id} ${r.role}`} className="h-4 w-4 accent-accent-600" checked={selected.has(k)} onChange={() => toggle(k)} />
+                        <label className="-m-2 inline-flex cursor-pointer p-2">
+                          <input type="checkbox" aria-label={`Pilih ${r.item_id} ${r.role}`} className="h-4 w-4 accent-accent-600" checked={selected.has(k)} onChange={() => toggle(k)} />
+                        </label>
                       </td>
                       <td className="py-2.5 pr-3">
                         <p className="font-medium text-ink">
@@ -227,12 +229,12 @@ function Table({ run }: { run: RunResult }) {
                       </td>
                       <td className="tabular py-2.5 pr-3 text-right">{fte((r.workdays ?? 0) * r.allocation_fte * r.quantity, 1)}</td>
                       <td className="py-2.5 pr-3">
-                        <button onClick={() => edit(r, { needs_review: !r.needs_review })} title="Ubah status review">
+                        <button onClick={() => edit(r, { needs_review: !r.needs_review })} title="Ubah status review" className="-my-2 inline-flex min-h-11 items-center">
                           {r.needs_review ? <StatusBadge tone="warn">Perlu review</StatusBadge> : <StatusBadge tone="neutral">OK</StatusBadge>}
                         </button>
                       </td>
                       <td className="py-2.5">
-                        <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} aria-label={`Lihat alasan untuk ${r.item_id} ${r.role}`} className="text-muted hover:text-ink">
+                        <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} aria-label={`Lihat alasan untuk ${r.item_id} ${r.role}`} className="-m-1.5 inline-flex rounded-md p-1.5 text-muted hover:bg-canvas hover:text-ink">
                           <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
                         </button>
                       </td>
@@ -258,7 +260,9 @@ function Table({ run }: { run: RunResult }) {
             return (
               <li key={k} className={`py-3 ${r.needs_review ? "-mx-2 rounded-lg bg-amber-50/60 px-2" : ""}`}>
                 <div className="flex items-start gap-3">
-                  <input type="checkbox" aria-label={`Pilih ${r.item_id} ${r.role}`} className="mt-1 h-4 w-4 accent-accent-600" checked={selected.has(k)} onChange={() => toggle(k)} />
+                  <label className="-m-3.5 inline-flex shrink-0 cursor-pointer p-3.5">
+                    <input type="checkbox" aria-label={`Pilih ${r.item_id} ${r.role}`} className="mt-1 h-4 w-4 accent-accent-600" checked={selected.has(k)} onChange={() => toggle(k)} />
+                  </label>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-medium text-ink">
@@ -304,11 +308,11 @@ function Table({ run }: { run: RunResult }) {
                       </label>
                     </div>
                     <div className="mt-2 flex items-center justify-between gap-2 text-xs">
-                      <button onClick={() => edit(r, { needs_review: !r.needs_review })} title="Ubah status review">
+                      <button onClick={() => edit(r, { needs_review: !r.needs_review })} title="Ubah status review" className="-my-2 inline-flex min-h-11 items-center">
                         {r.needs_review ? <StatusBadge tone="warn">Perlu review</StatusBadge> : <StatusBadge tone="neutral">OK</StatusBadge>}
                       </button>
                       <span className="tabular text-muted">{fte((r.workdays ?? 0) * r.allocation_fte * r.quantity, 1)} person-days</span>
-                      <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} className="inline-flex items-center gap-1 text-accent-700">
+                      <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} className="-my-2 -mr-2 inline-flex min-h-11 items-center gap-1 px-2 text-accent-700">
                         {expanded ? "Tutup" : "Alasan"}
                         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
                       </button>

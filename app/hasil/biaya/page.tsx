@@ -34,7 +34,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: {
 function gapTone(gap: number | null): "good" | "warn" | "bad" | "neutral" {
   if (gap === null) return "neutral";
   if (Math.abs(gap) < 1) return "good";
-  return gap > 0 ? "bad" : "warn";
+  return gap > 0 ? "warn" : "bad";
 }
 
 function gapLabel(gap: number | null): string {

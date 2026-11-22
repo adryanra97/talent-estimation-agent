@@ -74,7 +74,7 @@ function Sidebar() {
       <div className="sticky top-0 flex h-screen flex-col">
         <Link href="/" className="tl-app-brand flex items-center gap-3 border-b border-line px-5 py-5">
           <span aria-hidden className="tl-brand-symbol"><span /></span>
-          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[10px] font-semibold tracking-[.08em] text-muted">WORKFORCE INTELLIGENCE</small></span>
+          <span className="flex flex-col"><strong className="text-[16px] font-bold leading-tight text-ink">TalentLens</strong><small className="mt-0.5 text-[12px] font-semibold tracking-[.06em] text-muted">WORKFORCE INTELLIGENCE</small></span>
         </Link>
         <nav aria-label="Navigasi utama" className="flex-1 space-y-1 overflow-y-auto p-3">
           <p className="tl-nav-kicker">WORKSPACE</p>
@@ -172,7 +172,7 @@ function Header() {
             Data contoh
           </span>
         ) : null}
-        <Link href="/pengaturan" className="flex items-center gap-2 truncate text-muted hover:text-ink">
+        <Link href="/pengaturan" className="flex min-h-11 items-center gap-2 truncate text-muted hover:text-ink">
           <span
             aria-hidden
             className={`h-2 w-2 shrink-0 rounded-full ${connected ? "bg-emerald-500" : "bg-slate-300"}`}

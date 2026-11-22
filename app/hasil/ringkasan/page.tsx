@@ -28,6 +28,16 @@ function tone(text: string | null): "good" | "warn" | "bad" | "neutral" {
   return text === "Lebih tinggi" ? "bad" : "warn";
 }
 
+/** Short chip label; the request is the subject, as on the cost page. */
+function conclusionLabel(c: Comparison): string {
+  const t = c.conclusion.toLowerCase();
+  if (t.startsWith("selaras")) return "Selaras";
+  if (t.includes("lebih rendah")) return "Di atas kebutuhan";
+  if (t.includes("lebih tinggi")) return "Di bawah kebutuhan";
+  if (t.startsWith("isi fte")) return "Belum ada permintaan";
+  return "Perlu review";
+}
+
 function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
   if (c.conclusion.startsWith("Selaras")) return "good";
   if (c.conclusion.toLowerCase().includes("lebih tinggi")) return "bad";
@@ -160,7 +170,8 @@ export default function SummaryPage() {
                           <div className="tl-summary-barline"><span>BU</span><div className="tl-summary-bartrack"><div className="tl-summary-barfill is-bu" style={{ width: `${Math.max(0, c.bu_fte) / maxFte * 100}%` }} /></div><strong>{fte(c.bu_fte)}</strong></div>
                         </div>
                         <div className="tl-summary-role-status">
-                          <StatusBadge tone={conclusionTone(c)}>{c.conclusion}</StatusBadge>
+                          <span title={c.conclusion}><StatusBadge tone={conclusionTone(c)}>{conclusionLabel(c)}</StatusBadge></span>
+                          <span className="sr-only">{c.conclusion}.</span>
                           <small>Tambahan: {fte(Math.min(c.ucp_additional_fte, c.bu_additional_fte))}–{fte(Math.max(c.ucp_additional_fte, c.bu_additional_fte))} FTE</small>
                         </div>
                       </div>

@@ -43,7 +43,7 @@ export const ROLE_STYLE: Record<string, string> = {
 };
 
 export const ROLE_COLOR: Record<string, string> = {
-  DE: "#0284c7",
+  DE: "#a250ff",
   DA: "#0d9488",
   DS: "#d97706",
   AI: "#6d28d9",
@@ -53,7 +53,7 @@ export const ROLE_COLOR: Record<string, string> = {
 };
 
 /** Fallback colors for roles from an uploaded catalog. */
-const EXTRA_COLORS = ["#475569", "#0891b2", "#be123c", "#4d7c0f", "#7c3aed", "#b45309"];
+const EXTRA_COLORS = ["#57525e", "#a95dff", "#be123c", "#4d7c0f", "#7c3aed", "#b45309"];
 
 export function roleColor(role: string, index: number): string {
   return ROLE_COLOR[role] ?? EXTRA_COLORS[index % EXTRA_COLORS.length];

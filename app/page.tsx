@@ -73,19 +73,19 @@ function WorkSignal() {
       <div className="tlw-signal-grain" aria-hidden="true" />
       <svg className="tlw-signal-network" viewBox="0 0 600 660" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <defs>
-          <linearGradient id="tlw-flow" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#5f94ff" /><stop offset=".5" stopColor="#6bcfe4" /><stop offset="1" stopColor="#b2d9ff" /></linearGradient>
-          <radialGradient id="tlw-halo"><stop stopColor="#3978e8" stopOpacity=".57" /><stop offset=".7" stopColor="#3978e8" stopOpacity=".12" /><stop offset="1" stopColor="#3978e8" stopOpacity="0" /></radialGradient>
+          <linearGradient id="tlw-flow" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#b778ff" /><stop offset=".5" stopColor="#d3b4f6" /><stop offset="1" stopColor="#e3cbff" /></linearGradient>
+          <radialGradient id="tlw-halo"><stop stopColor="#9f52f7" stopOpacity=".57" /><stop offset=".7" stopColor="#9f52f7" stopOpacity=".12" /><stop offset="1" stopColor="#9f52f7" stopOpacity="0" /></radialGradient>
         </defs>
         <ellipse cx="355" cy="319" rx="265" ry="265" fill="url(#tlw-halo)" />
-        <circle cx="355" cy="318" r="193" fill="none" stroke="#7cb9e8" strokeOpacity=".15" strokeWidth="1" />
-        <circle cx="355" cy="318" r="145" fill="none" stroke="#a9d7ff" strokeOpacity=".13" strokeWidth="1" strokeDasharray="2 9" />
+        <circle cx="355" cy="318" r="193" fill="none" stroke="#c9a2f5" strokeOpacity=".15" strokeWidth="1" />
+        <circle cx="355" cy="318" r="145" fill="none" stroke="#e1c7ff" strokeOpacity=".13" strokeWidth="1" strokeDasharray="2 9" />
         <path className="tlw-flow-path" d="M48 151 C180 151 170 318 338 318 S499 492 577 492" fill="none" stroke="url(#tlw-flow)" strokeWidth="2.2" />
-        <path className="tlw-flow-path tlw-flow-delay" d="M36 363 C160 363 173 318 338 318 S488 174 566 174" fill="none" stroke="#a4baff" strokeOpacity=".73" strokeWidth="1.6" />
-        <path d="M54 542 C172 542 203 318 338 318 S502 356 583 355" fill="none" stroke="#6f9fb8" strokeOpacity=".38" strokeWidth="1" />
-        <path d="M338 318 C301 235 323 199 341 161" stroke="#9ac8f7" strokeOpacity=".24" fill="none" />
-        <g fill="#9ce8f3"><circle cx="48" cy="151" r="5"/><circle cx="36" cy="363" r="5"/><circle cx="54" cy="542" r="5"/><circle cx="577" cy="492" r="5"/></g>
-        <circle cx="338" cy="318" r="13" fill="#9be2ed" opacity=".1" /><circle cx="338" cy="318" r="5" fill="#bef5ff" />
-        <circle cx="338" cy="318" r="31" fill="none" stroke="#e2f4ff" strokeOpacity=".52" strokeWidth="1.2" />
+        <path className="tlw-flow-path tlw-flow-delay" d="M36 363 C160 363 173 318 338 318 S488 174 566 174" fill="none" stroke="#d2abff" strokeOpacity=".73" strokeWidth="1.6" />
+        <path d="M54 542 C172 542 203 318 338 318 S502 356 583 355" fill="none" stroke="#9f94ab" strokeOpacity=".38" strokeWidth="1" />
+        <path d="M338 318 C301 235 323 199 341 161" stroke="#d7b5fe" strokeOpacity=".24" fill="none" />
+        <g fill="#e7d4fd"><circle cx="48" cy="151" r="5"/><circle cx="36" cy="363" r="5"/><circle cx="54" cy="542" r="5"/><circle cx="577" cy="492" r="5"/></g>
+        <circle cx="338" cy="318" r="13" fill="#e3cefa" opacity=".1" /><circle cx="338" cy="318" r="5" fill="#f2e7ff" />
+        <circle cx="338" cy="318" r="31" fill="none" stroke="#f6eeff" strokeOpacity=".52" strokeWidth="1.2" />
       </svg>
       <div className="tlw-signal-note tlw-signal-note-a"><span>INPUT PROYEK</span><strong>28 paket kerja</strong><small>WBS · cakupan · asumsi</small></div>
       <div className="tlw-signal-note tlw-signal-note-b"><span>PEMETAAN CAPABILITY</span><strong>12 skill teridentifikasi</strong><small>Role · keahlian · alokasi</small></div>

@@ -219,7 +219,7 @@ export default function HomePage() {
             <div className="tlw-hero-copy">
               <div className="tlw-kicker"><span /> KEPUTUSAN TALENT BERBASIS BUKTI</div>
               <h1 id="tlw-title">Pekerjaan kompleks.<br /><em>Keputusan jelas.</em></h1>
-              <p>Dari cakupan proyek ke kebutuhan talent yang bisa dijelaskan. TalentLens mengubah WBS menjadi estimasi FTE, capability, review, dan skenario bantuan AI—dengan alasan yang dapat ditelusuri.</p>
+              <p>Unggah WBS proyek, lalu TalentLens menghitung berapa FTE yang dibutuhkan tiap role dan membandingkannya dengan yang diminta. Setiap angka bisa ditelusuri sampai ke item WBS-nya.</p>
               <div className="tlw-hero-actions">
                 <Link href="/validasi" className="tlw-button-primary">Mulai analisis <ArrowUpRight size={20} aria-hidden /></Link>
                 <button type="button" onClick={runSample} disabled={status === "running"} className="tlw-button-ghost"><Play size={16} aria-hidden />{status === "running" ? "Memproses…" : "Coba data contoh"}</button>
@@ -265,9 +265,9 @@ export default function HomePage() {
         <div className="tlw-review-story">
           <span>03 / DIBANGUN UNTUK AKUNTABILITAS</span>
           <h2>Setiap angka<br />punya <em>alasan.</em></h2>
-          <p>Jika satu hasil perlu diperiksa, jangan cari alasan di puluhan tabel. TalentLens membawa item WBS, klasifikasi, capability, asumsi, dan catatan reviewer ke dalam alur review yang jelas.</p>
+          <p>Kalau ada angka yang janggal, item WBS di baliknya, klasifikasi dari agent, asumsi yang dipakai, dan catatan reviewer bisa dibuka di satu tempat.</p>
           <Link href="/metodologi">Baca metodologinya <ArrowUpRight size={19} aria-hidden /></Link>
-          <div className="tlw-review-quote">"Analisis yang bisa dipertanyakan, bukan sekadar diterima."</div>
+          <div className="tlw-review-quote">"Kalau angkanya terasa janggal, asal-usulnya bisa dicek."</div>
         </div>
         <ReviewDetail />
       </div>

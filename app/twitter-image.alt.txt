@@ -1,0 +1,1 @@
+TalentLens: estimasi kebutuhan talent dari WBS. Contoh hasil menunjukkan permintaan 0,88 FTE di atas kebutuhan.

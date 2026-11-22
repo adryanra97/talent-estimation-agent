@@ -94,7 +94,7 @@ function Sidebar() {
           />
           <div className="pt-3">
             <p className="tl-nav-kicker">DECISION INTELLIGENCE</p>
-            <NavLink href="/hasil/ringkasan" label="Decision report" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
+            <NavLink href="/hasil/ringkasan" label="Ringkasan keputusan" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
             <NavLink href="/hasil/review" label={hasRun ? `Perlu review · ${run?.breakdown.filter((row) => row.needs_review).length ?? 0}` : "Perlu review"} icon={<GitBranch className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
             {hasRun && (
               <details className="tl-nav-details" open={pathname.startsWith("/hasil/") && pathname !== "/hasil/ringkasan" && pathname !== "/hasil/review" ? true : undefined}>

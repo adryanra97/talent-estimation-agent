@@ -1,6 +1,6 @@
 /** Reading order follows the decision: validate the scope, inspect AI opportunities, then price the scenarios. */
 export const RESULT_LINKS = [
-  { href: "/hasil/ringkasan", label: "Ringkasan FTE" },
+  { href: "/hasil/ringkasan", label: "Ringkasan keputusan" },
   { href: "/hasil/review", label: "Perlu Review" },
   { href: "/hasil/breakdown", label: "Breakdown WBS" },
   { href: "/hasil/capability", label: "Capability per WBS" },

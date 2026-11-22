@@ -119,3 +119,10 @@
 .tl-studio-app .tl-exec .tl-exec-tail{margin:22px 0 0}
 .tl-studio-app .tl-exec .tl-exec-lead{margin:18px 0 0}
 .tl-studio-app .tl-exec .tl-exec-kicker{margin:0}
+
+/* Exhibit 3: colour only the roles that prove the title (request off need); mute the rest. */
+.tl-studio-app .tl-results-page .tl-summary-role.is-muted .tl-summary-barfill{background:#b8c6d3}
+.tl-studio-app .tl-results-page .tl-summary-role.is-muted .tl-summary-barfill.is-bu{background:#d5dee6}
+/* Exhibit 1: the two totals being compared stay navy, intermediate steps are muted, the gap carries the accent. */
+.tl-wf-col.is-total:first-child .tl-wf-bar{background:#8ea4ba}
+.tl-wf-col.is-total:nth-child(3) .tl-wf-bar{background:#2f659b}

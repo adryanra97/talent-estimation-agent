@@ -40,6 +40,17 @@ function conclusionLabel(c: Comparison): string {
   return "Perlu review";
 }
 
+/** Size of the gap between request and additional need, averaged over both methods. */
+function gapOf(c: Comparison): number {
+  if (c.requested_fte === null) return -1;
+  return Math.abs(c.requested_fte - (c.ucp_additional_fte + c.bu_additional_fte) / 2);
+}
+
+function offNeed(c: Comparison): boolean {
+  const label = conclusionLabel(c);
+  return label === "Di atas kebutuhan" || label === "Di bawah kebutuhan";
+}
+
 function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
   if (c.conclusion.startsWith("Selaras")) return "good";
   if (c.conclusion.toLowerCase().includes("lebih tinggi")) return "bad";
@@ -72,6 +83,17 @@ export default function SummaryPage() {
         const setMethod = (m: CostMethod) => setCostSettings({ ...costSettings, method: m });
         const headline = totals(shown, method);
         const bridgeGap = headline.requested - headline.additional;
+        const offRoles = shown.filter(offNeed);
+        const over = offRoles.filter((c) => conclusionLabel(c) === "Di atas kebutuhan").length;
+        const under = offRoles.filter((c) => conclusionLabel(c) === "Di bawah kebutuhan").length;
+        const roleTitle = !hasRequested
+          ? "Kebutuhan per role dari dua metode"
+          : offRoles.length === 0
+            ? "Semua role selaras dengan permintaan"
+            : over >= under
+              ? `${over} dari ${shown.length} role diminta di atas kebutuhan`
+              : `${under} dari ${shown.length} role diminta di bawah kebutuhan`;
+        const roleNote = [over ? `${over} di atas kebutuhan` : "", under ? `${under} di bawah kebutuhan` : "", shown.length - offRoles.length ? `${shown.length - offRoles.length} selaras atau perlu review` : ""].filter(Boolean).join(", ");
         const monthlyTotals = run.monthly.map((m) => ({ month: m.month, value: [...displayedRoles].reduce((a, r) => a + ((method === "ucp" ? m.ucp : m.bottom_up)[r] ?? 0), 0) }));
         const peak = monthlyTotals.reduce<{ month: string; value: number } | null>((b, p) => (!b || p.value > b.value ? p : b), null);
 
@@ -84,9 +106,16 @@ export default function SummaryPage() {
                 <>
                   <TeamFilter run={run} />
                   {run.approved ? (
-                    <StatusBadge tone="good"><CheckCircle2 size={14} aria-hidden /> Disetujui</StatusBadge>
+                    <span className="inline-flex items-center gap-2">
+                      <StatusBadge tone="good"><CheckCircle2 size={14} aria-hidden /> Disetujui</StatusBadge>
+                      <Button variant="ghost" size="sm" onClick={() => current && void update({ ...current, approved: false })}>Batalkan</Button>
+                    </span>
                   ) : (
-                    <Button variant="secondary" onClick={() => current && void update({ ...current, approved: true })}>
+                    <Button variant="secondary" onClick={() => {
+                      if (!current) return;
+                      if (review > 0 && !window.confirm(`${review} baris masih ditandai perlu review. Tetap setujui hasil ini?`)) return;
+                      void update({ ...current, approved: true });
+                    }}>
                       Setujui hasil
                     </Button>
                   )}
@@ -128,15 +157,11 @@ export default function SummaryPage() {
               <div className="tl-summary-section-head">
                 <div>
                   <p className="tl-summary-eyebrow">EXHIBIT 3</p>
-                  <h2 id="tl-role-comparison">Di role mana angkanya berbeda?</h2>
-                </div>
-                <div className="tl-summary-legend" aria-label="Legenda metode">
-                  <span><i aria-hidden /> UCP</span>
-                  <span className="is-bu"><i aria-hidden /> Bottom-up</span>
+                  <h2 id="tl-role-comparison">{roleTitle}</h2>
                 </div>
               </div>
               <p className="tl-report-footnote tl-summary-chart-guide">
-                Panjang batang menggunakan skala yang sama untuk semua role yang sedang ditampilkan. Angka di kanan adalah FTE rata-rata.
+                {hasRequested && roleNote ? `${roleNote}. ` : ""}Role diurutkan dari selisih terbesar terhadap permintaan. Warna penuh menandai role yang permintaannya tidak sesuai kebutuhan; abu-abu berarti selaras atau belum ada permintaan.
               </p>
               {shown.length === 0 ? (
                 <p className="tl-results-empty-filter">Tidak ada role untuk tim ini. Pilih tim lainnya.</p>
@@ -148,8 +173,8 @@ export default function SummaryPage() {
                       <h3>{grouped || teamView !== "all" ? `Tim ${group.label}` : "Semua role"}</h3>
                       <p>{group.rows.length} role <span aria-hidden="true">·</span> UCP {fte(subtotal.ucp)} <span aria-hidden="true">/</span> Bottom-up {fte(subtotal.bu)} FTE</p>
                     </div>
-                    {group.rows.map((c) => (
-                      <div key={c.role} className="tl-summary-role">
+                    {[...group.rows].sort((a, b) => gapOf(b) - gapOf(a)).map((c) => (
+                      <div key={c.role} className={`tl-summary-role ${offNeed(c) ? "is-off" : "is-muted"}`}>
                         <div className="tl-summary-role-title">
                           <strong>{roleName(c.role, catalog?.roles)}</strong>
                           <small>{c.role} · Diminta {fte(c.requested_fte)} FTE</small>

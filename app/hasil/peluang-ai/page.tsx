@@ -45,7 +45,7 @@ export default function AiPage() {
           <>
             <PageHeader
               title="Peluang Bantuan AI"
-              description="Skenario terpisah: bagian pekerjaan yang bisa lebih cepat dengan bantuan AI. Angka di Ringkasan FTE tidak berubah."
+              description="Skenario terpisah: bagian pekerjaan yang bisa lebih cepat dengan bantuan AI. Angka di Ringkasan keputusan tidak berubah."
               actions={<TeamFilter run={run} />}
             />
             <div className="tl-results-scope" aria-label="Ringkasan skenario AI">

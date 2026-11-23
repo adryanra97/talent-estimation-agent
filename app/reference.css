@@ -1,0 +1,108 @@
+/* Reference and settings pages (Katalog, Feedback, Pengaturan, Metodologi, Tentang).
+   One type scale (13 / 15 / 16 / 18 / 24 / 32 / 44), two families (Newsreader for page
+   and section titles, Plus Jakarta Sans for everything else), one card style, one callout
+   style. Violet is reserved for links, active controls and primary buttons. */
+
+.tl-studio-app .tl-resource-page{
+  --ref-ink:#17141d;--ref-muted:#5f5869;--ref-line:#e3dfe8;--ref-soft:#f7f5fa;--ref-accent:#6a22c4;
+  --ref-serif:"Newsreader Variable","Newsreader",Georgia,serif;
+  --ref-sans:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;
+  max-width:1080px;color:var(--ref-ink);font-size:15px;line-height:1.6
+}
+.tl-studio-app .tl-resource-page :where(*):not(code):not(pre):not(kbd):not(svg *){font-family:var(--ref-sans)}
+
+/* Page header: no card, a rule underneath. */
+.tl-studio-app .tl-resource-page .tl-resource-hero{background:none;border:0;border-bottom:1px solid var(--ref-line);border-radius:0;padding:8px 0 28px;margin:0 0 32px;color:var(--ref-ink);box-shadow:none}
+.tl-studio-app .tl-resource-page .tl-resource-hero-top{border:0;padding:0;margin:0}
+.tl-studio-app .tl-resource-page .tl-resource-eyebrow{font:600 13px/1.4 var(--ref-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ref-muted);margin:0}
+.tl-studio-app .tl-resource-page .tl-resource-hero-main{padding-top:10px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px 32px;flex-wrap:wrap}
+.tl-studio-app .tl-resource-page .tl-resource-hero h1{font:500 44px/1.08 var(--ref-serif);letter-spacing:-.02em;color:var(--ref-ink);margin:0;max-width:22ch}
+.tl-studio-app .tl-resource-page .tl-resource-hero h1 em{font:inherit;font-style:normal;color:inherit}
+.tl-studio-app .tl-resource-page .tl-resource-hero p{font-size:18px;line-height:1.6;color:var(--ref-muted);max-width:62ch;margin-top:12px}
+.tl-studio-app .tl-resource-page .tl-resource-hero-note,.tl-studio-app .tl-resource-page .tl-resource-hero-note *{font-size:13px;color:var(--ref-muted)}
+
+/* Section headings. */
+.tl-studio-app .tl-resource-page .tl-resource-heading{margin:56px 0 20px;padding:0;border:0}
+.tl-studio-app .tl-resource-page .tl-resource-heading h2{font:500 32px/1.15 var(--ref-serif);letter-spacing:-.015em;color:var(--ref-ink);margin:6px 0 0;max-width:30ch}
+.tl-studio-app .tl-resource-page .tl-resource-heading-description{font-size:16px;line-height:1.6;color:var(--ref-muted);max-width:62ch;margin-top:8px}
+
+/* Sub-headings and body copy. */
+.tl-studio-app .tl-resource-page h3,.tl-studio-app .tl-resource-page .tl-ui-card h2{font:600 16px/1.4 var(--ref-sans);letter-spacing:0;color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page p,.tl-studio-app .tl-resource-page li,.tl-studio-app .tl-resource-page dd,.tl-studio-app .tl-resource-page td{letter-spacing:0}
+.tl-studio-app .tl-resource-page strong{color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page a:not([class*=button]):not(.tl-resource-action-link){color:var(--ref-accent)}
+
+/* One card style. */
+.tl-studio-app .tl-resource-page :is(.tl-ui-card,.tl-method-panel,.tl-method-concepts>*,.tl-method-augmentation,.tl-settings-aside,.tl-about-intro,.tl-about-technical,.tl-catalog-reference){background:#fff;border:1px solid var(--ref-line);border-radius:10px;box-shadow:none;color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page :is(.tl-method-panel,.tl-settings-aside,.tl-about-intro){padding:28px}
+.tl-studio-app .tl-resource-page :is(.tl-method-panel,.tl-about-intro,.tl-method-concepts>*)::before,
+.tl-studio-app .tl-resource-page :is(.tl-method-panel,.tl-about-intro,.tl-method-concepts>*)::after{display:none}
+
+/* One callout style. */
+.tl-studio-app .tl-resource-page :is(.tl-resource-notice,.tl-resource-note){background:var(--ref-soft);border:0;border-left:3px solid #7a29d7;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14px;line-height:1.6;color:var(--ref-ink);box-shadow:none}
+
+/* KPI strip: figures in ink on a rule, no tinted tiles. */
+.tl-studio-app .tl-resource-page .tl-resource-kpi-strip{gap:0 24px}
+.tl-studio-app .tl-resource-page .tl-resource-kpi{background:none;border:0;border-top:2px solid var(--ref-ink);border-radius:0;padding:14px 0 0}
+.tl-studio-app .tl-resource-page .tl-resource-kpi dt{font:600 13px/1.4 var(--ref-sans);color:var(--ref-muted);text-transform:none;letter-spacing:0}
+.tl-studio-app .tl-resource-page .tl-resource-kpi dd{font:500 40px/1.1 var(--ref-serif);color:var(--ref-ink);margin-top:6px}
+.tl-studio-app .tl-resource-page .tl-resource-kpi small{font-size:13px;color:var(--ref-muted)}
+
+/* Headings and numbers that were violet go back to ink. */
+.tl-studio-app .tl-resource-page :is(.tl-method-panel h3,.tl-settings-aside h2,.tl-settings-aside h3,.tl-about-intro h2,.tl-about-intro h3){color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-method-panel h3{font:500 26px/1.2 var(--ref-serif)}
+.tl-studio-app .tl-resource-page .tl-method-panel-index{font:600 13px/1.4 var(--ref-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ref-muted)}
+.tl-studio-app .tl-resource-page :is(.tl-method-steps li>span:first-child,.tl-method-steps li::marker,.tl-settings-aside ol li>span:first-child){color:var(--ref-muted);font:600 14px/1.5 var(--ref-sans);font-style:normal}
+.tl-studio-app .tl-resource-page .tl-method-equation{background:var(--ref-soft);border:0;border-left:3px solid var(--ref-ink);border-radius:0 6px 6px 0}
+.tl-studio-app .tl-resource-page .tl-method-equation :is(strong,b,code){font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ref-ink);font-size:14px}
+.tl-studio-app .tl-resource-page .tl-about-intro h2{font:500 28px/1.2 var(--ref-serif);letter-spacing:-.01em}
+
+/* Katalog: compact rule list and role rows. */
+.tl-studio-app .tl-resource-page .tl-catalog-rule summary{padding:12px 4px;min-height:48px;align-items:center}
+.tl-studio-app .tl-resource-page .tl-catalog-rule strong{font-size:15px;font-weight:600}
+.tl-studio-app .tl-resource-page .tl-rule-id{font:600 13px/1 var(--ref-sans);color:var(--ref-muted);min-width:34px}
+.tl-studio-app .tl-resource-page .tl-catalog-team-header h2,.tl-studio-app .tl-resource-page .tl-catalog-team-header h3{font:500 24px/1.2 var(--ref-serif);color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-catalog-role-name{font:600 16px/1.4 var(--ref-sans);color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-catalog-role-tags>*{background:var(--ref-soft);color:#3b3644;border:1px solid var(--ref-line)}
+
+/* Two-column card grids start on the same line. */
+.tl-studio-app .tl-resource-page .grid{align-items:start}
+.tl-studio-app .tl-resource-page .grid>.tl-ui-card{margin-top:0}
+
+@media (max-width:760px){
+  .tl-studio-app .tl-resource-page .tl-resource-hero h1{font-size:34px}
+  .tl-studio-app .tl-resource-page .tl-resource-hero p{font-size:16px}
+  .tl-studio-app .tl-resource-page .tl-resource-heading h2{font-size:26px}
+  .tl-studio-app .tl-resource-page .tl-resource-heading{margin-top:44px}
+  .tl-studio-app .tl-resource-page :is(.tl-method-panel,.tl-settings-aside,.tl-about-intro){padding:20px}
+  .tl-studio-app .tl-resource-page .tl-resource-kpi dd{font-size:30px}
+}
+
+/* Alignment and rhythm: header and body share one left edge. */
+.tl-studio-app .tl-resource-page{margin-top:0}
+.tl-studio-app .tl-resource-page .tl-resource-hero{padding:24px 0 28px;margin-bottom:0}
+.tl-studio-app .tl-resource-page .tl-resource-body{padding:32px 0 16px}
+.tl-studio-app .tl-resource-page .tl-resource-hero h1{max-width:30ch}
+.tl-studio-app .tl-resource-page .tl-resource-notice{margin-bottom:32px}
+
+/* Remaining violet numerals and tinted panels. */
+.tl-studio-app .tl-resource-page .tl-method-steps li>strong{font:600 14px/1.6 var(--ref-sans);color:var(--ref-muted);font-style:normal}
+.tl-studio-app .tl-resource-page :is(.tl-settings-aside ol li,.tl-about-journey li)::before{font:600 14px/1.5 var(--ref-sans)!important;font-style:normal!important;color:var(--ref-muted)!important}
+.tl-studio-app .tl-resource-page .tl-method-concepts>div:nth-child(n){background:#fff;border:1px solid var(--ref-line)}
+.tl-studio-app .tl-resource-page .tl-method-equation,.tl-studio-app .tl-resource-page .tl-method-equation *{color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-method-checklist{background:#fff;border:1px solid var(--ref-line);border-radius:10px;box-shadow:none}
+.tl-studio-app .tl-resource-page .tl-method-checklist::before,.tl-studio-app .tl-resource-page .tl-method-checklist::after{display:none}
+.tl-studio-app .tl-resource-page .tl-method-checklist h2{font:500 26px/1.2 var(--ref-serif);color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-method-checklist li{background:var(--ref-soft);border:0;box-shadow:none}
+.tl-studio-app .tl-resource-page .tl-about-journey{border-top-color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page table thead :is(tr,th){background:var(--ref-soft)}
+.tl-studio-app .tl-resource-page .tl-about-journey li>span:first-child{font:600 14px/1.5 var(--ref-sans);font-style:normal;color:var(--ref-muted)}
+.tl-studio-app .tl-resource-page .tl-ui-card .tl-ui-card-heading{padding:18px 24px}
+.tl-studio-app .tl-resource-page .tl-ui-card .tl-ui-card-body{padding:20px 24px}
+.tl-studio-app .tl-resource-page .tl-ui-card .tl-ui-card-heading p{font-size:14px;color:var(--ref-muted)}
+.tl-studio-app .tl-resource-page .tl-settings-aside :is(strong,b){color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page .tl-accent-number,.tl-studio-app .tl-resource-page ol .text-accent-700{color:var(--ref-muted)}
+@media (max-width:760px){.tl-studio-app .tl-resource-page .tl-ui-card .tl-ui-card-heading,.tl-studio-app .tl-resource-page .tl-ui-card .tl-ui-card-body{padding-inline:16px}}
+.tl-studio-app .tl-masuk-title{font:500 36px/1.1 "Newsreader Variable","Newsreader",Georgia,serif;letter-spacing:-.02em}
+.tl-studio-app .tl-resource-page .tl-settings-aside ol li strong{color:var(--ref-ink)}
+.tl-studio-app .tl-resource-page :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:#fff;border-color:#cfc9d6}

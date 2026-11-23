@@ -12,6 +12,7 @@ import "./studio.css";
 import "./refinement.css";
 import "./tln.css";
 import "./operational-theme.css";
+import "./reference.css";
 
 const SITE = "https://talentlens.adryanrizkyalviano.me";
 const TITLE = "TalentLens · Estimasi kebutuhan talent dari WBS";

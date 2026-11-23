@@ -96,11 +96,6 @@ export default function CostPage() {
               }
             />
 
-            <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
-              <strong>Estimasi menggunakan benchmark gaji publik, bukan tarif internal.</strong> Rate dan pengali dapat diubah di{" "}
-              <Link href="/pengaturan#rate" className="font-medium underline">Pengaturan</Link>.
-            </p>
-
             <section className="tl-summary-intro" aria-labelledby="tl-cost-conclusion">
               <div>
                 <p className="tl-summary-eyebrow">KEPUTUSAN BIAYA / PERMINTAAN VS. KEBUTUHAN</p>
@@ -133,6 +128,11 @@ export default function CostPage() {
                 <small>proyeksi {months} bulan</small>
               </div>
             </dl>
+
+            <p className="tl-cost-rate-note">
+              <strong>Estimasi menggunakan benchmark gaji publik, bukan tarif internal.</strong> Rate dan pengali dapat diubah di{" "}
+              <Link href="/pengaturan#rate" className="font-medium underline">Pengaturan</Link>.
+            </p>
 
             <section className="tl-cost-breakdown" aria-labelledby="tl-cost-breakdown-title">
               <div className="tl-summary-section-head">

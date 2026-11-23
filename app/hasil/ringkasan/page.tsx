@@ -8,7 +8,7 @@ import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, InfoTip, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
 import { ExecutiveHero, Exhibit, MonthlyLine, Waterfall, totals } from "@/components/summary-exhibits";
 import type { CostMethod } from "@/lib/cost";
-import { date, fte, month, num, pct } from "@/lib/format";
+import { fte, month, num, pct } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
 import type { Comparison } from "@/lib/types";
@@ -101,7 +101,7 @@ export default function SummaryPage() {
           <>
             <PageHeader
               title="Ringkasan keputusan"
-              description={`${run.project.name || "Proyek"} · ${date(run.project.start)} s.d. ${date(run.project.end)}. Semua angka FTE di halaman ini adalah rata-rata selama periode analisis.`}
+              description="Semua angka FTE di halaman ini adalah rata-rata selama periode analisis."
               actions={
                 <>
                   <TeamFilter run={run} />

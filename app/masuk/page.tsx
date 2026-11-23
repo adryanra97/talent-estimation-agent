@@ -15,7 +15,7 @@ function SignIn() {
   return (
     <div className="mx-auto grid max-w-md gap-6 py-6">
       <div>
-        <h1 className="tl-masuk-title text-ink">Masuk</h1>
+        <h1 className="text-2xl font-semibold text-ink">Masuk</h1>
         <p className="mt-1 text-sm text-muted">
           Akun dipakai untuk menyimpan feedback atas hasil analisis dan menyetujui usulan perbaikan agent.
         </p>

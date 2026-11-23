@@ -14,7 +14,7 @@ export function ResourceHero({
   return (
     <header className="tl-resource-hero">
       <div className="tl-resource-hero-top">
-        <span className="tl-resource-eyebrow">{eyebrow}</span>
+        <span className="tl-resource-eyebrow"><span className="tl-resource-hero-dot" aria-hidden /> {eyebrow}</span>
       </div>
       <div className="tl-resource-hero-main">
         <div className="tl-resource-hero-copy">
@@ -41,7 +41,7 @@ export function ResourceHeading({
   return (
     <div className="tl-resource-heading">
       <div>
-        <p className="tl-resource-eyebrow" data-index={index}>{label}</p>
+        <p className="tl-resource-eyebrow">{index} / {label}</p>
         <h2 id={id}>{title}</h2>
         {description && <p className="tl-resource-heading-description">{description}</p>}
       </div>

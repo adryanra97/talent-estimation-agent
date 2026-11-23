@@ -22,13 +22,8 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="tl-results-page">
       <header className="tl-report-cover">
-        <div className="tl-report-cover-top">
-          <span className="tl-report-overline"><span className="tl-report-overline-dot" /> TALENTLENS / LAPORAN ANALISIS</span>
-          <span className="tl-report-edition">PERENCANAAN TALENT BERBASIS BUKTI</span>
-        </div>
         <div className="tl-report-cover-main">
           <div className="tl-report-cover-copy">
-            <p className="tl-report-issue">LAPORAN PROYEK <span aria-hidden="true">/</span> {run ? "HASIL ANALISIS" : "MENUNGGU ANALISIS"}</p>
             <p className="tl-report-project">{run?.project.name || "Laporan estimasi kebutuhan talent"}</p>
             {run && <p className="tl-report-dates">Periode {date(run.project.start)} – {date(run.project.end)} <span aria-hidden="true">·</span> {run.comparisons.length} role dianalisis</p>}
           </div>
@@ -41,7 +36,7 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
                 </span>
                 <button type="button" disabled={busy} className="tl-report-export" onClick={() => void exportExcel()}>
                   <ArrowDownToLine size={16} aria-hidden />
-                  {busy ? "Menyiapkan…" : "Unduh laporan Excel"}
+                  {busy ? "Menyiapkan…" : <><span className="tl-export-long">Unduh laporan </span>Excel</>}
                 </button>
               </>
             ) : (

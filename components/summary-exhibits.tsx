@@ -239,3 +239,35 @@ export function MonthlyLine({ monthly, roles, method, reference, referenceLabel 
     </div>
   );
 }
+
+/** Dark answer panel used at the top of result pages: one claim, one figure, context on the side. */
+export function ExecPanel({ kicker, lead, value, unit, tail, side, note, tone = "is-neutral", id }: {
+  kicker: string;
+  lead: string;
+  value: string;
+  unit?: string;
+  tail?: React.ReactNode;
+  side: { label: string; value: string; strong?: boolean }[];
+  note?: React.ReactNode;
+  tone?: "is-neutral" | "is-over" | "is-under" | "is-fit";
+  id: string;
+}) {
+  return (
+    <section className={`tl-exec ${tone}`} aria-labelledby={id}>
+      <div className="tl-exec-main">
+        <p className="tl-exec-kicker">{kicker}</p>
+        <h2 id={id} className="tl-exec-lead">{lead}</h2>
+        <p className="tl-exec-figure"><span>{value}</span>{unit && <small>{unit}</small>}</p>
+        {tail && <p className="tl-exec-tail">{tail}</p>}
+      </div>
+      <aside className="tl-exec-side" aria-label="Rincian">
+        <dl>
+          {side.map((s) => (
+            <div key={s.label} className={s.strong ? "is-strong" : undefined}><dt>{s.label}</dt><dd>{s.value}</dd></div>
+          ))}
+        </dl>
+        {note && <p className="tl-exec-review">{note}</p>}
+      </aside>
+    </section>
+  );
+}

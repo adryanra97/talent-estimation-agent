@@ -95,7 +95,7 @@ export default function MethodPage() {
 
         <div className="tl-method-checklist" aria-label="Checklist review hasil">
           <div>
-            <p className="tl-resource-eyebrow">MANUSIA TETAP MEMUTUSKAN</p>
+            <p className="tl-resource-eyebrow">MANUSIA TETAP MEMUTUSKAN / 03</p>
             <h2>Ketika dua metode berbeda, apa berikutnya?</h2>
             <p>Reviewer Agent memeriksa selisih, kualitas data, dan kemungkinan ketidaksesuaian klasifikasi. Hasilnya dapat ditinjau serta dikoreksi manusia sebelum keputusan final.</p>
             <Link className="tl-resource-action-link" href="/hasil/temuan">Lihat temuan dan asumsi <ArrowRight size={15} aria-hidden /></Link>

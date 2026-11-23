@@ -181,7 +181,7 @@ export default function FeedbackPage() {
             ["Run berikutnya", "Panduan yang disetujui ditambahkan ke prompt agent terkait."],
           ].map(([t, d], i) => (
             <li key={t} className="rounded-lg border border-line bg-surface px-4 py-3">
-              <p className="font-medium text-ink"><span className="tabular mr-1.5 text-muted">{i + 1}</span>{t}</p>
+              <p className="font-medium text-ink"><span className="tabular mr-1.5 text-accent-700">{i + 1}</span>{t}</p>
               <p className="mt-1 text-muted">{d}</p>
             </li>
           ))}

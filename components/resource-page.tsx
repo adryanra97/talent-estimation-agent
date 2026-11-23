@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 
 export function ResourceHero({
-  eyebrow, title, accent, description, chapter, actions, footnote,
+  eyebrow, title, accent, description, actions, footnote,
 }: {
   eyebrow: string;
   title: string;
   accent?: string;
   description: string;
-  chapter: string;
+  chapter?: string;
   actions?: ReactNode;
   footnote?: ReactNode;
 }) {
@@ -15,7 +15,6 @@ export function ResourceHero({
     <header className="tl-resource-hero">
       <div className="tl-resource-hero-top">
         <span className="tl-resource-eyebrow"><span className="tl-resource-hero-dot" aria-hidden /> {eyebrow}</span>
-        <span className="tl-resource-chapter">{chapter}</span>
       </div>
       <div className="tl-resource-hero-main">
         <div className="tl-resource-hero-copy">

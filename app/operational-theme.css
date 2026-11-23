@@ -321,3 +321,12 @@
   .tl-studio-app .tl-export-long{display:none}
   .tl-studio-app .tl-results-page .tl-report-dates{font-size:12px}
 }
+
+/* NN/g pass: method definition at point of use, in-page confirmation, fewer ornaments. */
+.tl-studio-app .tl-method-note{margin:0 0 24px;padding:10px 14px;border-left:3px solid #7a29d7;background:#f6f2fb;font-size:13px;line-height:1.6;color:#2b2533}
+.tl-studio-app .tl-method-note a{color:#6a22c4;font-weight:650;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.tl-studio-app .tl-approve-confirm{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin:0 0 20px;padding:14px 18px;border:1px solid #e9c98f;border-left:4px solid #d98a1c;background:#fdf6ea;border-radius:8px;color:#3d2b0c;font-size:14px;line-height:1.55}
+.tl-studio-app .tl-approve-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.tl-studio-app .tl-approve-link{font-weight:650;color:#6a22c4;text-decoration:underline;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center}
+.tl-studio-app .tl-resource-hero:before,.tl-studio-app .tl-resource-hero:after{display:none}
+.tl-mobile-nav{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 32px),transparent)}

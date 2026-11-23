@@ -52,7 +52,7 @@ N1 = 7
 """First data row of the Breakdown_WBS sheet."""
 
 FINDING_LABELS = {
-    "gap": "Gap WBS",
+    "gap": "Celah WBS",
     "overlap": "Tumpang tindih",
     "outside_wbs": "Di luar WBS",
     "divergence": "Selisih metode",

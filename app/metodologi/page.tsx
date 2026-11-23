@@ -20,7 +20,7 @@ export default function MethodPage() {
   return (
     <div className="tl-resource-page tl-method-page">
       <ResourceHero eyebrow="METODOLOGI / ESTIMASI TRANSPARAN"
-        title="Cara angka dihitung." accent="Tanpa black box."
+        title="Cara TalentLens" accent="menghitung kebutuhan."
         chapter="METODE / 03"
         description="TalentLens menggunakan dua pendekatan estimasi yang dihitung terpisah. Agent membantu menilai konteks pekerjaan; mesin hitung menghasilkan angka yang bisa diaudit."
         actions={<Link href="/hasil/ringkasan">Buka hasil analisis <ArrowRight size={16} aria-hidden /></Link>}
@@ -28,12 +28,13 @@ export default function MethodPage() {
       <div className="tl-resource-body">
         <div className="tl-resource-notice">
           <ScanSearch size={19} className="shrink-0 mt-0.5" aria-hidden />
-          <div><strong>Prinsip dasar:</strong> model bahasa memilih klasifikasi dan memberikan alasan yang dapat ditinjau; rumus UCP, bottom-up, dan FTE dijalankan oleh kode. Parameter dapat dikaji di halaman Validasi Baru.</div>
+          <div><strong>Prinsip dasar:</strong> model bahasa memilih klasifikasi dan memberikan alasan yang dapat ditinjau; rumus UCP, bottom-up, dan FTE dijalankan oleh kode. Parameter bisa diubah di halaman Analisis baru.</div>
         </div>
 
+        <span id="dua-metode" aria-hidden="true" />
         <ResourceHeading index="01" label="DUA ESTIMASI INDEPENDEN"
           title="Satu WBS, dua sudut pandang."
-          description="UCP memberi ukuran kompleksitas. Bottom-up menghitung langsung effort berdasarkan jadwal dan alokasi. Perbedaan hasil adalah sinyal untuk membaca evidence lebih lanjut." />
+          description="UCP memberi ukuran kompleksitas. Bottom-up menghitung langsung effort berdasarkan jadwal dan alokasi. Kalau hasilnya jauh berbeda, itu tanda bukti di baliknya perlu dibaca lagi." />
         <div className="tl-method-grid">
           <section className="tl-method-panel" aria-labelledby="ucp-heading">
             <p className="tl-method-panel-index">METODE 01 / BERBASIS KOMPLEKSITAS</p>

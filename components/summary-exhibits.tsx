@@ -84,9 +84,9 @@ export function ExecutiveHero({ t, method, onMethod, review, roles }: {
   const headline = !t.hasRequested
     ? { value: t.need, unit: "FTE", lead: "Kebutuhan hasil hitung", tail: "Isi FTE yang diminta agar permintaan bisa diuji." }
     : over
-      ? { value: gap, unit: "FTE", lead: "Permintaan di atas kebutuhan", tail: `Tribe meminta ${fte(t.requested)} FTE, sedangkan pekerjaan di WBS membutuhkan ${fte(t.additional)} FTE tambahan.` }
+      ? { value: gap, unit: "FTE", lead: "Permintaan di atas kebutuhan", tail: `Pemohon meminta ${fte(t.requested)} FTE, sedangkan pekerjaan di WBS membutuhkan ${fte(t.additional)} FTE tambahan.` }
       : under
-        ? { value: -gap, unit: "FTE", lead: "Permintaan di bawah kebutuhan", tail: `Tribe meminta ${fte(t.requested)} FTE, sedangkan pekerjaan di WBS membutuhkan ${fte(t.additional)} FTE tambahan.` }
+        ? { value: -gap, unit: "FTE", lead: "Permintaan di bawah kebutuhan", tail: `Pemohon meminta ${fte(t.requested)} FTE, sedangkan pekerjaan di WBS membutuhkan ${fte(t.additional)} FTE tambahan.` }
         : { value: t.requested, unit: "FTE", lead: "Permintaan selaras dengan kebutuhan", tail: `Selisih kurang dari 0,05 FTE terhadap ${fte(t.additional)} FTE tambahan.` };
   const [n, ref] = useCountUp(headline.value);
   const tone = !t.hasRequested ? "is-neutral" : over ? "is-over" : under ? "is-under" : "is-fit";
@@ -165,7 +165,7 @@ export function Waterfall({ t, method }: { t: Totals; method: CostMethod }) {
   if (t.hasRequested) {
     const gap = t.requested - t.additional;
     steps.push({ label: gap >= 0 ? "Permintaan berlebih" : "Kekurangan permintaan", value: Math.abs(gap), from: Math.min(t.additional, t.requested), to: Math.max(t.additional, t.requested), kind: gap >= 0 ? "gap-over" : "gap-under" });
-    steps.push({ label: "Diminta Tribe", value: t.requested, from: 0, to: t.requested, kind: "total" });
+    steps.push({ label: "Diminta", value: t.requested, from: 0, to: t.requested, kind: "total" });
   }
   const max = Math.max(0.1, ...steps.map((s) => s.to)) * 1.12;
   const desc = steps.map((s) => `${s.label} ${fte(s.value)} FTE`).join(", ");

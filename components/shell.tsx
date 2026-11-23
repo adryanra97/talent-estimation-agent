@@ -19,7 +19,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { RESULT_LINKS } from "@/lib/nav";
 import { useStore } from "@/lib/store";
 import { FeedbackButton } from "./feedback-drawer";
 import { Button } from "./ui";
@@ -31,15 +30,17 @@ function NavLink({
   icon,
   disabled,
   nested,
+  match,
 }: {
   href: string;
   label: string;
   icon?: React.ReactNode;
   disabled?: boolean;
   nested?: boolean;
+  match?: (pathname: string) => boolean;
 }) {
   const pathname = usePathname();
-  const active = pathname === href;
+  const active = match ? match(pathname) : pathname === href;
   if (disabled) {
     return (
       <span
@@ -94,26 +95,16 @@ function Sidebar() {
           />
           <div className="pt-3">
             <p className="tl-nav-kicker">HASIL KEPUTUSAN</p>
-            <NavLink href="/hasil/ringkasan" label="Ringkasan keputusan" icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
+            <NavLink href="/hasil/ringkasan" label="Hasil analisis" match={(p) => p.startsWith("/hasil/") && p !== "/hasil/review"} icon={<CircleCheck className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
             <NavLink href="/hasil/review" label={hasRun ? `Perlu review · ${run?.breakdown.filter((row) => row.needs_review).length ?? 0}` : "Perlu review"} icon={<GitBranch className="h-4 w-4" aria-hidden />} disabled={!hasRun} />
-            {hasRun && (
-              <details className="tl-nav-details" open={pathname.startsWith("/hasil/") && pathname !== "/hasil/ringkasan" && pathname !== "/hasil/review" ? true : undefined}>
-                <summary>Jelajahi seluruh hasil</summary>
-                <div className="tl-nav-results">
-                  {RESULT_LINKS.filter((link) => link.href !== "/hasil/ringkasan" && link.href !== "/hasil/review").map((link) => (
-                    <NavLink key={link.href} {...link} nested />
-                  ))}
-                </div>
-              </details>
-            )}
           </div>
           <div className="space-y-1 border-t border-line pt-3">
             <p className="tl-nav-kicker">REFERENSI & PENGATURAN</p>
-            <NavLink href="/katalog" label="Katalog Capability" icon={<Layers className="h-4 w-4" aria-hidden />} />
+            <NavLink href="/katalog" label="Katalog capability" icon={<Layers className="h-4 w-4" aria-hidden />} />
             <NavLink href="/feedback" label="Feedback" icon={<MessageSquareText className="h-4 w-4" aria-hidden />} />
             <NavLink href="/pengaturan" label="Pengaturan" icon={<Settings className="h-4 w-4" aria-hidden />} />
             <NavLink href="/metodologi" label="Metodologi" icon={<BookOpen className="h-4 w-4" aria-hidden />} />
-            <NavLink href="/tentang" label="Tentang Aplikasi" icon={<Info className="h-4 w-4" aria-hidden />} />
+            <NavLink href="/tentang" label="Tentang" icon={<Info className="h-4 w-4" aria-hidden />} />
           </div>
         </nav>
       </div>
@@ -130,8 +121,8 @@ function MobileNav() {
   }, [pathname]);
   const links = [
     { href: "/", label: "Beranda" },
-    { href: "/validasi", label: "Validasi" },
-    ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil" }, { href: "/hasil/review", label: "Perlu review" }] : []),
+    { href: "/validasi", label: "Analisis baru" },
+    ...(run ? [{ href: "/hasil/ringkasan", label: "Hasil analisis" }] : []),
     { href: "/katalog", label: "Katalog" },
     { href: "/feedback", label: "Feedback" },
     { href: "/pengaturan", label: "Pengaturan" },
@@ -175,11 +166,11 @@ function Header() {
         <Link href="/pengaturan" className="flex min-h-11 items-center gap-2 truncate text-muted hover:text-ink">
           <span
             aria-hidden
-            className={`h-2 w-2 shrink-0 rounded-full ${connected ? "bg-emerald-500" : "bg-slate-300"}`}
+            className={`h-2 w-2 shrink-0 rounded-full ${connected ? "bg-emerald-500" : "border border-slate-400 bg-transparent"}`}
           />
           {connected
             ? `${providerName[provider.provider]}, ${provider.model}`
-            : "Model belum diatur"}
+            : "Atur model AI (opsional)"}
         </Link>
       </div>
       <div className="flex shrink-0 items-center gap-2">

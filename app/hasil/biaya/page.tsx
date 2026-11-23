@@ -6,9 +6,10 @@ import { useState } from "react";
 import { Drawer } from "@/components/drawer";
 import { jt } from "@/components/rates-editor";
 import { WithRun, roleName } from "@/components/result-guard";
+import { MethodNote, MethodSwitch } from "@/components/method-switch";
 import { TeamFilter } from "@/components/team-filter";
 import { Card, PageHeader, RoleBadge, StatusBadge, inputBase } from "@/components/ui";
-import { type CostBasis, type CostMethod, type RoleCost, roleCosts, rupiah } from "@/lib/cost";
+import { type CostBasis, type RoleCost, roleCosts, rupiah } from "@/lib/cost";
 import { fte } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { visibleGroups } from "@/lib/teams";
@@ -81,20 +82,20 @@ export default function CostPage() {
         return (
           <>
             <PageHeader
-              title="Keputusan biaya"
-              description={`Bandingkan biaya talent yang diminta dengan biaya kebutuhan hasil hitung, lalu lihat skenario bantuan AI. Menggunakan metode ${methodName} dan ${basisName} untuk ${months} bulan.`}
+              title="Estimasi biaya"
+              description={`Bandingkan biaya talent yang diminta dengan biaya kebutuhan hasil hitung untuk ${months} bulan, lalu lihat skenario bantuan AI.`}
               actions={
                 <>
                   <TeamFilter run={run} />
                   <Segmented<CostBasis> label="Dasar biaya" value={costSettings.basis}
                     options={[["employee", "Karyawan"], ["vendor", "Vendor"]]}
                     onChange={(basis) => setCostSettings({ ...costSettings, basis })} />
-                  <Segmented<CostMethod> label="Metode FTE" value={costSettings.method}
-                    options={[["bu", "Bottom-up"], ["ucp", "UCP"]]}
-                    onChange={(method) => setCostSettings({ ...costSettings, method })} />
+                  <MethodSwitch />
                 </>
               }
             />
+
+            <MethodNote />
 
             <section className="tl-summary-intro" aria-labelledby="tl-cost-conclusion">
               <div>
@@ -143,15 +144,15 @@ export default function CostPage() {
                     : "Skenario bantuan AI belum tersedia."}</h2>
                 </div>
                 <p>{aiComplete
-                  ? `Baseline ${rupiah(totalComputed)} menjadi ${rupiah(totalAssisted)} per bulan, atau ${rupiah(totalPotential === null ? null : totalPotential * months)} selama ${months} bulan. Ini kapasitas setara biaya, bukan penghematan anggaran yang sudah terjadi.`
+                  ? `Biaya kebutuhan ${rupiah(totalComputed)} menjadi ${rupiah(totalAssisted)} per bulan, atau ${rupiah(totalPotential === null ? null : totalPotential * months)} selama ${months} bulan. Ini kapasitas setara biaya, bukan penghematan anggaran yang sudah terjadi.`
                   : <>{!run.ai_enabled ? "Analisis bantuan AI belum diaktifkan untuk hasil ini." : "Skenario AI belum lengkap untuk semua role pada filter ini."}{" "}
                     <Link href={run.ai_enabled ? "/hasil/peluang-ai" : "/validasi"}>{run.ai_enabled ? "Periksa analisis AI" : "Aktifkan analisis AI"} →</Link></>}</p>
               </div>
               {costs.length ? costs.map((c) => (
                 <div className="tl-cost-role" key={c.role}>
                   <div className="tl-cost-role-label"><strong>{roleName(c.role, catalog?.roles)}</strong><small>{c.level} · {fte(c.computedFte)} FTE baseline{c.assistedFte === null ? "" : ` → ${fte(c.assistedFte)} FTE dibantu AI`}</small></div>
-                  <div className="tl-cost-role-bars" role="img" aria-label={`${roleName(c.role, catalog?.roles)}, baseline ${rupiah(c.computedMonthly)} per bulan, skenario AI ${rupiah(c.assistedMonthly)} per bulan`}>
-                    <div className="tl-cost-barline"><span>Baseline</span><div className="tl-cost-track"><i style={{ width: `${c.computedMonthly / maxCost * 100}%` }} /></div><b>{rupiah(c.computedMonthly)}</b></div>
+                  <div className="tl-cost-role-bars" role="img" aria-label={`${roleName(c.role, catalog?.roles)}, tanpa AI ${rupiah(c.computedMonthly)} per bulan, skenario AI ${rupiah(c.assistedMonthly)} per bulan`}>
+                    <div className="tl-cost-barline"><span>Tanpa AI</span><div className="tl-cost-track"><i style={{ width: `${c.computedMonthly / maxCost * 100}%` }} /></div><b>{rupiah(c.computedMonthly)}</b></div>
                     <div className="tl-cost-barline"><span>Dengan AI</span><div className="tl-cost-track"><i className="is-ai" style={{ width: `${(c.assistedMonthly ?? 0) / maxCost * 100}%` }} /></div><b>{rupiah(c.assistedMonthly)}</b></div>
                   </div>
                   <div className="tl-cost-role-saving"><strong>{rupiah(c.potentialMonthly)}</strong><small>potensi / bulan</small></div>
@@ -160,7 +161,7 @@ export default function CostPage() {
               <p className="tl-report-footnote">Biaya adalah proyeksi berbasis rata-rata FTE. Realisasi penghematan membutuhkan keputusan staffing, utilisasi, dan biaya implementasi AI yang tidak termasuk dalam estimasi ini.</p>
             </section>
 
-            <Card title="Rincian rate dan biaya per role" description="Pilih level talenta untuk memperbarui baseline dan skenario AI. Klik angka rate untuk memeriksa rumus dan sumbernya.">
+            <Card title="Rincian rate dan biaya per role" description="Pilih level talenta untuk memperbarui biaya kebutuhan dan skenario AI. Klik angka rate untuk memeriksa rumus dan sumbernya.">
               {costs.length === 0 ? (
                 <p className="text-sm text-muted">Tidak ada role untuk tim ini. Pilih tim lainnya.</p>
               ) : (
@@ -183,7 +184,7 @@ export default function CostPage() {
                           <div><dt className="text-xs text-muted">Hasil hitung ({fte(c.computedFte)} FTE)</dt><dd className="tabular font-medium">{rupiah(c.computedMonthly)}</dd></div>
                           <div><dt className="text-xs text-muted">Dengan AI</dt><dd className="tabular">{rupiah(c.assistedMonthly)}</dd></div>
                           <div><dt className="text-xs text-muted">Potensi efisiensi</dt><dd className="tabular">{rupiah(c.potentialMonthly)}</dd></div>
-                          <div className="col-span-2"><dt className="text-xs text-muted">Selisih permintaan vs baseline</dt><dd className="tabular">{rupiah(c.gapMonthly, true)}</dd></div>
+                          <div className="col-span-2"><dt className="text-xs text-muted">Selisih permintaan vs kebutuhan</dt><dd className="tabular">{rupiah(c.gapMonthly, true)}</dd></div>
                         </dl>
                         <button type="button" onClick={() => setDetail(c)} className="justify-self-start text-accent-700 hover:underline">Lihat rumus</button>
                       </li>
@@ -198,7 +199,7 @@ export default function CostPage() {
                           <th scope="col" className="py-2 pr-3 font-medium">Level</th>
                           <th scope="col" className="py-2 pr-3 text-right font-medium">Biaya per FTE</th>
                           <th scope="col" className="py-2 pr-3 text-right font-medium">Diminta</th>
-                          <th scope="col" className="py-2 pr-3 text-right font-medium">Baseline</th>
+                          <th scope="col" className="py-2 pr-3 text-right font-medium">Tanpa AI</th>
                           <th scope="col" className="py-2 pr-3 text-right font-medium">Dengan AI</th>
                           <th scope="col" className="py-2 pr-3 text-right font-medium">Potensi efisiensi</th>
                           <th scope="col" className="py-2 pr-3 text-right font-medium">Selisih permintaan</th>
@@ -258,7 +259,7 @@ export default function CostPage() {
                       ["Pengali", `${jt(detail.multiplier)} × (${basisName})`],
                       ["Biaya per FTE", `${rupiah(detail.perFte)} per bulan`],
                       ["FTE hasil hitung", `${fte(detail.computedFte)} FTE (${methodName})`],
-                      ["Biaya baseline", `${rupiah(detail.computedMonthly)} per bulan`],
+                      ["Biaya kebutuhan", `${rupiah(detail.computedMonthly)} per bulan`],
                       ["FTE dengan AI", detail.assistedFte === null ? "Tidak tersedia" : `${fte(detail.assistedFte)} FTE`],
                       ["Skenario biaya dengan AI", `${rupiah(detail.assistedMonthly)} per bulan`],
                       ["Potensi efisiensi", `${rupiah(detail.potentialMonthly)} per bulan`],

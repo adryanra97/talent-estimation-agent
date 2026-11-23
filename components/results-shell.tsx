@@ -17,7 +17,6 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
     tabsRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "center" });
   }, [pathname]);
   const pending = run?.breakdown.filter((row) => row.needs_review).length ?? 0;
-  const activeIndex = RESULT_LINKS.findIndex((item) => item.href === pathname);
 
   return (
     <div className="tl-results-page">
@@ -36,7 +35,7 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
                 </span>
                 <button type="button" disabled={busy} className="tl-report-export" onClick={() => void exportExcel()}>
                   <ArrowDownToLine size={16} aria-hidden />
-                  {busy ? "Menyiapkan…" : <><span className="tl-export-long">Unduh laporan </span>Excel</>}
+                  {busy ? "Menyiapkan…" : <span><span className="tl-export-long">Unduh laporan </span>Excel</span>}
                 </button>
               </>
             ) : (
@@ -57,7 +56,6 @@ export function ResultsShell({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </div>
-        <span className="tl-report-nav-position" aria-hidden="true">{activeIndex < 0 ? "—" : String(activeIndex + 1).padStart(2, "0")} / {String(RESULT_LINKS.length).padStart(2, "0")}</span>
       </nav>
 
       <div className="tl-report-content" id="report-content">

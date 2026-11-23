@@ -59,7 +59,7 @@ export default function ProcessPage() {
       <header className="tl-process-head tl-studio-process-head flex flex-wrap items-center justify-between gap-5">
         <div>
           <p className="tl-eyebrow">OPERASI AGENT / PEMANTAUAN LANGSUNG</p>
-          <h1 className="mt-3">Di balik setiap keputusan, <span className="tl-serif">ada proses yang bisa ditelusuri.</span></h1>
+          <h1 className="mt-3">Aktivitas agent, <span className="tl-serif">langkah demi langkah.</span></h1>
           <p>
             {demo
               ? "Data contoh dengan penilai berbasis aturan. Event diputar dengan jeda agar setiap langkah mudah diamati."

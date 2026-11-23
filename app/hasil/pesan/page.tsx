@@ -46,7 +46,7 @@ export default function MessagePage() {
     <WithRun>
       {(run) => (
         <>
-          <PageHeader title="Draf komunikasi" description="Ringkasan tertulis untuk dibagikan kepada pemohon. Periksa isi dan angka, lalu salin bersama berkas Excel hasil analisis." />
+          <PageHeader title="Draf pesan" description="Ringkasan tertulis untuk dibagikan kepada pemohon. Periksa isi dan angka, lalu salin bersama berkas Excel hasil analisis." />
           <div className="tl-report-writing-guide" aria-label="Langkah sebelum mengirim hasil">
             <div><strong>01 / VERIFIKASI</strong><p>Pastikan angka dan status review sesuai dengan ringkasan final.</p></div>
             <div><strong>02 / SESUAIKAN NARASI</strong><p>Sunting konteks proyek serta rekomendasi tanpa mengubah bukti perhitungan.</p></div>

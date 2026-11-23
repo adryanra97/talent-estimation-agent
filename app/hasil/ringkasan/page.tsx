@@ -2,8 +2,9 @@
 
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
+import { MethodNote } from "@/components/method-switch";
 import { TeamFilter } from "@/components/team-filter";
 import { Button, Card, InfoTip, PageHeader, RoleBadge, StatusBadge } from "@/components/ui";
 import { ExecutiveHero, Exhibit, MonthlyLine, Waterfall, totals } from "@/components/summary-exhibits";
@@ -60,6 +61,7 @@ function conclusionTone(c: Comparison): "good" | "warn" | "bad" | "neutral" {
 
 export default function SummaryPage() {
   const { catalog, update, run: current, teamView, costSettings, setCostSettings } = useStore();
+  const [confirming, setConfirming] = useState(false);
 
   return (
     <WithRun>
@@ -111,9 +113,9 @@ export default function SummaryPage() {
                       <Button variant="ghost" size="sm" onClick={() => current && void update({ ...current, approved: false })}>Batalkan</Button>
                     </span>
                   ) : (
-                    <Button variant="secondary" onClick={() => {
+                    <Button variant="secondary" aria-expanded={review > 0 ? confirming : undefined} onClick={() => {
                       if (!current) return;
-                      if (review > 0 && !window.confirm(`${review} baris masih ditandai perlu review. Tetap setujui hasil ini?`)) return;
+                      if (review > 0) { setConfirming(true); return; }
                       void update({ ...current, approved: true });
                     }}>
                       Setujui hasil
@@ -123,7 +125,22 @@ export default function SummaryPage() {
               }
             />
 
+            {confirming && !run.approved && (
+              <div className="tl-approve-confirm" role="alertdialog" aria-labelledby="tl-approve-title" aria-describedby="tl-approve-desc">
+                <div>
+                  <p id="tl-approve-title"><strong>{review} baris masih perlu review.</strong></p>
+                  <p id="tl-approve-desc">Angka di halaman ini bisa berubah setelah baris tersebut ditinjau. Persetujuan tetap bisa dibatalkan nanti.</p>
+                </div>
+                <div className="tl-approve-actions">
+                  <Link href="/hasil/review" className="tl-approve-link">Tinjau dulu</Link>
+                  <Button variant="secondary" onClick={() => { if (current) void update({ ...current, approved: true }); setConfirming(false); }}>Tetap setujui</Button>
+                  <Button variant="ghost" onClick={() => setConfirming(false)}>Batal</Button>
+                </div>
+              </div>
+            )}
+
             <ExecutiveHero t={headline} method={method} onMethod={setMethod} review={review} roles={shown.length} />
+            <MethodNote />
 
             <nav className="tl-exec-next" aria-label="Tindakan berikutnya">
               <span>Langkah berikutnya</span>

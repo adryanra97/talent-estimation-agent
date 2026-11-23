@@ -1,7 +1,8 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { WithRun, roleName } from "@/components/result-guard";
+import { MethodNote, MethodSwitch } from "@/components/method-switch";
 import { TeamFilter } from "@/components/team-filter";
 import { Exhibit } from "@/components/summary-exhibits";
 import { PageHeader, RoleBadge } from "@/components/ui";
@@ -42,8 +43,8 @@ function RolePanels({ months, series, focus }: {
 }
 
 export default function MonthlyPage() {
-  const [method, setMethod] = useState<"bottom_up" | "ucp">("bottom_up");
-  const { catalog, teamView } = useStore();
+  const { catalog, teamView, costSettings } = useStore();
+  const method = costSettings.method === "bu" ? "bottom_up" : "ucp";
   return (
     <WithRun>
       {(run) => {
@@ -61,31 +62,16 @@ export default function MonthlyPage() {
         return (
           <>
             <PageHeader
-              title="Per Bulan"
+              title="Per bulan"
               description="Effort tiap item dibagi ke bulan sesuai hari kerjanya."
               actions={
                 <>
                 <TeamFilter run={run} />
-                <div className="inline-flex rounded-lg border border-line bg-canvas p-1" role="group" aria-label="Metode">
-                  {(
-                    [
-                      ["bottom_up", "Bottom-up"],
-                      ["ucp", "UCP"],
-                    ] as const
-                  ).map(([value, label]) => (
-                    <button
-                      key={value}
-                      aria-pressed={method === value}
-                      onClick={() => setMethod(value)}
-                      className={`rounded-md px-4 py-1.5 text-sm ${method === value ? "bg-white font-medium text-accent-700 shadow-sm" : "text-muted"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                <MethodSwitch />
                 </>
               }
             />
+            <MethodNote />
             <div className="tl-results-scope" aria-label="Ringkasan distribusi bulanan">
               <div className="tl-results-scope-stat"><strong>{run.monthly.length}</strong><span>Bulan analisis</span></div>
               <div className="tl-results-scope-stat"><strong>{fte(Math.max(0, ...run.monthly.map((m) => monthTotal(m, roles))))}</strong><span>Puncak FTE · {method === "ucp" ? "UCP" : "bottom-up"}</span></div>

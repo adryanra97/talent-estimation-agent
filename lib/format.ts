@@ -60,7 +60,7 @@ export function roleColor(role: string, index: number): string {
 }
 
 export const FINDING_LABEL: Record<string, string> = {
-  gap: "Gap WBS",
+  gap: "Celah WBS",
   overlap: "Tumpang tindih",
   outside_wbs: "Di luar WBS",
   divergence: "Selisih metode",

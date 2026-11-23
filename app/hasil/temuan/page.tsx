@@ -39,7 +39,7 @@ export default function FindingsPage() {
         return (
           <>
             <PageHeader
-              title="Temuan & Asumsi"
+              title="Temuan & asumsi"
               description="Hal yang perlu dicek, dan jejak keputusan setiap agent."
               actions={<TeamFilter run={run} />}
             />

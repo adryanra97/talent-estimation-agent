@@ -44,14 +44,14 @@ export default function AiPage() {
         return (
           <>
             <PageHeader
-              title="Peluang Bantuan AI"
+              title="Peluang bantuan AI"
               description="Skenario terpisah: bagian pekerjaan yang bisa lebih cepat dengan bantuan AI. Angka di Ringkasan keputusan tidak berubah."
               actions={<TeamFilter run={run} />}
             />
             <div className="tl-results-scope" aria-label="Ringkasan skenario AI">
               <div className="tl-results-scope-stat">
                 <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.bu_fte ?? 0), 0))}</strong>
-                <span>Baseline bottom-up · FTE</span>
+                <span>Tanpa bantuan AI · FTE bottom-up</span>
               </div>
               <div className="tl-results-scope-stat">
                 <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.bu_fte_assisted ?? 0), 0))}</strong>
@@ -59,7 +59,7 @@ export default function AiPage() {
               </div>
               <div className="tl-results-scope-stat">
                 <strong>{fte(groups.flatMap((g) => g.roles).reduce((total, r) => total + (summaries[r]?.saved_person_days ?? 0), 0), 1)}</strong>
-                <span>Potensi person-days terbantu</span>
+                <span>Potensi hari kerja terbantu</span>
               </div>
             </div>
 
@@ -68,9 +68,9 @@ export default function AiPage() {
                 <p className="tl-summary-eyebrow">BANTUAN AI / SKENARIO</p>
                 <h2>Dampak bantuan AI per role</h2>
               </div>
-              <p>Skenario menunjukkan potensi efisiensi, bukan keputusan otomatis untuk mengurangi talent. Baseline di Ringkasan tetap sama.</p>
+              <p>Skenario menunjukkan potensi efisiensi, bukan keputusan otomatis untuk mengurangi talent. Angka tanpa AI di Ringkasan tetap sama.</p>
             </div>
-            <div className="tl-ai-role-list" aria-label="Perbandingan baseline dan skenario AI per role">
+            <div className="tl-ai-role-list" aria-label="Perbandingan tanpa AI dan dengan AI per role">
               {groups.map((g) => (
                 <section key={g.key} className="tl-ai-role-group">
                   {(groups.length > 1 || teamView !== "all") && (
@@ -83,7 +83,7 @@ export default function AiPage() {
                         <small>{a.role}{a.top_skills.length ? ` · ${a.top_skills.slice(0, 2).map((s) => s.split(" · ").at(-1)).join(", ")}` : ""}</small>
                       </div>
                       <div className="tl-ai-role-change">
-                        <span><small>Baseline BU</small><strong>{fte(a.bu_fte)}</strong></span>
+                        <span><small>Tanpa AI</small><strong>{fte(a.bu_fte)}</strong></span>
                         <span className="tl-ai-role-arrow" aria-hidden="true">→</span>
                         <span><small>Dengan AI</small><strong>{fte(a.bu_fte_assisted)}</strong></span>
                       </div>
@@ -97,7 +97,7 @@ export default function AiPage() {
               Angka tersebut menggunakan kategori dan asumsi penghematan tugas yang dapat diedit pada tabel di bawah. Hasil aktual tetap memerlukan validasi.
             </p>
             <Link href="/hasil/biaya" className="tl-ai-cost-next">
-              <span><small>LANGKAH TERAKHIR / ANALISIS BIAYA</small><strong>Bandingkan baseline biaya dengan skenario bantuan AI</strong><em>Rate yang sama diterapkan pada kedua skenario, agar perubahan effort dapat dihitung sebagai potensi biaya kapasitas.</em></span>
+              <span><small>LANGKAH TERAKHIR / ANALISIS BIAYA</small><strong>Bandingkan biaya tanpa AI dengan skenario bantuan AI</strong><em>Rate yang sama diterapkan pada kedua skenario, agar perubahan effort dapat dihitung sebagai potensi biaya kapasitas.</em></span>
               <ArrowRight size={21} aria-hidden />
             </Link>
 

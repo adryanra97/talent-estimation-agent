@@ -168,7 +168,7 @@ function Table({ run }: { run: RunResult }) {
                 <th className="py-2 pr-3 font-medium">Klasifikasi</th>
                 <th className="py-2 pr-3 text-right font-medium">Hari kerja</th>
                 <th className="py-2 pr-3 text-right font-medium">Alokasi FTE</th>
-                <th className="py-2 pr-3 text-right font-medium">Person-days</th>
+                <th className="py-2 pr-3 text-right font-medium">Hari kerja</th>
                 <th className="py-2 pr-3 font-medium">Status</th>
                 <th className="w-8 py-2"><span className="sr-only">Detail</span></th>
               </tr>
@@ -311,7 +311,7 @@ function Table({ run }: { run: RunResult }) {
                       <button onClick={() => edit(r, { needs_review: !r.needs_review })} title="Ubah status review" className="-my-2 inline-flex min-h-11 items-center">
                         {r.needs_review ? <StatusBadge tone="warn">Perlu review</StatusBadge> : <StatusBadge tone="neutral">OK</StatusBadge>}
                       </button>
-                      <span className="tabular text-muted">{fte((r.workdays ?? 0) * r.allocation_fte * r.quantity, 1)} person-days</span>
+                      <span className="tabular text-muted">{fte((r.workdays ?? 0) * r.allocation_fte * r.quantity, 1)} hari kerja</span>
                       <button onClick={() => setOpen(expanded ? null : k)} aria-expanded={expanded} className="-my-2 -mr-2 inline-flex min-h-11 items-center gap-1 px-2 text-accent-700">
                         {expanded ? "Tutup" : "Alasan"}
                         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
